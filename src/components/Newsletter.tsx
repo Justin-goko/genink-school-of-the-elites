@@ -28,11 +28,12 @@ const Newsletter = () => {
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
-            Stay Updated
+            Join the Elite Circle
           </h2>
           
-          <p className="text-lg text-primary-foreground/90">
-            Get the latest updates on new courses, exclusive content, and special offers delivered to your inbox.
+          <p className="text-lg text-primary-foreground/90 leading-relaxed">
+            Receive exclusive insights, early access to new courses, transformative content, and 
+            special invitations to live events. Join thousands on the path to generational wealth.
           </p>
           
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">

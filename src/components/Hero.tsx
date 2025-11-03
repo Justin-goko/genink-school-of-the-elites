@@ -21,21 +21,27 @@ const Hero = () => {
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground leading-tight">
-            Renew the Mind, Empower the Generation
+            Renew the Mind, <span className="text-accent">Empower</span> the Generation
           </h1>
           
-          <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto">
-            Your Journey to Spiritual and Financial Mastery Starts Here
+          <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-3xl mx-auto leading-relaxed">
+            Transform your life through a revolutionary blend of <strong>spiritual renewal</strong>, 
+            <strong> financial wisdom</strong>, and <strong>cutting-edge digital skills</strong>. 
+            Build generational wealth that transcends money.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground group">
-              Explore Courses
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-              Learn More
-            </Button>
+            <a href="#courses">
+              <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground group hover-scale">
+                Explore Courses
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </a>
+            <a href="/events">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover-scale">
+                Join Live Events
+              </Button>
+            </a>
           </div>
         </div>
       </div>
