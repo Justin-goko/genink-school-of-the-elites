@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Sparkles } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import genlinkLogo from "@/assets/genlink-logo.png";
 
 const StickyNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,8 +29,8 @@ const StickyNav = () => {
       <nav 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
           ${isScrolled 
-            ? 'bg-background/95 backdrop-blur-lg shadow-lg border-b border-border/50' 
-            : 'bg-transparent'}`}
+            ? 'bg-primary/95 backdrop-blur-lg shadow-lg border-b border-primary-foreground/10' 
+            : 'bg-primary/70 backdrop-blur-md border-b border-primary-foreground/10'}`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -41,8 +41,7 @@ const StickyNav = () => {
                 alt="Genlink Hub" 
                 className="h-10 w-auto transition-transform group-hover:scale-105"
               />
-              <span className={`font-bold text-xl hidden sm:block transition-colors
-                ${isScrolled ? 'text-foreground' : 'text-white'}`}>
+              <span className="font-bold text-xl hidden sm:block text-primary-foreground">
                 Genlink Hub
               </span>
             </Link>
@@ -53,8 +52,7 @@ const StickyNav = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors relative group
-                    ${isScrolled ? 'text-foreground hover:text-accent' : 'text-white hover:text-white/80'}`}
+                  className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground transition-colors relative group"
                 >
                   {link.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
@@ -65,9 +63,7 @@ const StickyNav = () => {
             {/* CTA Button */}
             <div className="hidden md:flex items-center gap-4">
               <Button 
-                className={`group ${isScrolled 
-                  ? 'bg-accent hover:bg-accent/90 text-accent-foreground' 
-                  : 'bg-white/20 hover:bg-white/30 text-white border border-white/40'}`}
+                className="group bg-accent hover:bg-accent/90 text-accent-foreground"
               >
                 <Sparkles className="w-4 h-4 mr-2 group-hover:animate-spin" />
                 Start Learning
@@ -77,8 +73,7 @@ const StickyNav = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg transition-colors
-                ${isScrolled ? 'text-foreground' : 'text-white'}`}
+              className={`md:hidden p-2 rounded-lg transition-colors text-primary-foreground hover:bg-primary-foreground/10`}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -87,7 +82,7 @@ const StickyNav = () => {
 
         {/* Mobile Menu */}
         <div 
-          className={`md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-xl transition-all duration-300 overflow-hidden
+          className={`md:hidden absolute top-full left-0 right-0 bg-primary/95 backdrop-blur-lg border-b border-primary-foreground/10 shadow-xl transition-all duration-300 overflow-hidden
             ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
         >
           <div className="container mx-auto px-4 py-4 space-y-4">
@@ -96,7 +91,7 @@ const StickyNav = () => {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-foreground hover:text-accent transition-colors"
+                className="block py-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors"
               >
                 {link.name}
               </a>
