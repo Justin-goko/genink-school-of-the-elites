@@ -42,7 +42,7 @@ const StickyNav = () => {
                 className="h-10 w-auto transition-transform group-hover:scale-105"
               />
               <span className={`font-bold text-xl hidden sm:block transition-colors
-                ${isScrolled ? 'text-foreground' : 'text-primary-foreground'}`}>
+                ${isScrolled ? 'text-foreground' : 'text-white'}`}>
                 Genlink Hub
               </span>
             </Link>
@@ -54,7 +54,7 @@ const StickyNav = () => {
                   key={link.name}
                   href={link.href}
                   className={`text-sm font-medium transition-colors relative group
-                    ${isScrolled ? 'text-foreground hover:text-accent' : 'text-primary-foreground/90 hover:text-primary-foreground'}`}
+                    ${isScrolled ? 'text-foreground hover:text-accent' : 'text-white hover:text-white/80'}`}
                 >
                   {link.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
@@ -67,7 +67,7 @@ const StickyNav = () => {
               <Button 
                 className={`group ${isScrolled 
                   ? 'bg-accent hover:bg-accent/90 text-accent-foreground' 
-                  : 'bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30'}`}
+                  : 'bg-white/20 hover:bg-white/30 text-white border border-white/40'}`}
               >
                 <Sparkles className="w-4 h-4 mr-2 group-hover:animate-spin" />
                 Start Learning
@@ -78,7 +78,7 @@ const StickyNav = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden p-2 rounded-lg transition-colors
-                ${isScrolled ? 'text-foreground' : 'text-primary-foreground'}`}
+                ${isScrolled ? 'text-foreground' : 'text-white'}`}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
