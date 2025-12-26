@@ -1,13 +1,18 @@
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
+import StickyNav from "@/components/StickyNav";
 import Hero from "@/components/Hero";
+import TrendingPicks from "@/components/TrendingPicks";
+import FeaturesGrid from "@/components/FeaturesGrid";
+import QuickQuiz from "@/components/QuickQuiz";
+import BadgesShowcase from "@/components/BadgesShowcase";
 import CourseCard from "@/components/CourseCard";
 import CourseModal from "@/components/CourseModal";
 import WhySection from "@/components/WhySection";
 import Newsletter from "@/components/Newsletter";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
 import { courses, Course } from "@/data/courses";
 import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
+import { Filter, Sparkles } from "lucide-react";
 
 const Index = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -31,18 +36,34 @@ const Index = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background scroll-smooth">
+      <StickyNav />
       <Hero />
+      
+      {/* Social Proof - Trending Picks */}
+      <TrendingPicks />
 
-      <section id="courses" className="py-20">
+      {/* Quick Quiz for Personalization */}
+      <QuickQuiz />
+
+      {/* Features Grid with Gamification */}
+      <FeaturesGrid />
+
+      {/* Badges & Achievements */}
+      <BadgesShowcase />
+
+      <section id="courses" className="py-20 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm text-accent font-medium">Curated for Kenyan Excellence</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground">
               Explore Our Transformative Courses
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Choose from our carefully crafted curriculum designed to empower your spiritual, financial, and technical growth
+              Discover what top learners are mastering next — each course designed for real-world impact
             </p>
           </div>
 
@@ -56,72 +77,59 @@ const Index = () => {
               <Button
                 variant={filter === "all" ? "default" : "outline"}
                 onClick={() => setFilter("all")}
-                className={filter === "all" ? "bg-accent hover:bg-accent/90" : ""}
+                className={`transition-all duration-300 ${filter === "all" ? "bg-accent hover:bg-accent/90 shadow-lg" : "hover:border-accent/50"}`}
               >
                 All Courses
               </Button>
               <Button
                 variant={filter === "free" ? "default" : "outline"}
                 onClick={() => setFilter("free")}
-                className={filter === "free" ? "bg-accent hover:bg-accent/90" : ""}
+                className={`transition-all duration-300 ${filter === "free" ? "bg-accent hover:bg-accent/90 shadow-lg" : "hover:border-accent/50"}`}
               >
                 Free
               </Button>
               <Button
                 variant={filter === "premium" ? "default" : "outline"}
                 onClick={() => setFilter("premium")}
-                className={filter === "premium" ? "bg-premium hover:bg-premium/90 text-premium-foreground" : ""}
+                className={`transition-all duration-300 ${filter === "premium" ? "bg-premium hover:bg-premium/90 text-premium-foreground shadow-lg" : "hover:border-premium/50"}`}
               >
                 Premium
               </Button>
             </div>
 
             <div className="flex gap-2 flex-wrap justify-center">
-              <Button
-                variant={categoryFilter === "all" ? "default" : "outline"}
-                onClick={() => setCategoryFilter("all")}
-                size="sm"
-              >
-                All Categories
-              </Button>
-              <Button
-                variant={categoryFilter === "spiritual" ? "default" : "outline"}
-                onClick={() => setCategoryFilter("spiritual")}
-                size="sm"
-              >
-                Spiritual
-              </Button>
-              <Button
-                variant={categoryFilter === "financial" ? "default" : "outline"}
-                onClick={() => setCategoryFilter("financial")}
-                size="sm"
-              >
-                Financial
-              </Button>
-              <Button
-                variant={categoryFilter === "ict" ? "default" : "outline"}
-                onClick={() => setCategoryFilter("ict")}
-                size="sm"
-              >
-                ICT
-              </Button>
-              <Button
-                variant={categoryFilter === "income" ? "default" : "outline"}
-                onClick={() => setCategoryFilter("income")}
-                size="sm"
-              >
-                Income Skills
-              </Button>
+              {[
+                { key: "all", label: "All Categories" },
+                { key: "spiritual", label: "Spiritual" },
+                { key: "financial", label: "Financial" },
+                { key: "ict", label: "ICT" },
+                { key: "income", label: "Income Skills" }
+              ].map((cat) => (
+                <Button
+                  key={cat.key}
+                  variant={categoryFilter === cat.key ? "default" : "outline"}
+                  onClick={() => setCategoryFilter(cat.key as any)}
+                  size="sm"
+                  className={`transition-all duration-300 ${categoryFilter === cat.key ? "shadow-md" : ""}`}
+                >
+                  {cat.label}
+                </Button>
+              ))}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
-              <CourseCard
+            {filteredCourses.map((course, index) => (
+              <div 
                 key={course.id}
-                {...course}
-                onLearnMore={() => handleLearnMore(course)}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CourseCard
+                  {...course}
+                  onLearnMore={() => handleLearnMore(course)}
+                />
+              </div>
             ))}
           </div>
 
@@ -136,9 +144,13 @@ const Index = () => {
       <WhySection />
       <Newsletter />
 
-      <footer className="bg-primary text-primary-foreground py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">&copy; 2025 Genlink Hub. Linking Generations. All rights reserved.</p>
+      <footer className="bg-primary text-primary-foreground py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-4">
+            <p className="text-lg font-medium">Genlink Hub — Linking Generations</p>
+            <p className="text-sm text-primary-foreground/70">&copy; 2025 Genlink Hub. All rights reserved.</p>
+            <p className="text-xs text-primary-foreground/50">Proudly serving learners across Kenya 🇰🇪</p>
+          </div>
         </div>
       </footer>
 
@@ -147,6 +159,9 @@ const Index = () => {
         onClose={() => setIsModalOpen(false)}
         course={selectedCourse}
       />
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup />
     </div>
   );
 };
