@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Star } from "lucide-react";
+import { Clock, Star, Play, BookOpen } from "lucide-react";
 
 interface CourseCardProps {
+  id: string;
   title: string;
   description: string;
   duration: string;
@@ -15,6 +17,7 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({
+  id,
   title,
   description,
   duration,
@@ -41,6 +44,11 @@ const CourseCard = ({
             Premium
           </Badge>
         )}
+        {/* Free modules badge */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+          <BookOpen className="w-3 h-3" />
+          <span>4 Free Modules</span>
+        </div>
       </div>
       
       <CardHeader>
@@ -78,9 +86,13 @@ const CourseCard = ({
           Learn More
         </Button>
         <Button 
+          asChild
           className={isPremium ? "flex-1 bg-premium hover:bg-premium/90 text-premium-foreground" : "flex-1 bg-accent hover:bg-accent/90"}
         >
-          Enroll Now
+          <Link to={`/learn/${id}`}>
+            <Play className="w-4 h-4 mr-1" />
+            Start Free
+          </Link>
         </Button>
       </CardFooter>
     </Card>
