@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          badge_type: Database["public"]["Enums"]["badge_type"]
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_value: number
+          xp_reward: number
+        }
+        Insert: {
+          badge_type: Database["public"]["Enums"]["badge_type"]
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          name: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Update: {
+          badge_type?: Database["public"]["Enums"]["badge_type"]
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           completed: boolean | null
@@ -44,6 +77,94 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_progress: {
+        Row: {
+          attempts: number | null
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          data: Json | null
+          exercise_id: string
+          id: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          exercise_id: string
+          id?: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          exercise_id?: string
+          id?: string
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_progress_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          exercise_type: Database["public"]["Enums"]["exercise_type"]
+          id: string
+          module_id: string
+          order_index: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          exercise_type: Database["public"]["Enums"]["exercise_type"]
+          id?: string
+          module_id: string
+          order_index?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          exercise_type?: Database["public"]["Enums"]["exercise_type"]
+          id?: string
+          module_id?: string
+          order_index?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_paths: {
         Row: {
           created_at: string | null
@@ -65,6 +186,45 @@ export type Database = {
           reasoning?: string | null
           recommended_courses?: Json
           user_id?: string
+        }
+        Relationships: []
+      }
+      modules: {
+        Row: {
+          content: Json | null
+          course_id: string
+          created_at: string
+          description: string | null
+          estimated_minutes: number
+          id: string
+          module_type: Database["public"]["Enums"]["module_type"]
+          order_index: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          content?: Json | null
+          course_id: string
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          module_type?: Database["public"]["Enums"]["module_type"]
+          order_index?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          content?: Json | null
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          module_type?: Database["public"]["Enums"]["module_type"]
+          order_index?: number
+          title?: string
+          xp_reward?: number
         }
         Relationships: []
       }
@@ -163,6 +323,109 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          module_id: string
+          score: number | null
+          time_spent_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          score?: number | null
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          score?: number | null
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_xp: {
+        Row: {
+          current_level: number
+          id: string
+          last_activity_date: string | null
+          streak_days: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_level?: number
+          id?: string
+          last_activity_date?: string | null
+          streak_days?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_level?: number
+          id?: string
+          last_activity_date?: string | null
+          streak_days?: number
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -171,7 +434,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      badge_type: "completion" | "streak" | "mastery" | "speed" | "explorer"
+      exercise_type:
+        | "simulation"
+        | "drag_drop"
+        | "scenario_game"
+        | "sandbox"
+        | "quiz"
+        | "video"
+      module_type: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -298,6 +569,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      badge_type: ["completion", "streak", "mastery", "speed", "explorer"],
+      exercise_type: [
+        "simulation",
+        "drag_drop",
+        "scenario_game",
+        "sandbox",
+        "quiz",
+        "video",
+      ],
+      module_type: ["free", "premium"],
+    },
   },
 } as const
