@@ -18,7 +18,7 @@ const Index = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "free" | "premium">("all");
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "spiritual" | "financial" | "ict" | "income">("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "spiritual" | "financial" | "ict" | "income" | "digital-skills">("all");
 
   const handleLearnMore = (course: Course) => {
     setSelectedCourse(course);
@@ -103,7 +103,8 @@ const Index = () => {
                 { key: "spiritual", label: "Spiritual" },
                 { key: "financial", label: "Financial" },
                 { key: "ict", label: "ICT" },
-                { key: "income", label: "Income Skills" }
+                { key: "income", label: "Income Skills" },
+                { key: "digital-skills", label: "Digital Skills" }
               ].map((cat) => (
                 <Button
                   key={cat.key}
