@@ -10,15 +10,29 @@ import CourseModal from "@/components/CourseModal";
 import WhySection from "@/components/WhySection";
 import Newsletter from "@/components/Newsletter";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
-import { courses, Course } from "@/data/courses";
+import { courses, pillars, Course } from "@/data/courses";
 import { Button } from "@/components/ui/button";
-import { Filter, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  Filter, Sparkles, Map, Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const pillarIcons: Record<string, React.ReactNode> = {
+  brain: <Brain className="w-4 h-4" />,
+  "trending-up": <TrendingUp className="w-4 h-4" />,
+  monitor: <Monitor className="w-4 h-4" />,
+  shield: <Shield className="w-4 h-4" />,
+  code: <Code className="w-4 h-4" />,
+  video: <Video className="w-4 h-4" />,
+  landmark: <Landmark className="w-4 h-4" />,
+};
 
 const Index = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "free" | "premium">("all");
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "spiritual" | "financial" | "ict" | "income" | "digital-skills">("all");
+  const [pillarFilter, setPillarFilter] = useState<string>("all");
 
   const handleLearnMore = (course: Course) => {
     setSelectedCourse(course);
@@ -30,9 +44,9 @@ const Index = () => {
       (filter === "free" && !course.isPremium) || 
       (filter === "premium" && course.isPremium);
     
-    const categoryMatch = categoryFilter === "all" || course.category === categoryFilter;
+    const pillarMatch = pillarFilter === "all" || course.pillarId === pillarFilter;
     
-    return priceMatch && categoryMatch;
+    return priceMatch && pillarMatch;
   });
 
   return (
@@ -57,14 +71,22 @@ const Index = () => {
           <div className="text-center mb-12 space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
               <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-sm text-accent font-medium">Curated for Kenyan Excellence</span>
+              <span className="text-sm text-accent font-medium">7 Core Pillars of Mastery</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground">
-              Explore Our Transformative Courses
+              Explore Our Learning Pillars
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover what top learners are mastering next — each course designed for real-world impact
+              Each pillar contains structured learning paths with Foundation (Free) through Elite levels
             </p>
+
+            {/* Learning Path Map CTA */}
+            <Button asChild variant="outline" className="border-accent text-accent hover:bg-accent/10">
+              <Link to="/learning-paths">
+                <Map className="w-4 h-4 mr-2" />
+                Open Learning Path Map
+              </Link>
+            </Button>
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-center flex-wrap">
@@ -77,43 +99,45 @@ const Index = () => {
               <Button
                 variant={filter === "all" ? "default" : "outline"}
                 onClick={() => setFilter("all")}
-                className={`transition-all duration-300 ${filter === "all" ? "bg-accent hover:bg-accent/90 shadow-lg" : "hover:border-accent/50"}`}
+                className={cn("transition-all duration-300", filter === "all" && "bg-accent hover:bg-accent/90 shadow-lg")}
               >
                 All Courses
               </Button>
               <Button
                 variant={filter === "free" ? "default" : "outline"}
                 onClick={() => setFilter("free")}
-                className={`transition-all duration-300 ${filter === "free" ? "bg-accent hover:bg-accent/90 shadow-lg" : "hover:border-accent/50"}`}
+                className={cn("transition-all duration-300", filter === "free" && "bg-accent hover:bg-accent/90 shadow-lg")}
               >
                 Free
               </Button>
               <Button
                 variant={filter === "premium" ? "default" : "outline"}
                 onClick={() => setFilter("premium")}
-                className={`transition-all duration-300 ${filter === "premium" ? "bg-premium hover:bg-premium/90 text-premium-foreground shadow-lg" : "hover:border-premium/50"}`}
+                className={cn("transition-all duration-300", filter === "premium" && "bg-premium hover:bg-premium/90 text-premium-foreground shadow-lg")}
               >
                 Premium
               </Button>
             </div>
 
             <div className="flex gap-2 flex-wrap justify-center">
-              {[
-                { key: "all", label: "All Categories" },
-                { key: "spiritual", label: "Spiritual" },
-                { key: "financial", label: "Financial" },
-                { key: "ict", label: "ICT" },
-                { key: "income", label: "Income Skills" },
-                { key: "digital-skills", label: "Digital Skills" }
-              ].map((cat) => (
+              <Button
+                variant={pillarFilter === "all" ? "default" : "outline"}
+                onClick={() => setPillarFilter("all")}
+                size="sm"
+                className={cn("transition-all duration-300", pillarFilter === "all" && "shadow-md")}
+              >
+                All Pillars
+              </Button>
+              {pillars.map((pillar) => (
                 <Button
-                  key={cat.key}
-                  variant={categoryFilter === cat.key ? "default" : "outline"}
-                  onClick={() => setCategoryFilter(cat.key as any)}
+                  key={pillar.id}
+                  variant={pillarFilter === pillar.id ? "default" : "outline"}
+                  onClick={() => setPillarFilter(pillar.id)}
                   size="sm"
-                  className={`transition-all duration-300 ${categoryFilter === cat.key ? "shadow-md" : ""}`}
+                  className={cn("transition-all duration-300", pillarFilter === pillar.id && "shadow-md")}
                 >
-                  {cat.label}
+                  {pillarIcons[pillar.icon]}
+                  <span className="ml-1">{pillar.name.split(" ")[0]}</span>
                 </Button>
               ))}
             </div>

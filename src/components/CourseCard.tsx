@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Star, Play, BookOpen, Brain } from "lucide-react";
+import { Clock, Star, Play, BookOpen, Brain, Layers } from "lucide-react";
+import { getPillarForCourse } from "@/data/courses";
 
 interface CourseCardProps {
   id: string;
@@ -13,8 +14,11 @@ interface CourseCardProps {
   price?: string;
   image: string;
   rating: number;
+  pillarId: string;
   subcategory?: string;
   responsibleUse?: string[];
+  hasCapstone: boolean;
+  progressionLevel: string;
   onLearnMore: () => void;
 }
 
@@ -27,11 +31,15 @@ const CourseCard = ({
   price,
   image,
   rating,
+  pillarId,
   subcategory,
   responsibleUse,
+  hasCapstone,
   onLearnMore,
 }: CourseCardProps) => {
   const hasResponsibleUse = responsibleUse && responsibleUse.length > 0;
+  const pillar = getPillarForCourse(id);
+
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
@@ -44,10 +52,10 @@ const CourseCard = ({
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute top-3 flex gap-2">
-          {subcategory && (
-            <Badge className="bg-secondary/90 text-secondary-foreground border-0 shadow-lg text-xs">
-              {subcategory}
+        <div className="absolute top-3 left-3 flex gap-2">
+          {pillar && (
+            <Badge className="bg-primary/90 text-primary-foreground border-0 shadow-lg text-xs">
+              {pillar.name.split("&")[0].trim()}
             </Badge>
           )}
         </div>
@@ -56,16 +64,21 @@ const CourseCard = ({
             Premium
           </Badge>
         )}
-        {/* Free modules and responsible use badges */}
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+          <div className="flex items-center gap-1 bg-accent/80 backdrop-blur-sm text-accent-foreground px-2 py-1 rounded-full text-xs">
             <BookOpen className="w-3 h-3" />
-            <span>4 Free Modules</span>
+            <span>Foundation Free</span>
           </div>
+          {hasCapstone && (
+            <div className="flex items-center gap-1 bg-premium/80 backdrop-blur-sm text-premium-foreground px-2 py-1 rounded-full text-xs">
+              <Layers className="w-3 h-3" />
+              <span>Capstone</span>
+            </div>
+          )}
           {hasResponsibleUse && (
-            <div className="flex items-center gap-1 bg-accent/80 backdrop-blur-sm text-accent-foreground px-2 py-1 rounded-full text-xs">
+            <div className="flex items-center gap-1 bg-primary/80 backdrop-blur-sm text-primary-foreground px-2 py-1 rounded-full text-xs">
               <Brain className="w-3 h-3" />
-              <span>Ethical Use</span>
+              <span>Ethics</span>
             </div>
           )}
         </div>
@@ -90,6 +103,16 @@ const CourseCard = ({
             <Star className="w-4 h-4 fill-premium text-premium" />
             <span className="font-medium">{rating}</span>
           </div>
+        </div>
+
+        {/* Progression indicator */}
+        <div className="flex gap-1">
+          {["Foundation", "Practitioner", "Specialist", "Elite"].map((level, i) => (
+            <div key={level} className="flex-1 text-center">
+              <div className={`h-1.5 rounded-full ${i === 0 ? "bg-accent" : "bg-muted"}`} />
+              <span className="text-[10px] text-muted-foreground">{level}</span>
+            </div>
+          ))}
         </div>
         
         {isPremium && price && (
