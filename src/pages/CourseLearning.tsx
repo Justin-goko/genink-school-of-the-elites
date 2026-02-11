@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useModules, useUserModuleProgress, useCompleteModule, Module } from "@/hooks/useUserProgress";
-import { courses, Course } from "@/data/courses";
+import { courses, Course, getPillarForCourse, entrepreneurialIntelligenceModule } from "@/data/courses";
 import StickyNav from "@/components/StickyNav";
 import XPBar from "@/components/learning/XPBar";
 import ModuleCard from "@/components/learning/ModuleCard";

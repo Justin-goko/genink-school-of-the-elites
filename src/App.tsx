@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CourseLearning from "./pages/CourseLearning";
+import LearningPathMap from "./pages/LearningPathMap";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/learn/:courseId" element={<CourseLearning />} />
+            <Route path="/learning-paths" element={<LearningPathMap />} />
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

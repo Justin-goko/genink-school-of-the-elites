@@ -15,7 +15,58 @@ import courseDataLiteracy from "@/assets/course-data-literacy.jpg";
 import courseDigitalProductivity from "@/assets/course-digital-productivity.jpg";
 import courseAutomation from "@/assets/course-automation.jpg";
 import courseDigitalCommunication from "@/assets/course-digital-communication.jpg";
+import courseCivicLeadership from "@/assets/course-civic-leadership.jpg";
 
+// ─── Progression Levels ────────────────────────────────────────
+export type ProgressionLevel = "foundation" | "practitioner" | "specialist" | "elite";
+
+export const progressionLevels: Record<ProgressionLevel, { label: string; description: string; isFree: boolean }> = {
+  foundation: { label: "Foundation", description: "Free introductory modules — immediate value", isFree: true },
+  practitioner: { label: "Practitioner", description: "Applied skills and guided practice", isFree: false },
+  specialist: { label: "Specialist", description: "Deep expertise and tool mastery", isFree: false },
+  elite: { label: "Elite", description: "Capstone project and deployment", isFree: false },
+};
+
+// ─── 5-Layer Course Structure ──────────────────────────────────
+export interface CourseLayer {
+  id: string;
+  name: string;
+  description: string;
+  modules: string[];
+}
+
+export const courseLayerTemplate: Omit<CourseLayer, "modules">[] = [
+  { id: "identity", name: "Identity & Mindset Foundation", description: "Establish your purpose and mental framework" },
+  { id: "core", name: "Core Knowledge", description: "Master essential theory and concepts" },
+  { id: "applied", name: "Applied Skill", description: "Hands-on practice and real-world exercises" },
+  { id: "tools", name: "Tool Mastery", description: "Proficiency with industry-standard tools" },
+  { id: "deploy", name: "Deployment & Monetization", description: "Launch, earn, and create impact" },
+];
+
+// ─── Learning Path ─────────────────────────────────────────────
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  targetRole: string;
+  skillLevel: "beginner" | "intermediate" | "advanced";
+  estimatedWeeks: number;
+  courseIds: string[];
+  capstoneProject?: string;
+}
+
+// ─── Pillar ────────────────────────────────────────────────────
+export interface Pillar {
+  id: string;
+  name: string;
+  tagline: string;
+  icon: string;
+  color: string;
+  learningPaths: LearningPath[];
+  courseIds: string[];
+}
+
+// ─── Course ────────────────────────────────────────────────────
 export interface Course {
   id: string;
   title: string;
@@ -25,462 +76,628 @@ export interface Course {
   price?: string;
   image: string;
   rating: number;
-  category: "spiritual" | "financial" | "ict" | "income" | "digital-skills";
+  category: string;
+  pillarId: string;
   subcategory?: string;
   overview: string;
   whatYouLearn: string[];
   prerequisites: string[];
   responsibleUse?: string[];
+  layers: CourseLayer[];
+  progressionLevel: ProgressionLevel;
+  hasCapstone: boolean;
+  entrepreneurialModule: boolean;
 }
 
+// ─── Entrepreneurial Intelligence Core (shared across premium) ─
+export const entrepreneurialIntelligenceModule = {
+  title: "Entrepreneurial Intelligence Core",
+  topics: [
+    "Pitching ideas and presenting with confidence",
+    "Building effective pitch decks",
+    "Intellectual property basics for Kenya",
+    "Business structures and registration in Kenya",
+    "Market positioning and competitive analysis",
+    "Professional communication for business",
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════
+// COURSES — merged from 17 originals into 7 pillars
+// ═══════════════════════════════════════════════════════════════
+
 export const courses: Course[] = [
+  // ──────────── PILLAR 1: Personal Mastery & Mind Renewal ──────
   {
     id: "mindset-renewal",
-    title: "Mindset Renewal & Spiritual Wealth Mastery",
-    description: "Transform your thinking patterns and unlock spiritual abundance through proven mindset renewal techniques.",
-    duration: "6 weeks",
-    isPremium: false,
+    title: "Personal Mastery & Mind Renewal",
+    description: "Transform your thinking patterns and unlock spiritual abundance through proven mindset renewal and cognitive discipline techniques.",
+    duration: "8 weeks",
+    isPremium: true,
+    price: "Ksh 7,999",
     image: courseMindset,
     rating: 4.9,
     category: "spiritual",
-    overview: "Embark on a transformative journey to renew your mind and unlock spiritual wealth. This foundational course teaches you how to break limiting beliefs and cultivate abundance consciousness.",
+    pillarId: "personal-mastery",
+    overview: "Embark on a transformative journey combining mindset renewal, spiritual wealth principles, and personal leadership. This pillar course covers identity formation, purpose discovery, and building an abundance-conscious life.",
     whatYouLearn: [
       "Understanding spiritual laws of prosperity",
       "Techniques for breaking limiting beliefs",
       "Building a wealth-conscious mindset",
-      "Daily practices for spiritual growth",
-      "Aligning your purpose with prosperity"
+      "Daily practices for spiritual growth and discipline",
+      "Aligning your purpose with prosperity",
+      "Cognitive discipline: thinking clearly in a noisy world",
     ],
     prerequisites: [
       "Open mind and willingness to grow",
       "Commitment to daily practice",
-      "Journal for reflection exercises"
-    ]
+      "Journal for reflection exercises",
+    ],
+    responsibleUse: [
+      "Self-mastery is the foundation of all other mastery",
+      "Technology aids growth — but discipline drives it",
+      "Guard your attention as fiercely as your finances",
+      "Wisdom is knowing what to ignore",
+      "Character is built in silence, not in feeds",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Discover your purpose and core values", modules: ["Who Am I? — Identity mapping", "Breaking limiting beliefs workshop"] },
+      { id: "core", name: "Core Knowledge", description: "Spiritual laws and abundance principles", modules: ["Laws of prosperity and stewardship", "The discipline of daily practice"] },
+      { id: "applied", name: "Applied Skill", description: "Guided reflection exercises", modules: ["Journaling for transformation", "Decision frameworks for life choices"] },
+      { id: "tools", name: "Tool Mastery", description: "Digital tools for personal growth", modules: ["Habit trackers and reflection apps", "Building accountability systems"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Lead and mentor others", modules: ["Becoming a mindset coach", "Capstone: Personal Mastery Blueprint"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
   },
+
+  // ──────────── PILLAR 2: Financial Intelligence & Income Systems ──
   {
     id: "financial-wisdom",
-    title: "Foundations of Financial Wisdom and Wealth Building",
-    description: "Master essential financial literacy principles and practical wealth-building strategies for long-term prosperity.",
-    duration: "8 weeks",
+    title: "Financial Intelligence & Wealth Building",
+    description: "Master financial literacy, budgeting, investing, and income systems for long-term wealth creation in Kenya.",
+    duration: "10 weeks",
     isPremium: true,
-    price: "Ksh 7,999",
+    price: "Ksh 9,999",
     image: courseFinance,
     rating: 4.8,
     category: "financial",
-    overview: "Gain comprehensive financial literacy through this intensive program covering budgeting, investing, asset building, and generational wealth strategies.",
+    pillarId: "financial-intelligence",
+    overview: "A comprehensive financial mastery program combining budgeting, investment strategy, forex fundamentals, and multiple income stream development — tailored for Kenyan professionals and entrepreneurs.",
     whatYouLearn: [
       "Personal budgeting and money management",
       "Investment fundamentals and strategies",
+      "Forex trading fundamentals and risk management",
       "Asset acquisition and portfolio building",
-      "Tax optimization techniques",
       "Creating multiple income streams",
-      "Estate planning for generational wealth"
+      "Tax optimization and estate planning in Kenya",
     ],
     prerequisites: [
       "Basic mathematics skills",
       "Willingness to track personal finances",
-      "Computer or smartphone for exercises"
-    ]
+      "Computer or smartphone for exercises",
+    ],
+    responsibleUse: [
+      "Wealth is a tool for impact, not just accumulation",
+      "High returns always carry high risk — there are no shortcuts",
+      "Financial discipline requires emotional discipline",
+      "Diversify wisely; never invest what you cannot afford to lose",
+      "Build wealth that serves your family and community",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your financial identity and money beliefs", modules: ["Money mindset assessment", "Breaking generational financial patterns"] },
+      { id: "core", name: "Core Knowledge", description: "Budgeting, investing, and forex fundamentals", modules: ["Personal finance foundations", "Investment vehicles in Kenya", "Forex market fundamentals"] },
+      { id: "applied", name: "Applied Skill", description: "Hands-on financial simulations", modules: ["Budget builder simulation", "Trading practice with demo accounts", "Portfolio construction exercise"] },
+      { id: "tools", name: "Tool Mastery", description: "Financial tools and platforms", modules: ["M-Pesa business tools", "Trading platforms and charting", "Financial spreadsheet mastery"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Launch your financial strategy", modules: ["Building your investment plan", "Capstone: Personal Wealth Blueprint"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
   },
+
+  // ──────────── PILLAR 3: Digital Literacy & Productivity Systems ──
   {
-    id: "digital-fluency",
-    title: "Digital Fluency & Tech Mindset Development",
-    description: "Develop essential digital literacy and cultivate a technology-forward mindset for the modern economy.",
-    duration: "6 weeks",
-    isPremium: false,
+    id: "digital-literacy",
+    title: "Digital Literacy & Productivity Systems",
+    description: "Build essential digital fluency, master productivity tools, and develop AI literacy while maintaining cognitive independence.",
+    duration: "8 weeks",
+    isPremium: true,
+    price: "Ksh 8,999",
     image: courseIct,
     rating: 4.7,
     category: "ict",
-    overview: "Build your digital confidence and master essential tech skills needed to thrive in today's connected world.",
+    pillarId: "digital-literacy",
+    subcategory: "Digital Skills for the Modern Economy",
+    overview: "From digital fluency basics to AI literacy, data interpretation, and workflow automation — this pillar builds the complete digital professional. Learn to leverage modern tools while maintaining sharp, independent thinking.",
     whatYouLearn: [
-      "Digital tools and productivity software",
-      "Online collaboration platforms",
-      "Digital security best practices",
-      "Cloud computing basics",
-      "Tech problem-solving mindset"
+      "Digital tools and productivity software mastery",
+      "AI literacy and critical evaluation of AI outputs",
+      "Data literacy and informed decision-making",
+      "Workflow automation with no-code tools",
+      "Professional digital communication",
+      "Maintaining focus and cognitive discipline online",
     ],
     prerequisites: [
       "Basic computer literacy",
       "Internet access",
-      "Curiosity about technology"
-    ]
-  },
-  {
-    id: "forex-trading",
-    title: "Forex Trading Fundamentals and Strategy",
-    description: "Learn professional forex trading techniques, risk management, and proven strategies for consistent profits.",
-    duration: "10 weeks",
-    isPremium: true,
-    price: "Ksh 12,999",
-    image: courseForex,
-    rating: 4.9,
-    category: "financial",
-    overview: "Master the art of forex trading with comprehensive training covering market analysis, trading psychology, and proven strategies.",
-    whatYouLearn: [
-      "Forex market fundamentals",
-      "Technical and fundamental analysis",
-      "Risk management strategies",
-      "Trading psychology mastery",
-      "Chart patterns and indicators",
-      "Developing a personal trading plan"
+      "Curiosity about technology",
     ],
-    prerequisites: [
-      "Basic financial knowledge",
-      "Discipline and patience",
-      "Capital for practice trading (demo account available)"
-    ]
-  },
-  {
-    id: "content-creation",
-    title: "Content Creation, Online Writing & eBook Entrepreneurship",
-    description: "Master the art of content creation, copywriting, and build a profitable eBook business from scratch.",
-    duration: "10 weeks",
-    isPremium: true,
-    price: "Ksh 9,999",
-    image: courseContent,
-    rating: 4.8,
-    category: "income",
-    overview: "Transform your writing skills into a profitable online business. Learn to create compelling content and monetize through eBooks.",
-    whatYouLearn: [
-      "Professional copywriting techniques",
-      "eBook creation and formatting",
-      "Publishing on major platforms",
-      "Marketing and promotion strategies",
-      "Building an author brand",
-      "Passive income generation"
+    responsibleUse: [
+      "AI tools amplify your thinking — they don't replace it",
+      "Productivity tools serve you, not the other way around",
+      "Data informs decisions — it doesn't make them for you",
+      "Automate the mechanical, not the meaningful",
+      "Protect time for thinking without digital input",
     ],
-    prerequisites: [
-      "Good command of written language",
-      "Creative thinking ability",
-      "Computer with internet access"
-    ]
-  },
-  {
-    id: "youtube-monetization",
-    title: "YouTube Monetization & Automation Masterclass",
-    description: "Build and automate a profitable YouTube channel with proven strategies for content creation and monetization.",
-    duration: "8 weeks",
-    isPremium: true,
-    price: "Ksh 11,999",
-    image: courseYoutube,
-    rating: 4.9,
-    category: "income",
-    overview: "Learn everything from channel setup to advanced monetization strategies, including automation techniques to scale your YouTube business.",
-    whatYouLearn: [
-      "Channel optimization and branding",
-      "Video content strategy and planning",
-      "SEO for YouTube growth",
-      "Monetization methods beyond AdSense",
-      "Automation tools and workflows",
-      "Analytics and performance optimization"
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your digital identity and tech mindset", modules: ["Digital confidence assessment", "Tech mindset vs tech dependency"] },
+      { id: "core", name: "Core Knowledge", description: "Digital fluency, AI, and data literacy", modules: ["Digital tools fundamentals", "AI literacy and critical thinking", "Data literacy essentials"] },
+      { id: "applied", name: "Applied Skill", description: "Hands-on tool practice", modules: ["Productivity system setup", "AI prompt engineering workshop", "Data analysis with spreadsheets"] },
+      { id: "tools", name: "Tool Mastery", description: "Modern productivity stack", modules: ["Automation with Zapier/Make", "Professional communication tools", "Digital workspace optimization"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Digital professional presence", modules: ["Building your digital brand", "Capstone: Digital Transformation Plan"] },
     ],
-    prerequisites: [
-      "Smartphone or camera for recording",
-      "Basic video editing knowledge (training provided)",
-      "Consistency and commitment"
-    ]
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
   },
+
+  // ──────────── PILLAR 4: Cybersecurity & Digital Protection ──
   {
     id: "cybersecurity",
-    title: "Cybersecurity Essentials",
-    description: "Protect digital assets and understand security fundamentals in an increasingly connected world.",
-    duration: "6 weeks",
-    isPremium: false,
+    title: "Cybersecurity & Digital Protection",
+    description: "Protect digital assets, understand threat landscapes, and build security-first thinking for personal and organizational safety.",
+    duration: "10 weeks",
+    isPremium: true,
+    price: "Ksh 10,999",
     image: courseCybersecurity,
     rating: 4.7,
     category: "ict",
-    overview: "Learn essential cybersecurity practices to protect yourself and organizations from digital threats.",
+    pillarId: "cybersecurity",
+    overview: "From personal digital safety to organizational security and cloud protection — this pillar covers the full spectrum of cybersecurity. Includes hands-on labs, threat simulations, and IoT security fundamentals.",
     whatYouLearn: [
       "Threat landscape and attack vectors",
-      "Network security fundamentals",
-      "Encryption and authentication",
-      "Security best practices",
-      "Incident response basics"
+      "Network security and encryption fundamentals",
+      "Cloud security and compliance",
+      "IoT device security essentials",
+      "Incident response and recovery",
+      "Security best practices for individuals and organizations",
     ],
     prerequisites: [
       "Basic networking knowledge",
       "Computer literacy",
-      "Logical thinking ability"
-    ]
-  },
-  {
-    id: "cloud-computing",
-    title: "Introduction to Cloud Computing",
-    description: "Understand cloud infrastructure, services, and deployment models used by modern businesses.",
-    duration: "6 weeks",
-    isPremium: false,
-    image: courseCloud,
-    rating: 4.6,
-    category: "ict",
-    overview: "Discover the fundamentals of cloud computing and how businesses leverage cloud services for scalability and efficiency.",
-    whatYouLearn: [
-      "Cloud service models (IaaS, PaaS, SaaS)",
-      "Major cloud providers overview",
-      "Cloud security and compliance",
-      "Cost optimization strategies",
-      "Migration planning basics"
+      "Logical thinking ability",
     ],
-    prerequisites: [
-      "Basic IT knowledge",
-      "Understanding of networking concepts",
-      "Internet access"
-    ]
-  },
-  {
-    id: "python-programming",
-    title: "Advanced Python Programming",
-    description: "Master advanced Python concepts, frameworks, and real-world application development techniques.",
-    duration: "8 weeks",
-    isPremium: true,
-    price: "Ksh 9,999",
-    image: coursePython,
-    rating: 4.8,
-    category: "ict",
-    overview: "Take your Python skills to the next level with advanced programming concepts, frameworks, and practical projects.",
-    whatYouLearn: [
-      "Advanced Python syntax and features",
-      "Object-oriented programming mastery",
-      "Working with APIs and databases",
-      "Popular frameworks (Django, Flask)",
-      "Testing and debugging techniques",
-      "Building real-world applications"
+    responsibleUse: [
+      "Security knowledge is for protection, never exploitation",
+      "Privacy is a fundamental right — defend it responsibly",
+      "The best security is built on awareness, not paranoia",
+      "Share security knowledge to protect your community",
+      "Ethics must guide every technical capability you develop",
     ],
-    prerequisites: [
-      "Basic Python knowledge",
-      "Understanding of programming concepts",
-      "Computer with Python installed"
-    ]
-  },
-  {
-    id: "data-science",
-    title: "Data Science & Analytics Foundations",
-    description: "Learn data analysis, visualization, and statistical methods to extract insights from complex datasets.",
-    duration: "10 weeks",
-    isPremium: true,
-    price: "Ksh 12,999",
-    image: courseDatascience,
-    rating: 4.9,
-    category: "ict",
-    overview: "Master the foundations of data science including statistical analysis, machine learning basics, and data visualization.",
-    whatYouLearn: [
-      "Statistical analysis fundamentals",
-      "Data cleaning and preprocessing",
-      "Exploratory data analysis",
-      "Data visualization with Python",
-      "Machine learning introduction",
-      "Real-world data projects"
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Security-first thinking", modules: ["The security mindset", "Ethical foundations of cybersecurity"] },
+      { id: "core", name: "Core Knowledge", description: "Threats, networks, and defense", modules: ["Network security fundamentals", "Encryption and authentication", "Cloud security and compliance"] },
+      { id: "applied", name: "Applied Skill", description: "Hands-on security labs", modules: ["Phishing detection simulation", "Vulnerability assessment exercise", "IoT security lab"] },
+      { id: "tools", name: "Tool Mastery", description: "Security tools and platforms", modules: ["Security scanning tools", "Firewall and VPN configuration", "Monitoring and alerting systems"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Security consulting and careers", modules: ["Building a security practice", "Capstone: Security Audit Report"] },
     ],
-    prerequisites: [
-      "Basic Python programming",
-      "Mathematics and statistics basics",
-      "Analytical mindset"
-    ]
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
   },
+
+  // ──────────── PILLAR 5: Programming & Intelligent Systems ──
   {
-    id: "iot-basics",
-    title: "IoT (Internet of Things) for Beginners",
-    description: "Explore the world of connected devices and learn to build simple IoT projects and applications.",
-    duration: "6 weeks",
-    isPremium: false,
-    image: courseIot,
-    rating: 4.7,
-    category: "ict",
-    overview: "Understand how IoT devices work and build your first connected projects using popular platforms and sensors.",
-    whatYouLearn: [
-      "IoT fundamentals and architecture",
-      "Sensor and actuator basics",
-      "Arduino and Raspberry Pi projects",
-      "IoT communication protocols",
-      "Building simple smart devices"
-    ],
-    prerequisites: [
-      "Basic electronics knowledge helpful",
-      "Programming basics (any language)",
-      "Curiosity about hardware"
-    ]
-  },
-  {
-    id: "ai-ml-basics",
-    title: "AI & Machine Learning Basics",
-    description: "Understand artificial intelligence fundamentals and build your first machine learning models.",
-    duration: "10 weeks",
+    id: "programming-systems",
+    title: "Programming & Intelligent Systems",
+    description: "Master Python, data science, AI/ML, and IoT — building practical intelligent systems from code to deployment.",
+    duration: "14 weeks",
     isPremium: true,
     price: "Ksh 14,999",
-    image: courseAi,
+    image: coursePython,
     rating: 4.9,
     category: "ict",
-    overview: "Dive into the exciting world of AI and machine learning with hands-on projects and real-world applications.",
+    pillarId: "programming-systems",
+    overview: "A comprehensive programming pillar that takes you from Python fundamentals through data science, machine learning, and IoT — with real-world projects at every stage. Build intelligent systems that solve African problems.",
     whatYouLearn: [
-      "AI and ML fundamentals",
-      "Supervised and unsupervised learning",
-      "Neural networks basics",
-      "Popular ML frameworks",
-      "Model training and evaluation",
-      "AI ethics and responsible use"
+      "Python programming from basics to advanced",
+      "Data science and statistical analysis",
+      "Machine learning model building and evaluation",
+      "IoT device programming and connected systems",
+      "API development and database integration",
+      "Deploying intelligent applications",
     ],
     prerequisites: [
-      "Python programming proficiency",
-      "Mathematics (algebra, calculus basics)",
-      "Data science foundations recommended"
-    ]
-  },
-  {
-    id: "ai-literacy",
-    title: "AI Literacy & Critical Thinking",
-    description: "Learn to use AI tools effectively while maintaining independent judgment and avoiding cognitive dependency.",
-    duration: "6 weeks",
-    isPremium: false,
-    image: courseAiLiteracy,
-    rating: 4.8,
-    category: "digital-skills",
-    subcategory: "Digital Skills for the Modern Economy",
-    overview: "Master the practical use of AI assistants, language models, and intelligent tools while developing the critical thinking skills to evaluate their outputs. This course teaches you to leverage AI as a powerful enhancer of your capabilities—not a replacement for your judgment.",
-    whatYouLearn: [
-      "Understanding how AI tools work and their limitations",
-      "Crafting effective prompts for better AI outputs",
-      "Evaluating AI-generated content for accuracy and bias",
-      "Integrating AI into professional workflows responsibly",
-      "Maintaining analytical skills while using AI assistance"
-    ],
-    prerequisites: [
-      "Basic computer literacy",
-      "Willingness to think critically",
-      "Access to internet for tool exploration"
+      "Basic computer skills",
+      "Mathematics fundamentals (algebra)",
+      "Problem-solving mindset",
     ],
     responsibleUse: [
-      "AI tools amplify your thinking—they don't replace it",
-      "Always verify AI outputs against trusted sources",
-      "Develop your own expertise before relying on AI shortcuts",
-      "Use AI to learn faster, not to avoid learning entirely",
-      "Maintain your ability to work without AI when needed"
-    ]
+      "Code is a tool — your judgment determines its impact",
+      "AI must serve human welfare, not replace human thought",
+      "Build systems that are transparent and explainable",
+      "Consider who benefits and who might be harmed by your code",
+      "The best programmers think about people, not just machines",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "The developer mindset", modules: ["Thinking like a programmer", "Problem decomposition and logic"] },
+      { id: "core", name: "Core Knowledge", description: "Python, data, and AI fundamentals", modules: ["Python programming mastery", "Data science foundations", "AI and ML fundamentals"] },
+      { id: "applied", name: "Applied Skill", description: "Build real projects", modules: ["Data analysis projects", "ML model training lab", "IoT sensor project"] },
+      { id: "tools", name: "Tool Mastery", description: "Developer tools and frameworks", modules: ["Django/Flask web development", "Jupyter and data tools", "IoT platforms and sensors"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Ship and monetize your code", modules: ["Deploying applications to production", "Capstone: Intelligent System Prototype"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
   },
+
+  // ──────────── PILLAR 6: Creator Economy & Digital Monetization ──
   {
-    id: "data-literacy",
-    title: "Data Literacy & Informed Decision Making",
-    description: "Develop the skills to read, interpret, and question data without falling for misleading statistics or blind trust in numbers.",
-    duration: "8 weeks",
+    id: "creator-economy",
+    title: "Creator Economy & Digital Monetization",
+    description: "Build, grow, and monetize your digital presence through content creation, YouTube, eBooks, and online business systems.",
+    duration: "10 weeks",
     isPremium: true,
-    price: "Ksh 8,999",
-    image: courseDataLiteracy,
-    rating: 4.9,
-    category: "digital-skills",
-    subcategory: "Digital Skills for the Modern Economy",
-    overview: "In a world awash with data, the ability to interpret information critically is essential. This course teaches you to extract meaningful insights from data, recognize manipulation, and make decisions grounded in evidence—not hype.",
-    whatYouLearn: [
-      "Reading charts, graphs, and statistical claims accurately",
-      "Identifying common data manipulation techniques",
-      "Using spreadsheets for basic data analysis",
-      "Understanding correlation vs causation",
-      "Making data-informed (not data-driven) decisions",
-      "Presenting data honestly and effectively"
-    ],
-    prerequisites: [
-      "Basic mathematics understanding",
-      "Computer with spreadsheet software",
-      "Curiosity about how information shapes decisions"
-    ],
-    responsibleUse: [
-      "Data informs decisions—it doesn't make them for you",
-      "Always ask: Who collected this data and why?",
-      "Numbers without context can mislead as easily as words",
-      "Your judgment must interpret what data cannot capture",
-      "Resist pressure to let metrics replace human insight"
-    ]
-  },
-  {
-    id: "digital-productivity",
-    title: "Digital Productivity & Focused Work",
-    description: "Master digital tools for productivity while building habits that protect your attention and cognitive capacity.",
-    duration: "5 weeks",
-    isPremium: false,
-    image: courseDigitalProductivity,
-    rating: 4.7,
-    category: "digital-skills",
-    subcategory: "Digital Skills for the Modern Economy",
-    overview: "Technology promises productivity but often delivers distraction. This course teaches you to organize your digital workspace, leverage productivity tools effectively, and establish boundaries that protect your ability to do deep, focused work.",
-    whatYouLearn: [
-      "Setting up distraction-free digital environments",
-      "Using task management and note-taking tools effectively",
-      "Time-blocking and calendar optimization techniques",
-      "Managing notifications and digital boundaries",
-      "Building sustainable productivity habits"
-    ],
-    prerequisites: [
-      "Smartphone or computer access",
-      "Willingness to change digital habits",
-      "Commitment to intentional tool use"
-    ],
-    responsibleUse: [
-      "Productivity tools serve you—not the other way around",
-      "More apps don't mean more productivity",
-      "Protect time for thinking without digital input",
-      "Regular digital detox maintains cognitive sharpness",
-      "The goal is meaningful output, not busy activity"
-    ]
-  },
-  {
-    id: "workflow-automation",
-    title: "Workflow Automation & Smart Systems",
-    description: "Learn to automate repetitive tasks while understanding when human oversight and manual control are essential.",
-    duration: "8 weeks",
-    isPremium: true,
-    price: "Ksh 10,999",
-    image: courseAutomation,
+    price: "Ksh 11,999",
+    image: courseContent,
     rating: 4.8,
-    category: "digital-skills",
-    subcategory: "Digital Skills for the Modern Economy",
-    overview: "Automation can free you from tedious work—but poorly designed automation creates new problems. This course teaches you to identify automation opportunities, build reliable workflows, and maintain appropriate human oversight of automated systems.",
+    category: "income",
+    pillarId: "creator-economy",
+    overview: "Master the creator economy — from professional copywriting and eBook publishing to YouTube channel growth and automation. Build sustainable online income with authenticity and strategic thinking.",
     whatYouLearn: [
-      "Identifying tasks suitable for automation",
-      "Using no-code automation tools (Zapier, Make, etc.)",
-      "Building automated email and document workflows",
-      "Testing and monitoring automated systems",
-      "Knowing when NOT to automate",
-      "Maintaining human checkpoints in critical processes"
+      "Professional copywriting and content strategy",
+      "eBook creation, formatting, and publishing",
+      "YouTube channel optimization and branding",
+      "Video content strategy and SEO for growth",
+      "Monetization beyond AdSense — sponsorships, courses, products",
+      "Automation tools for content workflows",
     ],
     prerequisites: [
-      "Familiarity with common business software",
-      "Understanding of basic workflow concepts",
-      "Patience for systematic problem-solving"
+      "Good command of written language",
+      "Creative thinking ability",
+      "Computer or smartphone with internet access",
     ],
     responsibleUse: [
-      "Automate the mechanical, not the meaningful",
-      "Every automation needs human oversight points",
-      "Understand what your automations actually do",
-      "Don't automate away your understanding of processes",
-      "Maintain ability to perform critical tasks manually"
-    ]
-  },
-  {
-    id: "digital-communication",
-    title: "Digital Communication & Professional Presence",
-    description: "Build an authentic professional presence online while avoiding the pitfalls of performative digital behavior.",
-    duration: "6 weeks",
-    isPremium: false,
-    image: courseDigitalCommunication,
-    rating: 4.6,
-    category: "digital-skills",
-    subcategory: "Digital Skills for the Modern Economy",
-    overview: "Your digital presence is increasingly important for career success—but authenticity matters more than algorithms. This course teaches effective online communication, professional networking, and personal branding without sacrificing integrity.",
-    whatYouLearn: [
-      "Writing clear, professional emails and messages",
-      "Building genuine professional networks online",
-      "Creating authentic personal brand presence",
-      "Effective video and voice communication",
-      "Managing online reputation thoughtfully"
-    ],
-    prerequisites: [
-      "Basic social media familiarity",
-      "Willingness to engage professionally online",
-      "Understanding of professional norms"
-    ],
-    responsibleUse: [
-      "Authenticity builds lasting professional relationships",
-      "Engagement should add value, not just visibility",
+      "Authenticity builds lasting audience relationships",
+      "Engagement should add value, not just chase metrics",
+      "Quality content outperforms volume every time",
       "Your digital presence reflects your real values",
-      "Quality connections outweigh follower counts",
-      "Protect your attention from endless feed scrolling"
-    ]
-  }
+      "Build a brand you'd be proud to explain to your grandchildren",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your creator identity", modules: ["Finding your creator voice", "The discipline of consistent creation"] },
+      { id: "core", name: "Core Knowledge", description: "Content, publishing, and video", modules: ["Copywriting and storytelling", "eBook creation and publishing", "YouTube fundamentals and strategy"] },
+      { id: "applied", name: "Applied Skill", description: "Create and publish real content", modules: ["Write and publish your first eBook", "Launch and optimize a YouTube channel", "Content calendar and batch production"] },
+      { id: "tools", name: "Tool Mastery", description: "Creator tools and automation", modules: ["Video editing and production tools", "SEO and analytics mastery", "Automation and scheduling systems"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Monetize your content empire", modules: ["Multi-platform monetization strategy", "Capstone: Creator Business Plan"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 7: Civic Leadership & Governance ──
+  {
+    id: "civic-leadership",
+    title: "Civic Leadership & Governance",
+    description: "Develop leadership skills for community impact, public service, and responsible governance in the digital age.",
+    duration: "8 weeks",
+    isPremium: true,
+    price: "Ksh 7,999",
+    image: courseCivicLeadership,
+    rating: 4.7,
+    category: "civic",
+    pillarId: "civic-leadership",
+    overview: "Equip yourself for meaningful civic participation and community leadership. This pillar covers public policy literacy, ethical governance, community organizing, and using digital tools for civic engagement — all grounded in Kenyan context.",
+    whatYouLearn: [
+      "Public policy literacy and the Kenyan constitution",
+      "Community organizing and stakeholder engagement",
+      "Ethical leadership and governance principles",
+      "Digital tools for civic engagement and transparency",
+      "Public speaking and advocacy communication",
+      "Project management for community development",
+    ],
+    prerequisites: [
+      "Interest in public service and community impact",
+      "Basic understanding of Kenyan governance structures",
+      "Commitment to ethical leadership",
+    ],
+    responsibleUse: [
+      "Leadership is service, not self-promotion",
+      "Digital tools amplify your voice — use it wisely",
+      "Governance requires transparency and accountability",
+      "Civic engagement is a responsibility, not a trend",
+      "Build institutions, not just influence",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "The leader within", modules: ["Your leadership identity", "Values-driven decision making"] },
+      { id: "core", name: "Core Knowledge", description: "Governance, policy, and civic literacy", modules: ["The Kenyan constitution and governance", "Public policy analysis", "Ethics in public service"] },
+      { id: "applied", name: "Applied Skill", description: "Civic engagement in practice", modules: ["Community needs assessment", "Stakeholder engagement simulation", "Public speaking workshop"] },
+      { id: "tools", name: "Tool Mastery", description: "Digital tools for governance", modules: ["Open data and transparency platforms", "Digital advocacy and campaign tools", "Project management for development"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Lead and serve", modules: ["Launching a community initiative", "Capstone: Civic Impact Project"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
 ];
+
+// ═══════════════════════════════════════════════════════════════
+// PILLARS — 7 Core Pillars with Learning Paths
+// ═══════════════════════════════════════════════════════════════
+
+export const pillars: Pillar[] = [
+  {
+    id: "personal-mastery",
+    name: "Personal Mastery & Mind Renewal",
+    tagline: "Renew the mind, empower the generation",
+    icon: "brain",
+    color: "hsl(270, 60%, 55%)",
+    courseIds: ["mindset-renewal"],
+    learningPaths: [
+      {
+        id: "purpose-driven-leader",
+        title: "Purpose-Driven Leader",
+        description: "Discover your purpose and lead with clarity and spiritual grounding",
+        targetRole: "Personal Leadership Coach",
+        skillLevel: "beginner",
+        estimatedWeeks: 8,
+        courseIds: ["mindset-renewal"],
+        capstoneProject: "Personal Mastery Blueprint — a life plan integrating purpose, values, and goals",
+      },
+      {
+        id: "mindset-coach",
+        title: "Mindset & Transformation Coach",
+        description: "Help others break limiting beliefs and build abundance consciousness",
+        targetRole: "Mindset Coach",
+        skillLevel: "intermediate",
+        estimatedWeeks: 12,
+        courseIds: ["mindset-renewal"],
+        capstoneProject: "Design and deliver a 4-session mindset coaching program",
+      },
+    ],
+  },
+  {
+    id: "financial-intelligence",
+    name: "Financial Intelligence & Income Systems",
+    tagline: "Build wealth that serves purpose",
+    icon: "trending-up",
+    color: "hsl(45, 100%, 55%)",
+    courseIds: ["financial-wisdom"],
+    learningPaths: [
+      {
+        id: "wealth-builder",
+        title: "Wealth Builder",
+        description: "Master personal finance, budgeting, and long-term investment strategy",
+        targetRole: "Financial Advisor",
+        skillLevel: "beginner",
+        estimatedWeeks: 10,
+        courseIds: ["financial-wisdom"],
+        capstoneProject: "Personal Wealth Blueprint with 5-year investment plan",
+      },
+      {
+        id: "forex-trader",
+        title: "Forex & Markets Trader",
+        description: "Learn forex trading, risk management, and technical analysis",
+        targetRole: "Forex Trader",
+        skillLevel: "intermediate",
+        estimatedWeeks: 14,
+        courseIds: ["financial-wisdom"],
+        capstoneProject: "30-day trading journal with performance analysis and risk review",
+      },
+      {
+        id: "financial-strategist",
+        title: "Financial Strategist",
+        description: "Advanced wealth management, tax optimization, and estate planning",
+        targetRole: "Financial Strategist",
+        skillLevel: "advanced",
+        estimatedWeeks: 16,
+        courseIds: ["financial-wisdom"],
+        capstoneProject: "Comprehensive financial strategy for a Kenyan SME",
+      },
+    ],
+  },
+  {
+    id: "digital-literacy",
+    name: "Digital Literacy & Productivity Systems",
+    tagline: "Master tools without losing your mind",
+    icon: "monitor",
+    color: "hsl(180, 75%, 45%)",
+    courseIds: ["digital-literacy"],
+    learningPaths: [
+      {
+        id: "digital-professional",
+        title: "Digital Professional",
+        description: "Build essential digital skills for modern workplace excellence",
+        targetRole: "Digital Professional",
+        skillLevel: "beginner",
+        estimatedWeeks: 8,
+        courseIds: ["digital-literacy"],
+        capstoneProject: "Digital Transformation Plan for a local business",
+      },
+      {
+        id: "productivity-specialist",
+        title: "Productivity & Automation Specialist",
+        description: "Master automation tools and build efficient digital workflows",
+        targetRole: "Automation Specialist",
+        skillLevel: "intermediate",
+        estimatedWeeks: 12,
+        courseIds: ["digital-literacy"],
+        capstoneProject: "End-to-end automated workflow for a real business process",
+      },
+      {
+        id: "ai-strategist",
+        title: "AI Literacy & Strategy",
+        description: "Leverage AI tools effectively while maintaining critical thinking",
+        targetRole: "AI Strategy Consultant",
+        skillLevel: "intermediate",
+        estimatedWeeks: 10,
+        courseIds: ["digital-literacy"],
+        capstoneProject: "AI Integration Strategy for an organization",
+      },
+    ],
+  },
+  {
+    id: "cybersecurity",
+    name: "Cybersecurity & Digital Protection",
+    tagline: "Defend the digital frontier",
+    icon: "shield",
+    color: "hsl(0, 70%, 50%)",
+    courseIds: ["cybersecurity"],
+    learningPaths: [
+      {
+        id: "cybersecurity-analyst",
+        title: "Cybersecurity Analyst",
+        description: "Monitor, detect, and respond to security threats in organizations",
+        targetRole: "Cybersecurity Analyst",
+        skillLevel: "beginner",
+        estimatedWeeks: 10,
+        courseIds: ["cybersecurity"],
+        capstoneProject: "Complete security audit report for a simulated organization",
+      },
+      {
+        id: "ethical-hacker",
+        title: "Ethical Hacker",
+        description: "Learn penetration testing and vulnerability assessment ethically",
+        targetRole: "Ethical Hacker / Pen Tester",
+        skillLevel: "advanced",
+        estimatedWeeks: 14,
+        courseIds: ["cybersecurity"],
+        capstoneProject: "Penetration test report with remediation recommendations",
+      },
+      {
+        id: "digital-safety-advocate",
+        title: "Digital Safety Advocate",
+        description: "Protect communities from online threats and promote digital wellness",
+        targetRole: "Digital Safety Educator",
+        skillLevel: "beginner",
+        estimatedWeeks: 8,
+        courseIds: ["cybersecurity"],
+        capstoneProject: "Community digital safety workshop curriculum",
+      },
+    ],
+  },
+  {
+    id: "programming-systems",
+    name: "Programming & Intelligent Systems",
+    tagline: "Build solutions that think",
+    icon: "code",
+    color: "hsl(210, 80%, 50%)",
+    courseIds: ["programming-systems"],
+    learningPaths: [
+      {
+        id: "software-developer",
+        title: "Software Developer",
+        description: "Master Python and web development for professional software engineering",
+        targetRole: "Software Developer",
+        skillLevel: "beginner",
+        estimatedWeeks: 14,
+        courseIds: ["programming-systems"],
+        capstoneProject: "Full-stack web application solving a real Kenyan problem",
+      },
+      {
+        id: "data-scientist",
+        title: "Data Scientist",
+        description: "Analyze data, build models, and extract actionable insights",
+        targetRole: "Data Scientist",
+        skillLevel: "intermediate",
+        estimatedWeeks: 16,
+        courseIds: ["programming-systems"],
+        capstoneProject: "End-to-end data science project with Kenya-relevant dataset",
+      },
+      {
+        id: "ai-engineer",
+        title: "AI & IoT Engineer",
+        description: "Build intelligent and connected systems using AI and IoT",
+        targetRole: "AI / IoT Engineer",
+        skillLevel: "advanced",
+        estimatedWeeks: 18,
+        courseIds: ["programming-systems"],
+        capstoneProject: "Intelligent IoT system prototype with ML integration",
+      },
+    ],
+  },
+  {
+    id: "creator-economy",
+    name: "Creator Economy & Digital Monetization",
+    tagline: "Create value, build legacy",
+    icon: "video",
+    color: "hsl(330, 70%, 50%)",
+    courseIds: ["creator-economy"],
+    learningPaths: [
+      {
+        id: "content-creator",
+        title: "Content Creator & Writer",
+        description: "Master copywriting, eBook publishing, and written content monetization",
+        targetRole: "Content Creator / Author",
+        skillLevel: "beginner",
+        estimatedWeeks: 10,
+        courseIds: ["creator-economy"],
+        capstoneProject: "Published eBook with marketing launch plan",
+      },
+      {
+        id: "youtube-entrepreneur",
+        title: "YouTube Entrepreneur",
+        description: "Build, grow, and monetize a YouTube channel with automation",
+        targetRole: "YouTube Creator / Entrepreneur",
+        skillLevel: "intermediate",
+        estimatedWeeks: 12,
+        courseIds: ["creator-economy"],
+        capstoneProject: "YouTube channel with 10 optimized videos and monetization strategy",
+      },
+      {
+        id: "digital-business-builder",
+        title: "Digital Business Builder",
+        description: "Build a complete online business combining content, products, and services",
+        targetRole: "Digital Entrepreneur",
+        skillLevel: "advanced",
+        estimatedWeeks: 14,
+        courseIds: ["creator-economy"],
+        capstoneProject: "Complete digital business plan with revenue model and launch strategy",
+      },
+    ],
+  },
+  {
+    id: "civic-leadership",
+    name: "Civic Leadership & Governance",
+    tagline: "Lead with purpose, govern with integrity",
+    icon: "landmark",
+    color: "hsl(150, 60%, 40%)",
+    courseIds: ["civic-leadership"],
+    learningPaths: [
+      {
+        id: "community-leader",
+        title: "Community Leader",
+        description: "Organize, mobilize, and lead community development initiatives",
+        targetRole: "Community Development Leader",
+        skillLevel: "beginner",
+        estimatedWeeks: 8,
+        courseIds: ["civic-leadership"],
+        capstoneProject: "Community initiative proposal with stakeholder map and action plan",
+      },
+      {
+        id: "policy-analyst",
+        title: "Policy Analyst & Advocate",
+        description: "Analyze public policy and advocate for evidence-based governance",
+        targetRole: "Policy Analyst",
+        skillLevel: "intermediate",
+        estimatedWeeks: 12,
+        courseIds: ["civic-leadership"],
+        capstoneProject: "Policy brief on a current Kenyan governance issue",
+      },
+    ],
+  },
+];
+
+// Helper: get pillar for a course
+export const getPillarForCourse = (courseId: string): Pillar | undefined => {
+  return pillars.find(p => p.courseIds.includes(courseId));
+};
+
+// Helper: get learning paths for a course
+export const getPathsForCourse = (courseId: string): LearningPath[] => {
+  const pillar = getPillarForCourse(courseId);
+  return pillar?.learningPaths ?? [];
+};
