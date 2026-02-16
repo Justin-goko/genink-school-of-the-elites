@@ -102,12 +102,277 @@ export const entrepreneurialIntelligenceModule = {
   ],
 };
 
+// ─── Pillar 1 Psychological Profiling ──────────────────────────
+export interface ProfileQuestion {
+  id: string;
+  question: string;
+  options: { label: string; value: string; traits: string[] }[];
+}
+
+export const psychProfileQuestions: ProfileQuestion[] = [
+  {
+    id: "q1",
+    question: "When faced with a major life decision, I tend to…",
+    options: [
+      { label: "Reflect deeply before acting", value: "reflective", traits: ["discipline", "introspection"] },
+      { label: "Seek advice and rally others", value: "collaborative", traits: ["leadership", "influence"] },
+      { label: "Build a system or framework to decide", value: "systematic", traits: ["systems", "optimization"] },
+      { label: "Trust my instinct and move quickly", value: "intuitive", traits: ["action", "resilience"] },
+    ],
+  },
+  {
+    id: "q2",
+    question: "What motivates me most?",
+    options: [
+      { label: "Inner peace and personal growth", value: "growth", traits: ["discipline", "introspection"] },
+      { label: "Inspiring and leading others", value: "impact", traits: ["leadership", "influence"] },
+      { label: "Efficiency and measurable results", value: "results", traits: ["systems", "optimization"] },
+      { label: "Overcoming challenges and adversity", value: "challenge", traits: ["resilience", "action"] },
+    ],
+  },
+  {
+    id: "q3",
+    question: "In a team setting, I naturally…",
+    options: [
+      { label: "Observe and contribute thoughtfully", value: "observer", traits: ["introspection", "discipline"] },
+      { label: "Take charge and set direction", value: "leader", traits: ["leadership", "influence"] },
+      { label: "Organize tasks and track progress", value: "organizer", traits: ["systems", "optimization"] },
+      { label: "Encourage and keep morale high", value: "motivator", traits: ["resilience", "influence"] },
+    ],
+  },
+  {
+    id: "q4",
+    question: "My biggest area for growth is…",
+    options: [
+      { label: "Building consistent daily habits", value: "habits", traits: ["discipline", "systems"] },
+      { label: "Communicating with more influence", value: "communication", traits: ["leadership", "influence"] },
+      { label: "Creating scalable personal systems", value: "scaling", traits: ["systems", "optimization"] },
+      { label: "Managing stress and staying focused", value: "focus", traits: ["resilience", "introspection"] },
+    ],
+  },
+  {
+    id: "q5",
+    question: "When I imagine my best self, I see someone who…",
+    options: [
+      { label: "Lives with intention and self-mastery", value: "master", traits: ["discipline", "introspection"] },
+      { label: "Leads movements and transforms communities", value: "transformer", traits: ["leadership", "influence"] },
+      { label: "Designs systems that run without constant effort", value: "architect", traits: ["systems", "optimization"] },
+      { label: "Stands strong through any storm", value: "resilient", traits: ["resilience", "action"] },
+    ],
+  },
+];
+
+export type ProfileType = "identity-builder" | "leadership-psychologist" | "performance-architect";
+
+export const profileTypeMap: Record<ProfileType, { title: string; description: string; pathId: string }> = {
+  "identity-builder": {
+    title: "The Identity Builder",
+    description: "You're driven by self-awareness, habit formation, and the pursuit of personal integrity. Your power lies in deep inner work.",
+    pathId: "identity-discipline-builder",
+  },
+  "leadership-psychologist": {
+    title: "The Influence Architect",
+    description: "You naturally lead, persuade, and inspire. Your edge is understanding people and shaping group outcomes.",
+    pathId: "leadership-psychology",
+  },
+  "performance-architect": {
+    title: "The Systems Thinker",
+    description: "You optimize everything. You think in frameworks, build routines, and design your life for peak output.",
+    pathId: "high-performance-architect",
+  },
+};
+
+export const determineProfileType = (answers: Record<string, string[]>): ProfileType => {
+  const traitCounts: Record<string, number> = {};
+  Object.values(answers).flat().forEach(trait => {
+    traitCounts[trait] = (traitCounts[trait] || 0) + 1;
+  });
+
+  const discipline = (traitCounts["discipline"] || 0) + (traitCounts["introspection"] || 0);
+  const leadership = (traitCounts["leadership"] || 0) + (traitCounts["influence"] || 0);
+  const systems = (traitCounts["systems"] || 0) + (traitCounts["optimization"] || 0);
+
+  if (leadership >= discipline && leadership >= systems) return "leadership-psychologist";
+  if (systems >= discipline && systems >= leadership) return "performance-architect";
+  return "identity-builder";
+};
+
 // ═══════════════════════════════════════════════════════════════
 // COURSES — merged from 17 originals into 7 pillars
 // ═══════════════════════════════════════════════════════════════
 
 export const courses: Course[] = [
-  // ──────────── PILLAR 1: Personal Mastery & Mind Renewal ──────
+  // ──────────── PILLAR 1: Mind Architecture & Identity Design (Foundation) ──────
+  {
+    id: "mind-architecture",
+    title: "Mind Architecture & Identity Design",
+    description: "The mandatory foundation course for Pillar 1. Build your internal operating system — identity, discipline, and cognitive frameworks — before choosing your specialization path.",
+    duration: "4 weeks",
+    isPremium: false,
+    image: courseMindset,
+    rating: 4.9,
+    category: "spiritual",
+    pillarId: "personal-mastery",
+    overview: "This is not a course — it's an internal operating system. Mind Architecture lays the foundation for everything in Personal Mastery. You'll map your identity, build cognitive discipline, and complete a psychological profiling assessment that recommends your ideal learning path.",
+    whatYouLearn: [
+      "Identity mapping and core values discovery",
+      "Cognitive discipline and attention management",
+      "Breaking limiting beliefs with evidence-based techniques",
+      "Building a personal operating system for daily life",
+      "Psychological self-assessment and profile generation",
+      "Ethical decision-making frameworks",
+    ],
+    prerequisites: [
+      "Open mind and commitment to honest self-reflection",
+      "Journal for reflection exercises",
+      "30 minutes daily for 4 weeks",
+    ],
+    responsibleUse: [
+      "Self-mastery is the foundation of all other mastery",
+      "Technology aids growth — but discipline drives it",
+      "Guard your attention as fiercely as your finances",
+      "Wisdom is knowing what to ignore",
+      "Character is built in silence, not in feeds",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Map your identity and core values", modules: ["Who Am I? — Identity Mapping", "Core Values Discovery Workshop", "Psychological Profiling Assessment"] },
+      { id: "core", name: "Core Knowledge", description: "Cognitive science and mental frameworks", modules: ["The Architecture of Thought", "Cognitive Biases & Mental Traps", "Attention Economics"] },
+      { id: "applied", name: "Applied Skill", description: "Build your personal operating system", modules: ["Daily Discipline Protocol Design", "Breaking Limiting Beliefs Lab", "Ethical Decision Simulations"] },
+      { id: "tools", name: "Tool Mastery", description: "Habit and reflection tools", modules: ["Habit Tracker Setup & Mastery", "Journaling Systems for Growth", "Cognitive Resilience Measurement"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Activate your operating system", modules: ["Personal Operating System Blueprint", "Path Selection & Commitment"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: false,
+    entrepreneurialModule: false,
+  },
+
+  // ──────────── PILLAR 1: Identity & Discipline Builder Path ──────
+  {
+    id: "identity-discipline",
+    title: "Identity & Discipline Builder",
+    description: "Deep inner work — master habits, self-regulation, and personal integrity. Build unshakeable discipline as your competitive advantage.",
+    duration: "10 weeks",
+    isPremium: true,
+    price: "Ksh 8,999",
+    image: courseMindset,
+    rating: 4.9,
+    category: "spiritual",
+    pillarId: "personal-mastery",
+    overview: "Go deep into identity formation, habit science, and self-regulation. This path transforms your daily patterns into a high-performance routine built on integrity and purpose.",
+    whatYouLearn: [
+      "Advanced habit formation and behavioral design",
+      "Self-regulation and emotional mastery",
+      "Building accountability systems that stick",
+      "Personal integrity as a competitive advantage",
+      "Coaching others in discipline and identity",
+      "Pitching, IP basics, and Kenyan business structures",
+    ],
+    prerequisites: [
+      "Completed: Mind Architecture & Identity Design",
+      "Commitment to 90-day habit challenge",
+    ],
+    responsibleUse: [
+      "Discipline is freedom, not restriction",
+      "Identity is built through action, not affirmation",
+      "True change happens when no one is watching",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your discipline identity", modules: ["The Disciplined Self — Identity Blueprint", "Emotional mastery fundamentals"] },
+      { id: "core", name: "Core Knowledge", description: "Behavioral science and habit architecture", modules: ["The Science of Habits", "Self-Regulation Theory", "Willpower vs Systems"] },
+      { id: "applied", name: "Applied Skill", description: "Build your discipline systems", modules: ["90-Day Habit Challenge", "Accountability Partner Protocol", "Ethical Decision Simulations (Advanced)"] },
+      { id: "tools", name: "Tool Mastery", description: "Tracking and coaching tools", modules: ["Advanced Habit Analytics", "Coaching frameworks and tools", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Coach and lead others", modules: ["Launch Your Discipline Coaching Practice", "Capstone: Personal Transformation Portfolio"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 1: Leadership Psychology & Influence ──────
+  {
+    id: "leadership-psychology",
+    title: "Leadership Psychology & Influence",
+    description: "Master the psychology of leadership, persuasion, and ethical influence. Learn to move people and shape outcomes.",
+    duration: "12 weeks",
+    isPremium: true,
+    price: "Ksh 10,999",
+    image: courseMindset,
+    rating: 4.8,
+    category: "spiritual",
+    pillarId: "personal-mastery",
+    overview: "Study the psychology behind great leadership. Master communication, ethical persuasion, conflict resolution, and team dynamics — grounded in African leadership philosophy.",
+    whatYouLearn: [
+      "Psychology of influence and ethical persuasion",
+      "Conflict resolution and negotiation",
+      "Public speaking and communication mastery",
+      "Team dynamics and organizational psychology",
+      "African leadership philosophy and Ubuntu",
+      "Pitching, pitch decks, and professional communication",
+    ],
+    prerequisites: [
+      "Completed: Mind Architecture & Identity Design",
+      "Interest in leadership and people development",
+    ],
+    responsibleUse: [
+      "Influence is a responsibility, not a weapon",
+      "Lead by example before leading by instruction",
+      "The most powerful leaders serve, not command",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your leadership identity", modules: ["The Leader Within — Self-Assessment", "African Leadership Philosophy"] },
+      { id: "core", name: "Core Knowledge", description: "Psychology of influence and leadership", modules: ["Influence Psychology & Ethical Persuasion", "Conflict Resolution Frameworks", "Organizational Behavior"] },
+      { id: "applied", name: "Applied Skill", description: "Leadership in practice", modules: ["Public Speaking Intensive", "Negotiation Simulations", "Team Leadership Scenarios"] },
+      { id: "tools", name: "Tool Mastery", description: "Communication and leadership tools", modules: ["Pitch Deck Mastery", "Professional Communication Systems", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Lead and consult", modules: ["Leadership Consulting Framework", "Capstone: Community Leadership Project"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 1: High-Performance Systems Architect ──────
+  {
+    id: "performance-architect",
+    title: "High-Performance Systems Architect",
+    description: "Design personal systems for peak performance — routines, workflows, energy management, and scalable productivity.",
+    duration: "10 weeks",
+    isPremium: true,
+    price: "Ksh 9,999",
+    image: courseMindset,
+    rating: 4.8,
+    category: "spiritual",
+    pillarId: "personal-mastery",
+    overview: "Engineer your life for maximum output and sustainability. This path teaches you to build personal operating systems — from morning routines to annual planning — that scale with your ambitions.",
+    whatYouLearn: [
+      "Personal systems design and optimization",
+      "Energy management and peak performance cycles",
+      "Time architecture and deep work protocols",
+      "Decision frameworks for complex life choices",
+      "Building systems that run without willpower",
+      "IP basics, business structures, and market positioning",
+    ],
+    prerequisites: [
+      "Completed: Mind Architecture & Identity Design",
+      "Willingness to redesign daily routines",
+    ],
+    responsibleUse: [
+      "Systems serve life — life doesn't serve systems",
+      "Optimization without purpose is just busyness",
+      "The goal is sustainability, not burnout",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your performance identity", modules: ["The Systems Thinker — Identity Map", "Performance vs Productivity distinction"] },
+      { id: "core", name: "Core Knowledge", description: "Performance science and systems theory", modules: ["Energy Management Science", "Deep Work & Flow State Theory", "Decision Architecture"] },
+      { id: "applied", name: "Applied Skill", description: "Build your performance systems", modules: ["Morning Routine Engineering", "Weekly Review System Design", "Annual Planning Framework"] },
+      { id: "tools", name: "Tool Mastery", description: "Productivity and tracking tools", modules: ["Digital Productivity Stack", "Personal Dashboard Design", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Consult and coach", modules: ["Performance Coaching Framework", "Capstone: Personal Operating System v2.0"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 1 LEGACY: Personal Mastery (retained) ──────
   {
     id: "mindset-renewal",
     title: "Personal Mastery & Mind Renewal",
@@ -432,30 +697,49 @@ export const pillars: Pillar[] = [
   {
     id: "personal-mastery",
     name: "Personal Mastery & Mind Renewal",
-    tagline: "Renew the mind, empower the generation",
+    tagline: "Your internal operating system",
     icon: "brain",
     color: "hsl(270, 60%, 55%)",
-    courseIds: ["mindset-renewal"],
+    courseIds: ["mind-architecture", "identity-discipline", "leadership-psychology", "performance-architect", "mindset-renewal"],
     learningPaths: [
       {
-        id: "purpose-driven-leader",
-        title: "Purpose-Driven Leader",
-        description: "Discover your purpose and lead with clarity and spiritual grounding",
-        targetRole: "Personal Leadership Coach",
+        id: "mind-architecture-foundation",
+        title: "Mind Architecture & Identity Design",
+        description: "Mandatory foundation — build your cognitive operating system before choosing a specialization",
+        targetRole: "Self-Mastery Practitioner",
         skillLevel: "beginner",
-        estimatedWeeks: 8,
-        courseIds: ["mindset-renewal"],
-        capstoneProject: "Personal Mastery Blueprint — a life plan integrating purpose, values, and goals",
+        estimatedWeeks: 4,
+        courseIds: ["mind-architecture"],
       },
       {
-        id: "mindset-coach",
-        title: "Mindset & Transformation Coach",
-        description: "Help others break limiting beliefs and build abundance consciousness",
-        targetRole: "Mindset Coach",
+        id: "identity-discipline-builder",
+        title: "Identity & Discipline Builder",
+        description: "Deep inner work — master habits, self-regulation, and personal integrity",
+        targetRole: "Discipline Coach",
+        skillLevel: "intermediate",
+        estimatedWeeks: 10,
+        courseIds: ["mind-architecture", "identity-discipline"],
+        capstoneProject: "Personal Transformation Portfolio — 90-day habit challenge results and coaching framework",
+      },
+      {
+        id: "leadership-psychology",
+        title: "Leadership Psychology & Influence",
+        description: "Master the psychology of leadership, persuasion, and ethical influence",
+        targetRole: "Leadership Consultant",
         skillLevel: "intermediate",
         estimatedWeeks: 12,
-        courseIds: ["mindset-renewal"],
-        capstoneProject: "Design and deliver a 4-session mindset coaching program",
+        courseIds: ["mind-architecture", "leadership-psychology"],
+        capstoneProject: "Community Leadership Project — design and lead a real initiative",
+      },
+      {
+        id: "high-performance-architect",
+        title: "High-Performance Systems Architect",
+        description: "Design personal systems for peak performance and scalable productivity",
+        targetRole: "Performance Coach",
+        skillLevel: "advanced",
+        estimatedWeeks: 10,
+        courseIds: ["mind-architecture", "performance-architect"],
+        capstoneProject: "Personal Operating System v2.0 — complete life system design",
       },
     ],
   },
