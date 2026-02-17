@@ -164,6 +164,103 @@ export const psychProfileQuestions: ProfileQuestion[] = [
 
 export type ProfileType = "identity-builder" | "leadership-psychologist" | "performance-architect";
 
+// ─── Pillar 2 Financial Profiling ──────────────────────────────
+export type FinancialProfileType = "stabilizer" | "analyst" | "builder" | "architect";
+
+export const financialProfileQuestions: ProfileQuestion[] = [
+  {
+    id: "fq1",
+    question: "When you receive unexpected money, your first instinct is to…",
+    options: [
+      { label: "Save it immediately for emergencies", value: "save", traits: ["stability", "caution"] },
+      { label: "Research the best investment options", value: "research", traits: ["analysis", "growth"] },
+      { label: "Invest it into a business idea", value: "invest-biz", traits: ["enterprise", "risk"] },
+      { label: "Build a system to generate more from it", value: "systematize", traits: ["systems", "growth"] },
+    ],
+  },
+  {
+    id: "fq2",
+    question: "How do you feel about financial risk?",
+    options: [
+      { label: "I avoid it — security comes first", value: "avoid", traits: ["stability", "caution"] },
+      { label: "I study risk carefully before committing", value: "study", traits: ["analysis", "caution"] },
+      { label: "Calculated risk is how wealth is built", value: "calculated", traits: ["enterprise", "growth"] },
+      { label: "I design systems to manage risk automatically", value: "design", traits: ["systems", "analysis"] },
+    ],
+  },
+  {
+    id: "fq3",
+    question: "Your ideal financial future looks like…",
+    options: [
+      { label: "Debt-free with a strong emergency fund", value: "secure", traits: ["stability", "caution"] },
+      { label: "A diversified portfolio generating passive income", value: "portfolio", traits: ["analysis", "growth"] },
+      { label: "Multiple income streams from businesses I built", value: "entrepreneur", traits: ["enterprise", "risk"] },
+      { label: "Automated wealth systems running in the background", value: "automated", traits: ["systems", "growth"] },
+    ],
+  },
+  {
+    id: "fq4",
+    question: "What's your current financial knowledge level?",
+    options: [
+      { label: "I need to learn the basics first", value: "basics", traits: ["stability", "caution"] },
+      { label: "I understand investing but want deeper analysis skills", value: "intermediate", traits: ["analysis", "growth"] },
+      { label: "I've started businesses but need better financial structure", value: "business", traits: ["enterprise", "systems"] },
+      { label: "I'm comfortable with finance and want to architect income systems", value: "advanced", traits: ["systems", "enterprise"] },
+    ],
+  },
+  {
+    id: "fq5",
+    question: "When it comes to money, your biggest challenge is…",
+    options: [
+      { label: "Spending discipline and sticking to budgets", value: "discipline", traits: ["stability", "caution"] },
+      { label: "Knowing where to invest and when", value: "timing", traits: ["analysis", "growth"] },
+      { label: "Turning ideas into profitable ventures", value: "monetizing", traits: ["enterprise", "risk"] },
+      { label: "Building scalable systems instead of trading time for money", value: "scaling", traits: ["systems", "enterprise"] },
+    ],
+  },
+];
+
+export const financialProfileTypeMap: Record<FinancialProfileType, { title: string; description: string; pathId: string }> = {
+  stabilizer: {
+    title: "The Stabilizer",
+    description: "You prioritize security, predictability, and financial peace. Your strength is building a rock-solid foundation before taking any growth steps.",
+    pathId: "personal-finance-stability",
+  },
+  analyst: {
+    title: "The Analyst",
+    description: "You approach money with data and logic. You research, compare, and calculate before committing. Markets and portfolios fascinate you.",
+    pathId: "investor-market-intelligence",
+  },
+  builder: {
+    title: "The Builder",
+    description: "You see money as fuel for creation. You're entrepreneurial, resourceful, and always looking for the next opportunity to build income.",
+    pathId: "income-systems-enterprise",
+  },
+  architect: {
+    title: "The Architect",
+    description: "You think in systems. You want automated wealth engines, scalable revenue models, and infrastructure that works without your constant attention.",
+    pathId: "income-systems-enterprise",
+  },
+};
+
+export const determineFinancialProfileType = (answers: Record<string, string[]>): FinancialProfileType => {
+  const traitCounts: Record<string, number> = {};
+  Object.values(answers).flat().forEach(trait => {
+    traitCounts[trait] = (traitCounts[trait] || 0) + 1;
+  });
+
+  const stability = (traitCounts["stability"] || 0) + (traitCounts["caution"] || 0);
+  const analysis = (traitCounts["analysis"] || 0) + (traitCounts["growth"] || 0);
+  const enterprise = (traitCounts["enterprise"] || 0) + (traitCounts["risk"] || 0);
+  const systems = (traitCounts["systems"] || 0);
+
+  const max = Math.max(stability, analysis, enterprise, systems);
+  if (max === stability) return "stabilizer";
+  if (max === analysis) return "analyst";
+  if (max === enterprise) return "builder";
+  return "architect";
+};
+
 export const profileTypeMap: Record<ProfileType, { title: string; description: string; pathId: string }> = {
   "identity-builder": {
     title: "The Identity Builder",
@@ -417,7 +514,182 @@ export const courses: Course[] = [
     entrepreneurialModule: true,
   },
 
-  // ──────────── PILLAR 2: Financial Intelligence & Income Systems ──
+  // ──────────── PILLAR 2: Money Psychology & Wealth Thinking (Foundation) ──────
+  {
+    id: "money-psychology",
+    title: "Money Psychology & Wealth Thinking",
+    description: "The mandatory foundation course for Pillar 2. Rewire your relationship with money — identity, discipline, and financial frameworks — before choosing your specialization.",
+    duration: "4 weeks",
+    isPremium: false,
+    image: courseFinance,
+    rating: 4.9,
+    category: "financial",
+    pillarId: "financial-intelligence",
+    overview: "This is your financial operating system. Before budgets, investments, or businesses — you must understand your money psychology. This course dismantles scarcity thinking, builds financial discipline, and prepares you for intelligent wealth creation.",
+    whatYouLearn: [
+      "Scarcity vs abundance mindset analysis",
+      "Risk vs gambling — understanding the difference",
+      "Financial discipline systems and daily practices",
+      "Emotional triggers around money and spending",
+      "Ethical wealth creation principles",
+      "Risk appetite self-assessment",
+      "30-day financial discipline challenge",
+    ],
+    prerequisites: [
+      "Honest willingness to examine your money beliefs",
+      "Journal or notebook for financial reflection",
+      "30 minutes daily for 4 weeks",
+    ],
+    responsibleUse: [
+      "Wealth is a tool for impact, not just accumulation",
+      "High returns always carry high risk — there are no shortcuts",
+      "Financial discipline requires emotional discipline",
+      "Build wealth that serves your family and community",
+      "Reject get-rich-fast thinking — pursue long-term value",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Reset", description: "Rewire your money identity", modules: ["Money Identity Mapping", "Scarcity vs Abundance Assessment", "Generational Financial Patterns"] },
+      { id: "core", name: "Core Financial Knowledge", description: "Foundational financial literacy", modules: ["Risk vs Gambling Framework", "Time Value of Money", "Income, Savings, and Wealth Basics"] },
+      { id: "applied", name: "Applied Personal Finance Skills", description: "Hands-on financial exercises", modules: ["Budget Builder Workshop", "Emotional Spending Triggers Lab", "30-Day Financial Discipline Challenge"] },
+      { id: "tools", name: "Tool Mastery", description: "Financial tracking and planning tools", modules: ["Personal Finance Tracker Setup", "Risk Appetite Assessment Tool", "Financial Goal Setting Framework"] },
+      { id: "deploy", name: "Deployment & Financial Blueprint", description: "Activate your financial foundation", modules: ["Personal Financial Blueprint", "Path Selection & Commitment"] },
+    ],
+    progressionLevel: "foundation",
+    hasCapstone: false,
+    entrepreneurialModule: false,
+  },
+
+  // ──────────── PILLAR 2: Personal Finance & Stability Architect ──────
+  {
+    id: "personal-finance-stability",
+    title: "Personal Finance & Stability Architect",
+    description: "Build bulletproof financial stability — budget systems, emergency funds, debt management, and savings automation for the Kenyan context.",
+    duration: "10 weeks",
+    isPremium: true,
+    price: "Ksh 9,999",
+    image: courseFinance,
+    rating: 4.8,
+    category: "financial",
+    pillarId: "financial-intelligence",
+    overview: "Design a complete personal financial stability system. From zero-based budgeting to insurance literacy and credit management in Kenya — this path makes you financially unbreakable.",
+    whatYouLearn: [
+      "Zero-based and envelope budgeting systems",
+      "Emergency fund design and automation",
+      "Debt management and elimination strategies",
+      "Insurance literacy for Kenyan professionals",
+      "Savings automation and M-Pesa integration",
+      "Credit literacy and CRB awareness in Kenya",
+      "Pitching, IP basics, and Kenyan business structures",
+    ],
+    prerequisites: [
+      "Completed: Money Psychology & Wealth Thinking",
+      "Willingness to track every shilling for 30 days",
+    ],
+    responsibleUse: [
+      "Stability is the foundation of all wealth",
+      "Budgets are not restrictions — they are freedom plans",
+      "Insurance is preparation, not pessimism",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your stability identity", modules: ["The Stability Architect — Identity Blueprint", "Financial peace vs financial anxiety"] },
+      { id: "core", name: "Core Knowledge", description: "Budgeting, debt, and insurance", modules: ["Budgeting Systems Deep Dive", "Debt Psychology & Elimination", "Insurance & Risk Protection in Kenya"] },
+      { id: "applied", name: "Applied Skill", description: "Build your stability systems", modules: ["Emergency Fund Calculator & Plan", "Debt Snowball/Avalanche Simulation", "Credit Score & CRB Workshop"] },
+      { id: "tools", name: "Tool Mastery", description: "Financial tools and automation", modules: ["M-Pesa & Mobile Banking Optimization", "Savings Automation Setup", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Launch your stability blueprint", modules: ["Financial Coaching Framework", "Capstone: 12-Month Personal Financial Stability Blueprint"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 2: Investor & Market Intelligence Builder ──────
+  {
+    id: "investor-market-intelligence",
+    title: "Investor & Market Intelligence Builder",
+    description: "Understand financial markets, build diversified portfolios, and develop data-driven investment thinking — without hype or gambling culture.",
+    duration: "12 weeks",
+    isPremium: true,
+    price: "Ksh 12,999",
+    image: courseForex,
+    rating: 4.8,
+    category: "financial",
+    pillarId: "financial-intelligence",
+    overview: "From the Nairobi Securities Exchange to global markets — learn to analyze, diversify, and build portfolios with discipline. This path reframes forex as 'Understanding Financial Markets & Risk Exposure' — no hype, no gambling.",
+    whatYouLearn: [
+      "Asset classes and investment vehicles",
+      "NSE and global markets overview",
+      "Portfolio diversification strategies",
+      "Risk-adjusted return analysis",
+      "Inflation, interest rates, and macro basics",
+      "Understanding Financial Markets & Risk Exposure (Forex reframed)",
+      "Pitching, pitch decks, and professional financial communication",
+    ],
+    prerequisites: [
+      "Completed: Money Psychology & Wealth Thinking",
+      "Basic mathematics and analytical thinking",
+    ],
+    responsibleUse: [
+      "Investing is not gambling — discipline separates the two",
+      "Diversify wisely; never invest what you cannot afford to lose",
+      "Markets reward patience, not impulse",
+      "Understand what you own and why you own it",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your investor identity", modules: ["The Intelligent Investor — Identity Map", "Risk tolerance vs risk appetite"] },
+      { id: "core", name: "Core Knowledge", description: "Markets, assets, and macro fundamentals", modules: ["Asset Classes & Investment Vehicles", "NSE & Global Markets Overview", "Inflation, Interest Rates & Macro"] },
+      { id: "applied", name: "Applied Skill", description: "Portfolio building and analysis", modules: ["Portfolio Diversification Workshop", "Risk-Adjusted Return Calculator", "Financial Markets & Risk Exposure Sim"] },
+      { id: "tools", name: "Tool Mastery", description: "Investment platforms and analysis", modules: ["Trading Platforms & Charting Tools", "Financial Statement Analysis", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Build and present your strategy", modules: ["Investment Advisory Framework", "Capstone: Simulated Diversified Portfolio with Risk Justification"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 2: Income Systems & Digital Enterprise Architect ──────
+  {
+    id: "income-systems-enterprise",
+    title: "Income Systems & Digital Enterprise Architect",
+    description: "Design monetizable business models, revenue systems, and digital income streams — from unit economics to pricing psychology.",
+    duration: "12 weeks",
+    isPremium: true,
+    price: "Ksh 11,999",
+    image: courseFinance,
+    rating: 4.9,
+    category: "financial",
+    pillarId: "financial-intelligence",
+    overview: "Move beyond employment. This path teaches you to design business models, understand unit economics, manage cashflow, and build digital income streams. Think like an architect of wealth systems.",
+    whatYouLearn: [
+      "Business model design and validation",
+      "Revenue systems and unit economics",
+      "Cashflow management and forecasting",
+      "Digital income stream architecture",
+      "Pricing psychology and value perception",
+      "IP fundamentals, taxation, and compliance in Kenya",
+      "Professional financial communication and pitch decks",
+    ],
+    prerequisites: [
+      "Completed: Money Psychology & Wealth Thinking",
+      "Entrepreneurial drive and willingness to build",
+    ],
+    responsibleUse: [
+      "Income systems should create value, not extract it",
+      "Sustainable business beats quick profit every time",
+      "Price for value delivered, not for maximum extraction",
+    ],
+    layers: [
+      { id: "identity", name: "Identity & Mindset Foundation", description: "Your enterprise identity", modules: ["The Enterprise Architect — Identity Map", "Employee mindset vs builder mindset"] },
+      { id: "core", name: "Core Knowledge", description: "Business models and economics", modules: ["Business Model Design Framework", "Unit Economics & Revenue Systems", "Cashflow Management Fundamentals"] },
+      { id: "applied", name: "Applied Skill", description: "Build your income system", modules: ["Digital Income Stream Workshop", "Pricing Psychology Lab", "Cashflow Forecasting Simulation"] },
+      { id: "tools", name: "Tool Mastery", description: "Business and financial tools", modules: ["Financial Modeling Spreadsheets", "Digital Business Platforms", "Entrepreneurial Intelligence Core"] },
+      { id: "deploy", name: "Deployment & Monetization", description: "Launch your enterprise", modules: ["Go-to-Market Strategy Design", "Capstone: Monetizable Income System Blueprint"] },
+    ],
+    progressionLevel: "practitioner",
+    hasCapstone: true,
+    entrepreneurialModule: true,
+  },
+
+  // ──────────── PILLAR 2 LEGACY: Financial Intelligence (retained) ──────
   {
     id: "financial-wisdom",
     title: "Financial Intelligence & Wealth Building",
@@ -749,37 +1021,46 @@ export const pillars: Pillar[] = [
     tagline: "Build wealth that serves purpose",
     icon: "trending-up",
     color: "hsl(45, 100%, 55%)",
-    courseIds: ["financial-wisdom"],
+    courseIds: ["money-psychology", "personal-finance-stability", "investor-market-intelligence", "income-systems-enterprise", "financial-wisdom"],
     learningPaths: [
       {
-        id: "wealth-builder",
-        title: "Wealth Builder",
-        description: "Master personal finance, budgeting, and long-term investment strategy",
-        targetRole: "Financial Advisor",
+        id: "money-psychology-foundation",
+        title: "Money Psychology & Wealth Thinking",
+        description: "Mandatory foundation — rewire your financial operating system before choosing a specialization",
+        targetRole: "Financially Literate Individual",
         skillLevel: "beginner",
-        estimatedWeeks: 10,
-        courseIds: ["financial-wisdom"],
-        capstoneProject: "Personal Wealth Blueprint with 5-year investment plan",
+        estimatedWeeks: 4,
+        courseIds: ["money-psychology"],
       },
       {
-        id: "forex-trader",
-        title: "Forex & Markets Trader",
-        description: "Learn forex trading, risk management, and technical analysis",
-        targetRole: "Forex Trader",
+        id: "personal-finance-stability",
+        title: "Personal Finance & Stability Architect",
+        description: "Build bulletproof financial stability — budgets, emergency funds, debt management, and savings automation",
+        targetRole: "Financial Stability Coach",
         skillLevel: "intermediate",
-        estimatedWeeks: 14,
-        courseIds: ["financial-wisdom"],
-        capstoneProject: "30-day trading journal with performance analysis and risk review",
+        estimatedWeeks: 10,
+        courseIds: ["money-psychology", "personal-finance-stability"],
+        capstoneProject: "12-Month Personal Financial Stability Blueprint with emergency fund design and debt elimination plan",
       },
       {
-        id: "financial-strategist",
-        title: "Financial Strategist",
-        description: "Advanced wealth management, tax optimization, and estate planning",
-        targetRole: "Financial Strategist",
+        id: "investor-market-intelligence",
+        title: "Investor & Market Intelligence Builder",
+        description: "Understand financial markets, build diversified portfolios, and develop data-driven investment thinking",
+        targetRole: "Investment Analyst",
+        skillLevel: "intermediate",
+        estimatedWeeks: 12,
+        courseIds: ["money-psychology", "investor-market-intelligence"],
+        capstoneProject: "Simulated diversified portfolio strategy with risk justification and macro analysis",
+      },
+      {
+        id: "income-systems-enterprise",
+        title: "Income Systems & Digital Enterprise Architect",
+        description: "Design business models, revenue systems, and digital income streams from zero to launch",
+        targetRole: "Digital Enterprise Architect",
         skillLevel: "advanced",
-        estimatedWeeks: 16,
-        courseIds: ["financial-wisdom"],
-        capstoneProject: "Comprehensive financial strategy for a Kenyan SME",
+        estimatedWeeks: 12,
+        courseIds: ["money-psychology", "income-systems-enterprise"],
+        capstoneProject: "Monetizable income system blueprint with business model, pricing strategy, and go-to-market plan",
       },
     ],
   },
