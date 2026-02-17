@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import CourseLearning from "./pages/CourseLearning";
 import LearningPathMap from "./pages/LearningPathMap";
 import MindArchitecture from "./pages/MindArchitecture";
+import FinancialIntelligence from "./pages/FinancialIntelligence";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/learn/:courseId" element={<CourseLearning />} />
             <Route path="/learning-paths" element={<LearningPathMap />} />
             <Route path="/mind-architecture" element={<MindArchitecture />} />
+            <Route path="/financial-intelligence" element={<FinancialIntelligence />} />
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
