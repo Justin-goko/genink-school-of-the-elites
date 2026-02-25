@@ -53,6 +53,11 @@ export interface LearningPath {
   estimatedWeeks: number;
   courseIds: string[];
   capstoneProject?: string;
+  careerOutcomes?: string[];
+  competencyMilestones?: string[];
+  requiredFoundation?: string;
+  certificationTier?: string;
+  comparisonData?: Record<string, string>;
 }
 
 // ─── Pillar ────────────────────────────────────────────────────
@@ -62,9 +67,28 @@ export interface Pillar {
   tagline: string;
   icon: string;
   color: string;
+  description: string;
+  focusAreas: string[];
+  whoIsItFor: string;
+  coreCompetencies: string[];
   learningPaths: LearningPath[];
   courseIds: string[];
 }
+
+// ─── Learning Path Comparison Metrics ──────────────────────────
+export interface PathComparisonMetric {
+  label: string;
+  key: string;
+}
+
+export const comparisonMetrics: PathComparisonMetric[] = [
+  { label: "Technical Depth", key: "technicalDepth" },
+  { label: "Coding Intensity", key: "codingIntensity" },
+  { label: "Infrastructure Exposure", key: "infrastructureExposure" },
+  { label: "Career Environment", key: "careerEnvironment" },
+  { label: "Difficulty Level", key: "difficultyLevel" },
+  { label: "Duration", key: "duration" },
+];
 
 // ─── Course ────────────────────────────────────────────────────
 export interface Course {
@@ -968,10 +992,14 @@ export const courses: Course[] = [
 export const pillars: Pillar[] = [
   {
     id: "personal-mastery",
-    name: "Personal Mastery & Mind Renewal",
+    name: "Personal Mastery & Mindset Renewal",
     tagline: "Your internal operating system",
     icon: "brain",
     color: "hsl(270, 60%, 55%)",
+    description: "Build your cognitive operating system — identity, discipline, and mental frameworks that power everything else you do.",
+    focusAreas: ["Identity design", "Cognitive discipline", "Habit architecture", "Leadership psychology", "High-performance systems"],
+    whoIsItFor: "Anyone who wants to master themselves before mastering their career. Students, professionals, and aspiring leaders who understand that external success begins with internal architecture.",
+    coreCompetencies: ["Self-awareness & identity mapping", "Behavioral design & habit formation", "Ethical decision-making", "Leadership & influence", "Personal systems optimization"],
     courseIds: ["mind-architecture", "identity-discipline", "leadership-psychology", "performance-architect", "mindset-renewal"],
     learningPaths: [
       {
@@ -982,6 +1010,10 @@ export const pillars: Pillar[] = [
         skillLevel: "beginner",
         estimatedWeeks: 4,
         courseIds: ["mind-architecture"],
+        careerOutcomes: ["Personal development coach", "Mindset consultant", "Self-leadership practitioner"],
+        competencyMilestones: ["Identity mapping complete", "Cognitive discipline protocol active", "Psychological profile generated"],
+        requiredFoundation: "None — this IS the foundation",
+        certificationTier: "Foundation",
       },
       {
         id: "identity-discipline-builder",
@@ -992,6 +1024,11 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 10,
         courseIds: ["mind-architecture", "identity-discipline"],
         capstoneProject: "Personal Transformation Portfolio — 90-day habit challenge results and coaching framework",
+        careerOutcomes: ["Discipline coach", "Habit design consultant", "Personal accountability partner"],
+        competencyMilestones: ["90-day habit challenge complete", "Accountability system built", "Coaching framework designed"],
+        requiredFoundation: "Mind Architecture & Identity Design",
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Personal systems", careerEnvironment: "Coaching & consulting", difficultyLevel: "Intermediate", duration: "10 weeks" },
       },
       {
         id: "leadership-psychology",
@@ -1002,6 +1039,11 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 12,
         courseIds: ["mind-architecture", "leadership-psychology"],
         capstoneProject: "Community Leadership Project — design and lead a real initiative",
+        careerOutcomes: ["Leadership consultant", "Team development specialist", "Public speaking coach"],
+        competencyMilestones: ["Influence psychology mastered", "Conflict resolution certified", "Public speaking intensive complete"],
+        requiredFoundation: "Mind Architecture & Identity Design",
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "None", infrastructureExposure: "Organizational", careerEnvironment: "Corporate & community leadership", difficultyLevel: "Intermediate", duration: "12 weeks" },
       },
       {
         id: "high-performance-architect",
@@ -1012,15 +1054,24 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 10,
         courseIds: ["mind-architecture", "performance-architect"],
         capstoneProject: "Personal Operating System v2.0 — complete life system design",
+        careerOutcomes: ["Performance coach", "Productivity consultant", "Systems designer"],
+        competencyMilestones: ["Energy management system active", "Deep work protocol implemented", "Annual planning framework built"],
+        requiredFoundation: "Mind Architecture & Identity Design",
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "High", codingIntensity: "Low", infrastructureExposure: "Digital productivity tools", careerEnvironment: "Consulting & executive coaching", difficultyLevel: "Advanced", duration: "10 weeks" },
       },
     ],
   },
   {
     id: "financial-intelligence",
-    name: "Financial Intelligence & Income Systems",
+    name: "Financial Intelligence & Economic Literacy",
     tagline: "Build wealth that serves purpose",
     icon: "trending-up",
     color: "hsl(45, 100%, 55%)",
+    description: "Rewire your relationship with money and build intelligent wealth systems — from personal budgets to investment portfolios and digital enterprises.",
+    focusAreas: ["Money psychology", "Personal finance", "Investment literacy", "Business model design", "Income systems"],
+    whoIsItFor: "Professionals, entrepreneurs, and young adults who want to build financial stability, understand markets, or design income-generating systems — without falling for get-rich-fast schemes.",
+    coreCompetencies: ["Financial discipline & budgeting", "Investment analysis", "Risk management", "Business model design", "Revenue system architecture"],
     courseIds: ["money-psychology", "personal-finance-stability", "investor-market-intelligence", "income-systems-enterprise", "financial-wisdom"],
     learningPaths: [
       {
@@ -1031,6 +1082,10 @@ export const pillars: Pillar[] = [
         skillLevel: "beginner",
         estimatedWeeks: 4,
         courseIds: ["money-psychology"],
+        careerOutcomes: ["Financially disciplined individual", "Personal finance educator"],
+        competencyMilestones: ["Money identity mapped", "Risk appetite assessed", "30-day discipline challenge complete"],
+        requiredFoundation: "None — this IS the foundation",
+        certificationTier: "Foundation",
       },
       {
         id: "personal-finance-stability",
@@ -1040,7 +1095,12 @@ export const pillars: Pillar[] = [
         skillLevel: "intermediate",
         estimatedWeeks: 10,
         courseIds: ["money-psychology", "personal-finance-stability"],
-        capstoneProject: "12-Month Personal Financial Stability Blueprint with emergency fund design and debt elimination plan",
+        capstoneProject: "12-Month Personal Financial Stability Blueprint",
+        careerOutcomes: ["Financial coach", "Budget consultant", "Insurance advisor"],
+        competencyMilestones: ["Budget system operational", "Emergency fund designed", "Debt elimination plan active"],
+        requiredFoundation: "Money Psychology & Wealth Thinking",
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "Low", infrastructureExposure: "Banking & M-Pesa", careerEnvironment: "Personal finance coaching", difficultyLevel: "Intermediate", duration: "10 weeks" },
       },
       {
         id: "investor-market-intelligence",
@@ -1050,7 +1110,12 @@ export const pillars: Pillar[] = [
         skillLevel: "intermediate",
         estimatedWeeks: 12,
         courseIds: ["money-psychology", "investor-market-intelligence"],
-        capstoneProject: "Simulated diversified portfolio strategy with risk justification and macro analysis",
+        capstoneProject: "Simulated diversified portfolio strategy with risk justification",
+        careerOutcomes: ["Investment analyst", "Portfolio advisor", "Market researcher"],
+        competencyMilestones: ["Asset classes mastered", "Portfolio simulation complete", "Macro analysis framework built"],
+        requiredFoundation: "Money Psychology & Wealth Thinking",
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "High", codingIntensity: "Medium", infrastructureExposure: "NSE & global markets", careerEnvironment: "Finance & investment firms", difficultyLevel: "Intermediate", duration: "12 weeks" },
       },
       {
         id: "income-systems-enterprise",
@@ -1060,16 +1125,25 @@ export const pillars: Pillar[] = [
         skillLevel: "advanced",
         estimatedWeeks: 12,
         courseIds: ["money-psychology", "income-systems-enterprise"],
-        capstoneProject: "Monetizable income system blueprint with business model, pricing strategy, and go-to-market plan",
+        capstoneProject: "Monetizable income system blueprint with business model and go-to-market plan",
+        careerOutcomes: ["Digital entrepreneur", "Business strategist", "Revenue systems designer"],
+        competencyMilestones: ["Business model designed", "Unit economics calculated", "Go-to-market plan complete"],
+        requiredFoundation: "Money Psychology & Wealth Thinking",
+        certificationTier: "Elite",
+        comparisonData: { technicalDepth: "High", codingIntensity: "Medium", infrastructureExposure: "Digital platforms", careerEnvironment: "Entrepreneurship & startups", difficultyLevel: "Advanced", duration: "12 weeks" },
       },
     ],
   },
   {
     id: "digital-literacy",
-    name: "Digital Literacy & Productivity Systems",
+    name: "Digital Literacy & Productivity",
     tagline: "Master tools without losing your mind",
     icon: "monitor",
     color: "hsl(180, 75%, 45%)",
+    description: "Build essential digital fluency, master productivity tools, and develop AI literacy while maintaining cognitive independence.",
+    focusAreas: ["Digital tools mastery", "AI literacy", "Workflow automation", "Data interpretation", "Professional communication"],
+    whoIsItFor: "Professionals, students, and business owners who need to work efficiently with modern digital tools, understand AI, and automate repetitive workflows.",
+    coreCompetencies: ["Digital tool proficiency", "AI prompt engineering", "Data analysis basics", "Workflow automation", "Digital communication"],
     courseIds: ["digital-literacy"],
     learningPaths: [
       {
@@ -1081,6 +1155,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 8,
         courseIds: ["digital-literacy"],
         capstoneProject: "Digital Transformation Plan for a local business",
+        careerOutcomes: ["Digital professional", "Tech-savvy office manager", "Digital trainer"],
+        competencyMilestones: ["Digital tools mastered", "Professional communication setup", "Digital brand established"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Office & cloud tools", careerEnvironment: "Any modern workplace", difficultyLevel: "Beginner", duration: "8 weeks" },
       },
       {
         id: "productivity-specialist",
@@ -1091,6 +1169,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 12,
         courseIds: ["digital-literacy"],
         capstoneProject: "End-to-end automated workflow for a real business process",
+        careerOutcomes: ["Automation specialist", "Operations optimizer", "Workflow consultant"],
+        competencyMilestones: ["Zapier/Make automation built", "Process documentation complete", "ROI analysis presented"],
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "Low", infrastructureExposure: "Automation platforms", careerEnvironment: "Operations & consulting", difficultyLevel: "Intermediate", duration: "12 weeks" },
       },
       {
         id: "ai-strategist",
@@ -1101,15 +1183,23 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 10,
         courseIds: ["digital-literacy"],
         capstoneProject: "AI Integration Strategy for an organization",
+        careerOutcomes: ["AI strategy consultant", "AI trainer", "Digital transformation lead"],
+        competencyMilestones: ["AI tools evaluated", "Prompt engineering mastered", "Strategy document complete"],
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "Low", infrastructureExposure: "AI platforms", careerEnvironment: "Consulting & corporate", difficultyLevel: "Intermediate", duration: "10 weeks" },
       },
     ],
   },
   {
     id: "cybersecurity",
-    name: "Cybersecurity & Digital Protection",
+    name: "Cybersecurity & Digital Defense",
     tagline: "Defend the digital frontier",
     icon: "shield",
     color: "hsl(0, 70%, 50%)",
+    description: "Protect digital assets, understand threat landscapes, and build security-first thinking for personal and organizational safety.",
+    focusAreas: ["Threat detection", "Network security", "Ethical hacking", "Cloud security", "Digital forensics"],
+    whoIsItFor: "Tech enthusiasts, IT professionals, and anyone passionate about protecting digital infrastructure — from personal devices to enterprise networks.",
+    coreCompetencies: ["Threat analysis & detection", "Network & cloud security", "Vulnerability assessment", "Incident response", "Security policy design"],
     courseIds: ["cybersecurity"],
     learningPaths: [
       {
@@ -1121,16 +1211,24 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 10,
         courseIds: ["cybersecurity"],
         capstoneProject: "Complete security audit report for a simulated organization",
+        careerOutcomes: ["SOC analyst", "Security operations specialist", "IT security officer"],
+        competencyMilestones: ["Threat landscape mapped", "SIEM tools mastered", "Incident response plan created"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "Low", infrastructureExposure: "Enterprise networks", careerEnvironment: "SOC & IT departments", difficultyLevel: "Beginner", duration: "10 weeks" },
       },
       {
         id: "ethical-hacker",
-        title: "Ethical Hacker",
+        title: "Red Team & Ethical Hacking",
         description: "Learn penetration testing and vulnerability assessment ethically",
         targetRole: "Ethical Hacker / Pen Tester",
         skillLevel: "advanced",
         estimatedWeeks: 14,
         courseIds: ["cybersecurity"],
         capstoneProject: "Penetration test report with remediation recommendations",
+        careerOutcomes: ["Penetration tester", "Red team operator", "Security researcher"],
+        competencyMilestones: ["Recon & enumeration complete", "Exploitation techniques mastered", "Report writing certified"],
+        certificationTier: "Elite",
+        comparisonData: { technicalDepth: "Very High", codingIntensity: "High", infrastructureExposure: "Full-stack offensive", careerEnvironment: "Security firms & bug bounty", difficultyLevel: "Advanced", duration: "14 weeks" },
       },
       {
         id: "digital-safety-advocate",
@@ -1141,15 +1239,23 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 8,
         courseIds: ["cybersecurity"],
         capstoneProject: "Community digital safety workshop curriculum",
+        careerOutcomes: ["Digital safety trainer", "Community cyber educator", "School ICT safety coordinator"],
+        competencyMilestones: ["Threat awareness curriculum built", "Workshop facilitated", "Community safety guide published"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Consumer devices", careerEnvironment: "Education & community", difficultyLevel: "Beginner", duration: "8 weeks" },
       },
     ],
   },
   {
     id: "programming-systems",
-    name: "Programming & Intelligent Systems",
+    name: "Programming, Data & AI",
     tagline: "Build solutions that think",
     icon: "code",
     color: "hsl(210, 80%, 50%)",
+    description: "Master Python, data science, AI/ML, and IoT — building practical intelligent systems from code to deployment.",
+    focusAreas: ["Python programming", "Data science", "Machine learning", "IoT systems", "Web development"],
+    whoIsItFor: "Aspiring developers, data scientists, and tech innovators who want to build real solutions — from web apps to intelligent IoT systems — that solve African problems.",
+    coreCompetencies: ["Python programming", "Data analysis & visualization", "ML model building", "API development", "System deployment"],
     courseIds: ["programming-systems"],
     learningPaths: [
       {
@@ -1161,6 +1267,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 14,
         courseIds: ["programming-systems"],
         capstoneProject: "Full-stack web application solving a real Kenyan problem",
+        careerOutcomes: ["Junior software developer", "Web developer", "Freelance programmer"],
+        competencyMilestones: ["Python fundamentals mastered", "Web app deployed", "API integration complete"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "High", codingIntensity: "Very High", infrastructureExposure: "Web & cloud", careerEnvironment: "Tech companies & freelance", difficultyLevel: "Beginner", duration: "14 weeks" },
       },
       {
         id: "data-scientist",
@@ -1171,6 +1281,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 16,
         courseIds: ["programming-systems"],
         capstoneProject: "End-to-end data science project with Kenya-relevant dataset",
+        careerOutcomes: ["Data analyst", "Data scientist", "BI specialist"],
+        competencyMilestones: ["Statistical analysis complete", "ML model trained", "Dashboard published"],
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "Very High", codingIntensity: "High", infrastructureExposure: "Data platforms & cloud", careerEnvironment: "Analytics & research", difficultyLevel: "Intermediate", duration: "16 weeks" },
       },
       {
         id: "ai-engineer",
@@ -1181,15 +1295,23 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 18,
         courseIds: ["programming-systems"],
         capstoneProject: "Intelligent IoT system prototype with ML integration",
+        careerOutcomes: ["AI engineer", "IoT developer", "Embedded systems specialist"],
+        competencyMilestones: ["ML pipeline built", "IoT prototype operational", "Edge deployment complete"],
+        certificationTier: "Elite",
+        comparisonData: { technicalDepth: "Very High", codingIntensity: "Very High", infrastructureExposure: "Hardware & cloud", careerEnvironment: "R&D & innovation labs", difficultyLevel: "Advanced", duration: "18 weeks" },
       },
     ],
   },
   {
     id: "creator-economy",
-    name: "Creator Economy & Digital Monetization",
+    name: "Creator Economy & Digital Entrepreneurship",
     tagline: "Create value, build legacy",
     icon: "video",
     color: "hsl(330, 70%, 50%)",
+    description: "Build, grow, and monetize your digital presence through content creation, YouTube, eBooks, and online business systems.",
+    focusAreas: ["Content strategy", "eBook publishing", "YouTube growth", "Digital business models", "Monetization systems"],
+    whoIsItFor: "Aspiring creators, writers, YouTubers, and digital entrepreneurs who want to build sustainable income from content and digital products.",
+    coreCompetencies: ["Copywriting & storytelling", "Video production", "Audience growth", "Digital product creation", "Multi-platform monetization"],
     courseIds: ["creator-economy"],
     learningPaths: [
       {
@@ -1201,6 +1323,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 10,
         courseIds: ["creator-economy"],
         capstoneProject: "Published eBook with marketing launch plan",
+        careerOutcomes: ["Freelance writer", "eBook author", "Content strategist"],
+        competencyMilestones: ["Copywriting portfolio built", "eBook published", "Marketing plan launched"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Publishing platforms", careerEnvironment: "Freelance & publishing", difficultyLevel: "Beginner", duration: "10 weeks" },
       },
       {
         id: "youtube-entrepreneur",
@@ -1211,6 +1337,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 12,
         courseIds: ["creator-economy"],
         capstoneProject: "YouTube channel with 10 optimized videos and monetization strategy",
+        careerOutcomes: ["YouTube creator", "Video marketer", "Brand consultant"],
+        competencyMilestones: ["Channel launched", "10 videos optimized", "Monetization strategy active"],
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "None", infrastructureExposure: "YouTube & social platforms", careerEnvironment: "Creator economy & marketing", difficultyLevel: "Intermediate", duration: "12 weeks" },
       },
       {
         id: "digital-business-builder",
@@ -1221,6 +1351,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 14,
         courseIds: ["creator-economy"],
         capstoneProject: "Complete digital business plan with revenue model and launch strategy",
+        careerOutcomes: ["Digital entrepreneur", "Online business owner", "Product creator"],
+        competencyMilestones: ["Business model validated", "Revenue system built", "Launch strategy executed"],
+        certificationTier: "Elite",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "Low", infrastructureExposure: "E-commerce & digital platforms", careerEnvironment: "Entrepreneurship", difficultyLevel: "Advanced", duration: "14 weeks" },
       },
     ],
   },
@@ -1230,6 +1364,10 @@ export const pillars: Pillar[] = [
     tagline: "Lead with purpose, govern with integrity",
     icon: "landmark",
     color: "hsl(150, 60%, 40%)",
+    description: "Develop leadership skills for community impact, public service, and responsible governance in the digital age.",
+    focusAreas: ["Public policy literacy", "Community organizing", "Ethical governance", "Digital civic engagement", "Advocacy communication"],
+    whoIsItFor: "Aspiring civic leaders, community organizers, policy enthusiasts, and anyone committed to ethical public service and governance in Kenya.",
+    coreCompetencies: ["Policy analysis", "Stakeholder engagement", "Public speaking", "Community development", "Project management"],
     courseIds: ["civic-leadership"],
     learningPaths: [
       {
@@ -1241,6 +1379,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 8,
         courseIds: ["civic-leadership"],
         capstoneProject: "Community initiative proposal with stakeholder map and action plan",
+        careerOutcomes: ["Community development officer", "NGO coordinator", "Youth leader"],
+        competencyMilestones: ["Needs assessment complete", "Stakeholder map built", "Initiative proposal submitted"],
+        certificationTier: "Practitioner",
+        comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Community platforms", careerEnvironment: "NGOs & community organizations", difficultyLevel: "Beginner", duration: "8 weeks" },
       },
       {
         id: "policy-analyst",
@@ -1251,6 +1393,10 @@ export const pillars: Pillar[] = [
         estimatedWeeks: 12,
         courseIds: ["civic-leadership"],
         capstoneProject: "Policy brief on a current Kenyan governance issue",
+        careerOutcomes: ["Policy analyst", "Government advisor", "Think tank researcher"],
+        competencyMilestones: ["Constitutional literacy certified", "Policy brief published", "Advocacy campaign designed"],
+        certificationTier: "Specialist",
+        comparisonData: { technicalDepth: "Medium", codingIntensity: "None", infrastructureExposure: "Government systems", careerEnvironment: "Government & think tanks", difficultyLevel: "Intermediate", duration: "12 weeks" },
       },
     ],
   },
@@ -1265,4 +1411,18 @@ export const getPillarForCourse = (courseId: string): Pillar | undefined => {
 export const getPathsForCourse = (courseId: string): LearningPath[] => {
   const pillar = getPillarForCourse(courseId);
   return pillar?.learningPaths ?? [];
+};
+
+// Helper: get pillar by ID
+export const getPillarById = (pillarId: string): Pillar | undefined => {
+  return pillars.find(p => p.id === pillarId);
+};
+
+// Helper: get learning path by ID
+export const getPathById = (pathId: string): { path: LearningPath; pillar: Pillar } | undefined => {
+  for (const pillar of pillars) {
+    const path = pillar.learningPaths.find(lp => lp.id === pathId);
+    if (path) return { path, pillar };
+  }
+  return undefined;
 };

@@ -21,7 +21,7 @@ const StickyNav = () => {
   }, []);
 
   const navLinks = [
-    { name: "Courses", href: "/#courses" },
+    { name: "Courses", href: "/courses" },
     { name: "Mind Architecture", href: "/mind-architecture" },
     { name: "Financial Intelligence", href: "/financial-intelligence" },
     { name: "Learning Paths", href: "/learning-paths" },
@@ -57,14 +57,14 @@ const StickyNav = () => {
 
             <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
-                  href={link.href}
+                  to={link.href}
                   className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground transition-colors relative group"
                 >
                   {link.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -122,14 +122,14 @@ const StickyNav = () => {
         >
           <div className="container mx-auto px-4 py-4 space-y-4">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block py-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             {user ? (
               <Button onClick={handleSignOut} variant="outline" className="w-full border-primary-foreground/30 text-primary-foreground">
