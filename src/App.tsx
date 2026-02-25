@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Courses from "./pages/Courses";
+import PillarDetail from "./pages/PillarDetail";
+import PathDetail from "./pages/PathDetail";
 import CourseLearning from "./pages/CourseLearning";
 import LearningPathMap from "./pages/LearningPathMap";
 import MindArchitecture from "./pages/MindArchitecture";
@@ -26,6 +29,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/pillar/:pillarId" element={<PillarDetail />} />
+            <Route path="/path/:pillarId/:pathId" element={<PathDetail />} />
             <Route path="/learn/:courseId" element={<CourseLearning />} />
             <Route path="/learning-paths" element={<LearningPathMap />} />
             <Route path="/mind-architecture" element={<MindArchitecture />} />
