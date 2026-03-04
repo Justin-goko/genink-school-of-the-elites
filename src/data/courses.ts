@@ -60,6 +60,15 @@ export interface LearningPath {
   comparisonData?: Record<string, string>;
 }
 
+// ─── Pillar Unit (grouping of paths within a pillar) ──────────
+export interface PillarUnit {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  learningPaths: LearningPath[];
+}
+
 // ─── Pillar ────────────────────────────────────────────────────
 export interface Pillar {
   id: string;
@@ -73,6 +82,7 @@ export interface Pillar {
   coreCompetencies: string[];
   learningPaths: LearningPath[];
   courseIds: string[];
+  units?: PillarUnit[];
 }
 
 // ─── Learning Path Comparison Metrics ──────────────────────────
