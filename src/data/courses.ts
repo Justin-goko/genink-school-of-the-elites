@@ -60,6 +60,15 @@ export interface LearningPath {
   comparisonData?: Record<string, string>;
 }
 
+// ─── Pillar Unit (grouping of paths within a pillar) ──────────
+export interface PillarUnit {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  learningPaths: LearningPath[];
+}
+
 // ─── Pillar ────────────────────────────────────────────────────
 export interface Pillar {
   id: string;
@@ -73,6 +82,7 @@ export interface Pillar {
   coreCompetencies: string[];
   learningPaths: LearningPath[];
   courseIds: string[];
+  units?: PillarUnit[];
 }
 
 // ─── Learning Path Comparison Metrics ──────────────────────────
@@ -1131,6 +1141,60 @@ export const pillars: Pillar[] = [
         requiredFoundation: "Money Psychology & Wealth Thinking",
         certificationTier: "Elite",
         comparisonData: { technicalDepth: "High", codingIntensity: "Medium", infrastructureExposure: "Digital platforms", careerEnvironment: "Entrepreneurship & startups", difficultyLevel: "Advanced", duration: "12 weeks" },
+      },
+    ],
+    units: [
+      {
+        id: "financial-markets-trading",
+        title: "Financial Markets & Trading Foundations",
+        description: "Understand how financial markets work, develop trading literacy, and learn capital preservation — without gambling culture or get-rich-fast hype.",
+        icon: "trending-up",
+        learningPaths: [
+          {
+            id: "financial-markets-literacy",
+            title: "Financial Markets Literacy",
+            description: "Foundation track — understand market structure, trading mechanics, risk basics, and trading psychology",
+            targetRole: "Financially Literate Market Participant",
+            skillLevel: "beginner",
+            estimatedWeeks: 6,
+            courseIds: ["money-psychology"],
+            careerOutcomes: ["Informed investor", "Financial literacy educator", "Market-aware professional"],
+            competencyMilestones: ["Market structure understood", "Trading mechanics mastered", "Risk fundamentals assessed"],
+            requiredFoundation: "Money Psychology & Wealth Thinking",
+            certificationTier: "Foundation",
+            comparisonData: { technicalDepth: "Low", codingIntensity: "None", infrastructureExposure: "Market data platforms", careerEnvironment: "Personal finance & education", difficultyLevel: "Beginner", duration: "6 weeks" },
+          },
+          {
+            id: "retail-trading-analyst",
+            title: "Retail Trading Analyst Track",
+            description: "Premium track — technical analysis foundations, risk management, strategy frameworks, backtesting, and demo trading",
+            targetRole: "Retail Trading Analyst",
+            skillLevel: "intermediate",
+            estimatedWeeks: 14,
+            courseIds: ["money-psychology", "investor-market-intelligence"],
+            capstoneProject: "Backtested trading strategy with risk parameters and 30-day demo trading journal",
+            careerOutcomes: ["Retail trading analyst", "Market research assistant", "Risk-aware independent trader"],
+            competencyMilestones: ["Technical analysis foundations complete", "Risk management framework built", "Strategy backtested", "Demo trading requirement met"],
+            requiredFoundation: "Financial Markets Literacy",
+            certificationTier: "Specialist",
+            comparisonData: { technicalDepth: "High", codingIntensity: "Low", infrastructureExposure: "Trading platforms & charting tools", careerEnvironment: "Financial analysis & independent trading", difficultyLevel: "Intermediate", duration: "14 weeks" },
+          },
+          {
+            id: "capital-preservation-risk",
+            title: "Capital Preservation & Risk Specialist Track",
+            description: "Master position sizing, drawdown management, portfolio hedging, and risk modeling fundamentals",
+            targetRole: "Risk Management Specialist",
+            skillLevel: "advanced",
+            estimatedWeeks: 12,
+            courseIds: ["money-psychology", "investor-market-intelligence"],
+            capstoneProject: "Comprehensive risk management framework with position sizing model and hedging strategy",
+            careerOutcomes: ["Risk management specialist", "Portfolio risk analyst", "Capital preservation advisor"],
+            competencyMilestones: ["Position sizing mastery achieved", "Drawdown management plan active", "Hedging concepts applied", "Risk model built"],
+            requiredFoundation: "Financial Markets Literacy",
+            certificationTier: "Elite",
+            comparisonData: { technicalDepth: "Very High", codingIntensity: "Medium", infrastructureExposure: "Risk platforms & modeling tools", careerEnvironment: "Risk management & advisory", difficultyLevel: "Advanced", duration: "12 weeks" },
+          },
+        ],
       },
     ],
   },
