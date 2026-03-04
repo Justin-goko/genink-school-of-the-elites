@@ -15,6 +15,7 @@ import MindArchitecture from "./pages/MindArchitecture";
 import FinancialIntelligence from "./pages/FinancialIntelligence";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
+import UnitDetail from "./pages/UnitDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
