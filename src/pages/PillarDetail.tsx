@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
   ArrowRight, Clock, Target, Layers, Users, CheckCircle2, ArrowLeft, GitCompare,
-  X,
+  X, BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
