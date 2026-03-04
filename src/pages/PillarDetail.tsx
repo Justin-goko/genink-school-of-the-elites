@@ -253,7 +253,40 @@ const PillarDetail = () => {
           })}
         </div>
 
-        {/* Comparison Table */}
+        {/* Units Section */}
+        {pillar.units && pillar.units.length > 0 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Specialized Units</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {pillar.units.map((unit) => (
+                <Card key={unit.id} className="group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <CardTitle className="text-lg group-hover:text-accent transition-colors">
+                        {unit.title}
+                      </CardTitle>
+                    </div>
+                    <CardDescription>{unit.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Layers className="w-4 h-4 text-accent" />
+                      <span>{unit.learningPaths.length} learning paths inside</span>
+                    </div>
+                    <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="sm">
+                      <Link to={`/pillar/${pillar.id}/unit/${unit.id}`}>
+                        Explore Unit <ArrowRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
         {showCompare && comparePaths.length >= 2 && (
           <Card className="overflow-hidden">
             <CardHeader className="bg-muted/50">
