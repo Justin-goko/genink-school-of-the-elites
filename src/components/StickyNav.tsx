@@ -22,9 +22,6 @@ const StickyNav = () => {
 
   const navLinks = [
     { name: "Courses", href: "/courses" },
-    { name: "Mind Architecture", href: "/mind-architecture" },
-    { name: "Financial Intelligence", href: "/financial-intelligence" },
-    { name: "Learning Paths", href: "/learning-paths" },
     { name: "Events", href: "/events" },
     { name: "Resources", href: "/resources" },
   ];
