@@ -231,6 +231,10 @@ const PillarDetail = () => {
                 className={cn(
                   "group transition-all duration-300 hover:shadow-xl hover:-translate-y-1",
                   isSelected && "ring-2 ring-accent",
+                  isFoundation && "border-accent/40 bg-accent/5",
+                  archetype?.recommendedPathId === path.id && "ring-2 ring-accent border-accent/40 bg-accent/5"
+                )}
+              >
                   isFoundation && "border-accent/40 bg-accent/5"
                 )}
               >
