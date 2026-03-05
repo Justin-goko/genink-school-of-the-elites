@@ -2,13 +2,16 @@ import { useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import { getPillarById, comparisonMetrics, type LearningPath } from "@/data/courses";
+import { pillarAssessments } from "@/data/orientationAssessments";
+import type { LearnerArchetype } from "@/data/orientationAssessments";
+import PillarOrientation from "@/components/PillarOrientation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
   ArrowRight, Clock, Target, Layers, Users, CheckCircle2, ArrowLeft, GitCompare,
-  X, BookOpen,
+  X, BookOpen, ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
