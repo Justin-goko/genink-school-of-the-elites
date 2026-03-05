@@ -132,42 +132,92 @@ const PillarDetail = () => {
           </Card>
         </div>
 
-        {/* Compare Paths Toggle */}
-        {nonFoundationPaths.length >= 2 && (
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Available Learning Paths</h2>
-            <Button
-              variant={showCompare ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setShowCompare(!showCompare);
-                if (showCompare) setComparePaths([]);
-              }}
-              className={cn(showCompare && "bg-accent hover:bg-accent/90")}
-            >
-              <GitCompare className="w-4 h-4 mr-2" />
-              {showCompare ? "Exit Compare" : "Compare Paths"}
-            </Button>
+        {/* Orientation Assessment Section */}
+        {hasAssessment && !assessmentComplete && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4">
+                <ClipboardCheck className="w-4 h-4 text-accent" />
+                <span className="text-sm font-medium text-foreground">Orientation Assessment Required</span>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Discover Your Learning Direction</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Complete the orientation assessment to receive a personalized pathway recommendation. 
+                This diagnostic evaluates your cognitive style, execution preference, risk orientation, 
+                and motivation drivers to identify your optimal learning direction.
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <PillarOrientation
+                pillarId={pillarId || ""}
+                pillarColor={pillar.color}
+                onComplete={(result) => {
+                  setArchetype(result);
+                  setAssessmentComplete(true);
+                }}
+              />
+            </div>
           </div>
         )}
 
-        {/* Compare Selection Bar */}
-        {showCompare && (
-          <div className="bg-muted rounded-lg p-4 flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium">Select 2–3 paths to compare:</span>
-            {comparePaths.map((p) => (
-              <Badge key={p.id} className="bg-accent text-accent-foreground gap-1">
-                {p.title}
-                <button onClick={() => toggleCompare(p)}>
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
-            {comparePaths.length >= 2 && (
-              <span className="text-xs text-muted-foreground ml-auto">Scroll down to see comparison</span>
+        {/* Learning Paths — visible only after assessment or if no assessment exists */}
+        {(assessmentComplete || !hasAssessment) && (
+          <>
+            {/* Archetype Result Banner */}
+            {archetype && (
+              <Card className="border-accent/30 bg-accent/5">
+                <CardContent className="flex items-center gap-4 py-4">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                    <Target className="w-5 h-5 text-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      Your Archetype: {archetype.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Recommended path highlighted below. You may choose any path that aligns with your goals.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </div>
-        )}
+
+            {/* Compare Paths Toggle */}
+            {nonFoundationPaths.length >= 2 && (
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Available Learning Paths</h2>
+                <Button
+                  variant={showCompare ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setShowCompare(!showCompare);
+                    if (showCompare) setComparePaths([]);
+                  }}
+                  className={cn(showCompare && "bg-accent hover:bg-accent/90")}
+                >
+                  <GitCompare className="w-4 h-4 mr-2" />
+                  {showCompare ? "Exit Compare" : "Compare Paths"}
+                </Button>
+              </div>
+            )}
+
+            {/* Compare Selection Bar */}
+            {showCompare && (
+              <div className="bg-muted rounded-lg p-4 flex items-center gap-4 flex-wrap">
+                <span className="text-sm font-medium">Select 2–3 paths to compare:</span>
+                {comparePaths.map((p) => (
+                  <Badge key={p.id} className="bg-accent text-accent-foreground gap-1">
+                    {p.title}
+                    <button onClick={() => toggleCompare(p)}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {comparePaths.length >= 2 && (
+                  <span className="text-xs text-muted-foreground ml-auto">Scroll down to see comparison</span>
+                )}
+              </div>
+            )}
 
         {/* Path Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
