@@ -236,6 +236,11 @@ const PillarDetail = () => {
                 )}
               >
                 <CardHeader>
+                  {archetype?.recommendedPathId === path.id && (
+                    <Badge className="w-fit bg-accent text-accent-foreground mb-2 text-xs">
+                      ✦ Recommended for You
+                    </Badge>
+                  )}
                   {isFoundation && (
                     <Badge className="w-fit bg-accent text-accent-foreground mb-2 text-xs">
                       🔓 Mandatory Foundation — Free
