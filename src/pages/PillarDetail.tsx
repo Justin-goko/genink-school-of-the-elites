@@ -36,6 +36,9 @@ const PillarDetail = () => {
   const pillar = getPillarById(pillarId || "");
   const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const [assessmentComplete, setAssessmentComplete] = useState(false);
+  const [archetype, setArchetype] = useState<LearnerArchetype | null>(null);
+  const hasAssessment = pillarId ? !!pillarAssessments[pillarId] : false;
 
   if (!pillar) return <Navigate to="/courses" replace />;
 
