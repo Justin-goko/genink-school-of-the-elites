@@ -235,9 +235,6 @@ const PillarDetail = () => {
                   archetype?.recommendedPathId === path.id && "ring-2 ring-accent border-accent/40 bg-accent/5"
                 )}
               >
-                  isFoundation && "border-accent/40 bg-accent/5"
-                )}
-              >
                 <CardHeader>
                   {isFoundation && (
                     <Badge className="w-fit bg-accent text-accent-foreground mb-2 text-xs">
