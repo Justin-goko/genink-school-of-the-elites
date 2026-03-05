@@ -392,6 +392,8 @@ const PillarDetail = () => {
             </CardContent>
           </Card>
         )}
+          </>
+        )}
       </div>
     </div>
   );
