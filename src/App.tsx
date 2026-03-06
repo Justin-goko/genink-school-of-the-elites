@@ -16,6 +16,7 @@ import FinancialIntelligence from "./pages/FinancialIntelligence";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
 import UnitDetail from "./pages/UnitDetail";
+import PathwayIntelligence from "./pages/PathwayIntelligence";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
