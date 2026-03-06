@@ -16,6 +16,7 @@ import FinancialIntelligence from "./pages/FinancialIntelligence";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
 import UnitDetail from "./pages/UnitDetail";
+import PathwayIntelligence from "./pages/PathwayIntelligence";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/financial-intelligence" element={<FinancialIntelligence />} />
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/pathway-intelligence" element={<PathwayIntelligence />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

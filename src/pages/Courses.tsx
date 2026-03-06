@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
-  ArrowRight, GraduationCap, Sparkles,
+  ArrowRight, GraduationCap, Sparkles, Compass,
 } from "lucide-react";
 
 const pillarIcons: Record<string, React.ReactNode> = {
@@ -38,7 +38,28 @@ const Courses = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 space-y-12">
+        {/* Pathway Intelligence CTA */}
+        <Card className="border-accent/30 bg-gradient-to-r from-accent/5 to-transparent overflow-hidden">
+          <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
+            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <Compass className="w-6 h-6 text-accent" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-semibold text-foreground">Not sure where to start?</p>
+              <p className="text-sm text-muted-foreground">
+                Take the Pathway Intelligence Assessment — a cross-pillar diagnostic that generates your personalized multi-year learning blueprint.
+              </p>
+            </div>
+            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground flex-shrink-0">
+              <Link to="/pathway-intelligence">
+                <Compass className="w-4 h-4 mr-2" />
+                Start Assessment
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {pillars.map((pillar, index) => (
             <Card
