@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
-  ArrowRight, GraduationCap, Sparkles,
+  ArrowRight, GraduationCap, Sparkles, Compass,
 } from "lucide-react";
 
 const pillarIcons: Record<string, React.ReactNode> = {
