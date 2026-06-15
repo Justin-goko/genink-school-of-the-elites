@@ -85,6 +85,58 @@ export const useModules = (courseId?: string) => {
   });
 };
 
+// Metadata-only listing (no `content` column) — publicly readable so the UI can
+// render locked placeholders for modules the viewer is not enrolled in.
+export interface ModuleMeta {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string;
+  module_type: "free" | "premium";
+  order_index: number;
+  xp_reward: number;
+  estimated_minutes: number;
+}
+
+export const useModulesMeta = (courseId?: string) => {
+  return useQuery({
+    queryKey: ["modulesMeta", courseId],
+    queryFn: async () => {
+      let query = (supabase as unknown as { from: (t: string) => ReturnType<typeof supabase.from> })
+        .from("modules_public")
+        .select("id,course_id,title,description,module_type,order_index,xp_reward,estimated_minutes")
+        .order("order_index", { ascending: true });
+
+      if (courseId) {
+        query = (query as unknown as { eq: (c: string, v: string) => typeof query }).eq("course_id", courseId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data ?? []) as unknown as ModuleMeta[];
+    },
+  });
+};
+
+export const useEnrollment = (courseId?: string) => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["enrollment", user?.id, courseId],
+    queryFn: async () => {
+      if (!user || !courseId) return false;
+      const { data, error } = await supabase
+        .from("enrollments")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("course_id", courseId)
+        .maybeSingle();
+      if (error) throw error;
+      return !!data;
+    },
+    enabled: !!user && !!courseId,
+  });
+};
+
 export const useUserModuleProgress = (courseId?: string) => {
   const { user } = useAuth();
 

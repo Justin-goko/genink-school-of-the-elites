@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useModules, useUserModuleProgress, useCompleteModule, Module } from "@/hooks/useUserProgress";
+import { useModules, useModulesMeta, useEnrollment, useUserModuleProgress, useCompleteModule, Module } from "@/hooks/useUserProgress";
 import { courses, Course, getPillarForCourse, entrepreneurialIntelligenceModule } from "@/data/courses";
 import StickyNav from "@/components/StickyNav";
 import XPBar from "@/components/learning/XPBar";
@@ -13,6 +13,7 @@ import BudgetSimulator from "@/components/simulations/BudgetSimulator";
 import CodeSandbox from "@/components/simulations/CodeSandbox";
 import TradingSimulator from "@/components/simulations/TradingSimulator";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
@@ -219,10 +220,13 @@ const CourseLearning = () => {
 
   const course = courses.find(c => c.id === courseId);
   const { data: modules = [], isLoading: modulesLoading } = useModules(courseId);
+  const { data: modulesMeta = [], isLoading: metaLoading } = useModulesMeta(courseId);
+  const { data: isEnrolled = false } = useEnrollment(courseId);
   const { data: progress = [], isLoading: progressLoading } = useUserModuleProgress(courseId);
   const completeModuleMutation = useCompleteModule();
+  const { toast } = useToast();
 
-  const isLoading = modulesLoading || progressLoading || authLoading;
+  const isLoading = modulesLoading || metaLoading || progressLoading || authLoading;
 
   if (!course) {
     return (
@@ -243,10 +247,6 @@ const CourseLearning = () => {
       navigate("/auth");
       return;
     }
-    if (module.module_type === "premium" && !course.isPremium) {
-      // Would handle premium upgrade here
-      return;
-    }
     setActiveModule(module);
   };
 
@@ -263,8 +263,27 @@ const CourseLearning = () => {
     return progress.find(p => p.module_id === moduleId);
   };
 
-  const freeModules = modules.filter(m => m.module_type === "free");
-  const premiumModules = modules.filter(m => m.module_type === "premium");
+  // Merge full (content-bearing) modules returned by RLS with the public
+  // metadata list so we can render locked placeholders for gated content.
+  const accessibleIds = new Set(modules.map(m => m.id));
+  const merged = modulesMeta.map(meta => {
+    const full = modules.find(m => m.id === meta.id);
+    const locked = !full; // RLS hid the content row
+    return { meta, full, locked };
+  });
+  const freeItems = merged.filter(({ meta }) => meta.module_type === "free");
+  const premiumItems = merged.filter(({ meta }) => meta.module_type === "premium");
+
+  const handleLockedClick = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    toast({
+      title: "Enroll to unlock this lesson",
+      description: "Enroll in this course to access full module content.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -309,7 +328,7 @@ const CourseLearning = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
-                  {freeModules.length} free modules
+                  {freeItems.length} free modules
                 </div>
               </div>
             </div>
@@ -357,37 +376,45 @@ const CourseLearning = () => {
                     <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
                   ))
                 ) : (
-                  freeModules.map((module, index) => (
-                    <ModuleCard
-                      key={module.id}
-                      module={module}
-                      progress={getModuleProgress(module.id)}
-                      onClick={() => handleModuleClick(module)}
-                      index={index + 1}
-                    />
-                  ))
+                  freeItems.map(({ meta, full, locked }, index) => {
+                    const m = (full ?? { ...meta, content: {} }) as Module;
+                    return (
+                      <ModuleCard
+                        key={meta.id}
+                        module={m}
+                        progress={getModuleProgress(meta.id)}
+                        isLocked={locked}
+                        onClick={() => (locked ? handleLockedClick() : handleModuleClick(m))}
+                        index={index + 1}
+                      />
+                    );
+                  })
                 )}
               </div>
             </div>
 
             {/* Premium Modules */}
-            {premiumModules.length > 0 && (
+            {premiumItems.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <Lock className="w-5 h-5 text-premium" />
                   Premium Core Course
                 </h2>
                 <div className="space-y-4">
-                  {premiumModules.map((module, index) => (
-                    <ModuleCard
-                      key={module.id}
-                      module={module}
-                      progress={getModuleProgress(module.id)}
-                      isLocked={!course.isPremium}
-                      onClick={() => handleModuleClick(module)}
-                      index={freeModules.length + index + 1}
-                    />
-                  ))}
+                  {premiumItems.map(({ meta, full, locked }, index) => {
+                    const m = (full ?? { ...meta, content: {} }) as Module;
+                    const lockedForUser = locked || !isEnrolled;
+                    return (
+                      <ModuleCard
+                        key={meta.id}
+                        module={m}
+                        progress={getModuleProgress(meta.id)}
+                        isLocked={lockedForUser}
+                        onClick={() => (lockedForUser ? handleLockedClick() : handleModuleClick(m))}
+                        index={freeItems.length + index + 1}
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Upgrade CTA */}
@@ -396,12 +423,16 @@ const CourseLearning = () => {
                     <div>
                       <h3 className="font-bold text-lg text-foreground">Unlock Premium Content</h3>
                       <p className="text-muted-foreground">
-                        Get access to advanced modules, hands-on projects, and certification
+                        {isEnrolled
+                          ? "You're enrolled — all premium modules below are unlocked for you."
+                          : "Enroll to access advanced modules, hands-on projects, and certification."}
                       </p>
                     </div>
-                    <Button className="bg-premium hover:bg-premium/90 text-premium-foreground whitespace-nowrap">
-                      Upgrade for {course.price}
-                    </Button>
+                    {!isEnrolled && (
+                      <Button className="bg-premium hover:bg-premium/90 text-premium-foreground whitespace-nowrap">
+                        Enroll for {course.price}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
