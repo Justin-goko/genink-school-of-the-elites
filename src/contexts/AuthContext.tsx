@@ -34,12 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Initialize user XP record on first sign in
-        if (event === "SIGNED_IN" && session?.user) {
-          setTimeout(() => {
-            initializeUserXP(session.user.id);
-          }, 0);
-        }
+        // user_xp rows are created server-side by the award-xp edge function
+        // on first XP award. Clients no longer have INSERT access to user_xp.
       }
     );
 
@@ -52,18 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const initializeUserXP = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_xp")
-      .select("id")
-      .eq("user_id", userId)
-      .single();
-
-    if (!data) {
-      await supabase.from("user_xp").insert({ user_id: userId });
-    }
-  };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     const redirectUrl = `${window.location.origin}/`;

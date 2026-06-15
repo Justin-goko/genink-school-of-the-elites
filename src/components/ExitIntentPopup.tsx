@@ -33,7 +33,7 @@ const ExitIntentPopup = () => {
     };
 
     // Also trigger after 30 seconds of inactivity
-    let inactivityTimer: NodeJS.Timeout;
+    let inactivityTimer: ReturnType<typeof setTimeout>;
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
