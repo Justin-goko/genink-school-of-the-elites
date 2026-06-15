@@ -160,63 +160,24 @@ export const useCompleteModule = () => {
     mutationFn: async ({ moduleId, score, timeSpent }: { moduleId: string; score?: number; timeSpent?: number }) => {
       if (!user) throw new Error("Not authenticated");
 
-      // Get module details for XP
+      // Read-only: module title for the toast. Progress and XP writes happen server-side.
       const { data: module } = await supabase
         .from("modules")
-        .select("xp_reward, title")
+        .select("title")
         .eq("id", moduleId)
         .single();
 
-      // Upsert progress
-      const { error: progressError } = await supabase
-        .from("user_progress")
-        .upsert({
-          user_id: user.id,
-          module_id: moduleId,
-          completed: true,
-          completed_at: new Date().toISOString(),
-          score: score || 100,
-          time_spent_seconds: timeSpent || 0,
-        }, {
-          onConflict: "user_id,module_id",
-        });
+      // All XP/progress mutations go through the award-xp edge function,
+      // which validates the action server-side and writes with the service role.
+      const { data, error } = await supabase.functions.invoke("award-xp", {
+        body: {
+          action_type: "module_complete",
+          session_id: moduleId, // idempotency key per module
+        },
+      });
+      if (error) throw error;
 
-      if (progressError) throw progressError;
-
-      // Update XP
-      const { data: currentXP } = await supabase
-        .from("user_xp")
-        .select("total_xp, current_level, streak_days, last_activity_date")
-        .eq("user_id", user.id)
-        .single();
-
-      const today = new Date().toISOString().split("T")[0];
-      const lastActivity = currentXP?.last_activity_date;
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-      let newStreakDays = 1;
-      if (lastActivity === yesterday) {
-        newStreakDays = (currentXP?.streak_days || 0) + 1;
-      } else if (lastActivity === today) {
-        newStreakDays = currentXP?.streak_days || 1;
-      }
-
-      const newTotalXP = (currentXP?.total_xp || 0) + (module?.xp_reward || 50);
-      const newLevel = Math.floor(newTotalXP / 500) + 1;
-
-      await supabase
-        .from("user_xp")
-        .upsert({
-          user_id: user.id,
-          total_xp: newTotalXP,
-          current_level: newLevel,
-          streak_days: newStreakDays,
-          last_activity_date: today,
-        }, {
-          onConflict: "user_id",
-        });
-
-      return { xpEarned: module?.xp_reward || 50, moduleName: module?.title };
+      return { xpEarned: data?.xp_awarded ?? 0, moduleName: module?.title };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["userProgress"] });
