@@ -134,10 +134,13 @@ const ModuleCard = ({ module, progress, isLocked, onClick, index }: ModuleCardPr
             </Button>
           </div>
         ) : isLocked ? (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Unlock with Premium</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5" />
+              Enroll to unlock
+            </p>
             <Button size="sm" className="bg-premium hover:bg-premium/90 text-premium-foreground">
-              Upgrade
+              Enroll
             </Button>
           </div>
         ) : (
