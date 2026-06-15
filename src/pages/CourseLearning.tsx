@@ -328,7 +328,7 @@ const CourseLearning = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
-                  {freeModules.length} free modules
+                  {freeItems.length} free modules
                 </div>
               </div>
             </div>
