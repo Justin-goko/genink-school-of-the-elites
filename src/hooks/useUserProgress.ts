@@ -231,7 +231,12 @@ export const useCompleteModule = () => {
       });
       if (error) throw error;
 
-      return { xpEarned: data?.xp_awarded ?? 0, moduleName: module?.title };
+      return {
+        xpEarned: data?.xp_awarded ?? 0,
+        newTotal: data?.total_xp ?? 0,
+        newLevel: data?.current_level ?? 1,
+        moduleName: module?.title,
+      };
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["userProgress"] });
@@ -246,7 +251,7 @@ export const useCompleteModule = () => {
           ) as HTMLElement | null) ??
           (document.querySelector("[data-xp-counter]") as HTMLElement | null);
 
-        const newLevel = calculateLevel((data as { newTotal?: number }).newTotal ?? 0) || currentLevel;
+        const newLevel = data.newLevel || calculateLevel(data.newTotal);
         const leveledUp = newLevel > currentLevel;
         award({ amount: xp, originEl, leveledUp, newLevel });
       }
