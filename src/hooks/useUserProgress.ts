@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useXPReward } from "@/contexts/XPRewardContext";
 
 export interface UserXP {
   id: string;
@@ -207,6 +208,7 @@ export const useCompleteModule = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { award, level: currentLevel } = useXPReward();
 
   return useMutation({
     mutationFn: async ({ moduleId, score, timeSpent }: { moduleId: string; score?: number; timeSpent?: number }) => {
@@ -231,9 +233,24 @@ export const useCompleteModule = () => {
 
       return { xpEarned: data?.xp_awarded ?? 0, moduleName: module?.title };
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["userProgress"] });
       queryClient.invalidateQueries({ queryKey: ["userXP"] });
+
+      const xp = data.xpEarned ?? 0;
+      if (xp > 0) {
+        // Spawn the floater from the module card (if rendered with data-module-id).
+        const originEl =
+          (document.querySelector(
+            `[data-module-id="${variables.moduleId}"]`,
+          ) as HTMLElement | null) ??
+          (document.querySelector("[data-xp-counter]") as HTMLElement | null);
+
+        const newLevel = calculateLevel((data as { newTotal?: number }).newTotal ?? 0) || currentLevel;
+        const leveledUp = newLevel > currentLevel;
+        award({ amount: xp, originEl, leveledUp, newLevel });
+      }
+
       toast({
         title: `+${data.xpEarned} XP Earned! 🎉`,
         description: `You completed "${data.moduleName}"`,
