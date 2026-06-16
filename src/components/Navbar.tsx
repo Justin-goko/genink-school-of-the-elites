@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import genlinkLogo from "@/assets/genlink-logo.png";
+import NavbarXPCounter from "@/components/xp/NavbarXPCounter";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +17,7 @@ const Navbar = () => {
           </a>
 
           <div className="hidden md:flex items-center gap-6">
+            <NavbarXPCounter />
             <a href="/#courses" className="text-foreground/80 hover:text-accent transition-colors">
               Courses
             </a>
