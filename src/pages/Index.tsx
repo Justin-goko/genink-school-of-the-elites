@@ -29,7 +29,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background scroll-smooth">
       <StickyNav />
-      <Hero />
+      <ProgressMap />
       
       {/* Social Proof - Trending Picks */}
       <TrendingPicks />
