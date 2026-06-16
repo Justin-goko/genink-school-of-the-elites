@@ -1,5 +1,5 @@
 import StickyNav from "@/components/StickyNav";
-import Hero from "@/components/Hero";
+import ProgressMap from "@/components/ProgressMap";
 import TrendingPicks from "@/components/TrendingPicks";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import QuickQuiz from "@/components/QuickQuiz";
