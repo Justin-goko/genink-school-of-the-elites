@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { XPRewardProvider } from "@/contexts/XPRewardContext";
 import XPRewardOverlay from "@/components/xp/XPRewardOverlay";
 import Index from "./pages/Index";
+import MarketingHome from "./pages/MarketingHome";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Courses from "./pages/Courses";
 import PillarDetail from "./pages/PillarDetail";
@@ -34,20 +36,24 @@ const App = () => (
           <XPRewardOverlay />
           <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* Layer 1 — public marketing */}
+            <Route path="/" element={<MarketingHome />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/pillar/:pillarId" element={<PillarDetail />} />
-            <Route path="/path/:pillarId/:pathId" element={<PathDetail />} />
-            <Route path="/pillar/:pillarId/unit/:unitId" element={<UnitDetail />} />
-            <Route path="/pillar/:pillarId/unit/:unitId/session/:sessionIndex" element={<SessionReader />} />
-            <Route path="/learn/:courseId" element={<CourseLearning />} />
-            <Route path="/learning-paths" element={<LearningPathMap />} />
-            <Route path="/mind-architecture" element={<MindArchitecture />} />
-            <Route path="/financial-intelligence" element={<FinancialIntelligence />} />
+            <Route path="/pathway-intelligence" element={<PathwayIntelligence />} />
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
-            <Route path="/pathway-intelligence" element={<PathwayIntelligence />} />
+
+            {/* Layer 2 — authenticated journey */}
+            <Route path="/journey" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/path/:pillarId/:pathId" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
+            <Route path="/pillar/:pillarId/unit/:unitId" element={<ProtectedRoute><UnitDetail /></ProtectedRoute>} />
+            <Route path="/pillar/:pillarId/unit/:unitId/session/:sessionIndex" element={<ProtectedRoute><SessionReader /></ProtectedRoute>} />
+            <Route path="/learn/:courseId" element={<ProtectedRoute><CourseLearning /></ProtectedRoute>} />
+            <Route path="/learning-paths" element={<ProtectedRoute><LearningPathMap /></ProtectedRoute>} />
+            <Route path="/mind-architecture" element={<ProtectedRoute><MindArchitecture /></ProtectedRoute>} />
+            <Route path="/financial-intelligence" element={<ProtectedRoute><FinancialIntelligence /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
