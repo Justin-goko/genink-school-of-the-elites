@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Cast to bypass generated types until DB types regenerate.
+const db = supabase as any;
+
 export type PillarTheme =
   | "financial" | "communication" | "digital" | "leadership"
   | "entrepreneurship" | "creator" | "civic";
@@ -35,7 +38,7 @@ export function usePillarUnits(pillarId: string | undefined) {
     queryKey: ["units", pillarId],
     enabled: !!pillarId,
     queryFn: async (): Promise<Unit[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("units")
         .select("*")
         .eq("pillar_id", pillarId!)
@@ -53,7 +56,7 @@ export function useUserUnitProgress(unitIds: string[]) {
     queryKey: ["user_unit_progress", user?.id, unitIds.join(",")],
     enabled: !!user && unitIds.length > 0,
     queryFn: async (): Promise<Record<string, UserUnitProgress>> => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("user_unit_progress")
         .select("unit_id, sessions_completed, xp_earned, last_session_index, completed_at")
         .in("unit_id", unitIds);
@@ -70,7 +73,7 @@ export function useUnit(unitId: string | undefined) {
     queryKey: ["unit", unitId],
     enabled: !!unitId,
     queryFn: async (): Promise<Unit | null> => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("units").select("*").eq("id", unitId!).maybeSingle();
       if (error) throw error;
       return (data as Unit) ?? null;
@@ -92,7 +95,7 @@ export function useUnitSessions(unitId: string | undefined) {
     queryKey: ["unit_sessions", unitId],
     enabled: !!unitId,
     queryFn: async (): Promise<UnitSession[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("unit_sessions").select("*")
         .eq("unit_id", unitId!)
         .order("order_index", { ascending: true });
