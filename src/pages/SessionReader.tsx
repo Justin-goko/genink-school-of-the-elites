@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
 import StickyNav from "@/components/StickyNav";
 import { toast } from "sonner";
+import TutorButton from "@/components/tutor/TutorButton";
 
 const FALLBACK_BLOCKS: Block[] = [
   { type: "heading", text: "Welcome to this session" },
@@ -133,6 +134,16 @@ export default function SessionReader() {
           </Button>
         </div>
       </div>
+
+      <TutorButton
+        context={{
+          unit_id: unitId,
+          session_id: session?.id,
+          pillar_name: pillarId,
+          unit_title: unit?.title,
+          session_title: session?.title ?? `Session ${idx + 1}`,
+        }}
+      />
     </div>
   );
 }
