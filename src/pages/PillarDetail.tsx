@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { usePillarUnits, useUserUnitProgress } from "@/hooks/useUnits";
 import UnitCard from "@/components/learning/UnitCard";
 import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
+import PillarHeader, { type PillarTheme, pillarThemes } from "@/components/learning/PillarHeader";
 
 const pillarIcons: Record<string, React.ReactNode> = {
   brain: <Brain className="w-8 h-8" />,
@@ -66,32 +67,21 @@ const PillarDetail = () => {
     <div className="min-h-screen bg-background">
       <StickyNav />
 
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground py-16">
-        <div className="container mx-auto px-4">
-          <Button asChild variant="ghost" size="sm" className="text-primary-foreground/70 hover:text-primary-foreground mb-4">
-            <Link to="/courses">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              All Pillars
-            </Link>
-          </Button>
-
-          <div className="flex items-center gap-4 mb-6">
-            <div
-              className="w-16 h-16 rounded-xl flex items-center justify-center text-accent-foreground"
-              style={{ backgroundColor: pillar.color }}
-            >
-              {pillarIcons[pillar.icon]}
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold">{pillar.name}</h1>
-              <p className="text-primary-foreground/70 italic">{pillar.tagline}</p>
-            </div>
-          </div>
-
-          <p className="text-lg text-primary-foreground/80 max-w-3xl">{pillar.description}</p>
-        </div>
-      </div>
+      {/* Themed Pillar Header */}
+      <PillarHeader
+        theme={(pillar.id as PillarTheme) in pillarThemes ? (pillar.id as PillarTheme) : "personal-mastery"}
+        title={pillar.name}
+        tagline={pillar.tagline}
+        icon={pillarIcons[pillar.icon]}
+      >
+        <Button asChild variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 -ml-2 mb-3">
+          <Link to="/courses">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            All Pillars
+          </Link>
+        </Button>
+        <p className="text-lg text-white/80 max-w-3xl">{pillar.description}</p>
+      </PillarHeader>
 
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Overview Section */}
