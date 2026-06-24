@@ -14,6 +14,10 @@ const XP_POINTS: Record<string, number> = {
   daily_login: 10,
   course_complete: 250,
   assessment_complete: 100,
+  session: 50,
+  reflection: 75,
+  exercise: 150,
+  unit_complete: 500,
 };
 
 // Per-(user, action, session) idempotency guard kept in-memory per isolate.
@@ -56,7 +60,7 @@ Deno.serve(async (req) => {
     const user_id = userData.user.id;
 
     const body = await req.json().catch(() => ({}));
-    const { action_type, session_id } = body ?? {};
+    const { action_type, session_id, unit_id } = body ?? {};
 
     if (typeof action_type !== "string" || typeof session_id !== "string" || !session_id) {
       return new Response(JSON.stringify({ error: "action_type and session_id are required" }), {
@@ -82,6 +86,48 @@ Deno.serve(async (req) => {
     seen.add(dedupeKey);
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+
+    // Update unit progress server-side when a session/unit-complete event arrives.
+    if (unit_id && typeof unit_id === "string") {
+      const { data: unit } = await admin
+        .from("units")
+        .select("session_count, total_xp")
+        .eq("id", unit_id)
+        .maybeSingle();
+
+      const { data: prog } = await admin
+        .from("user_unit_progress")
+        .select("sessions_completed, xp_earned, last_session_index")
+        .eq("user_id", user_id)
+        .eq("unit_id", unit_id)
+        .maybeSingle();
+
+      let sessionsCompleted = prog?.sessions_completed ?? 0;
+      let lastIdx = prog?.last_session_index ?? 0;
+
+      if (action_type === "session") {
+        sessionsCompleted = Math.min((unit?.session_count ?? 999), sessionsCompleted + 1);
+        lastIdx = sessionsCompleted;
+      }
+
+      const xpEarned = (prog?.xp_earned ?? 0) + xp_to_award;
+      const completedAt =
+        action_type === "unit_complete" || (unit && sessionsCompleted >= unit.session_count)
+          ? new Date().toISOString()
+          : null;
+
+      await admin.from("user_unit_progress").upsert(
+        {
+          user_id,
+          unit_id,
+          sessions_completed: sessionsCompleted,
+          last_session_index: lastIdx,
+          xp_earned: xpEarned,
+          completed_at: completedAt,
+        },
+        { onConflict: "user_id,unit_id" },
+      );
+    }
 
     // Fetch existing row to atomically compute new totals.
     const { data: existing } = await admin

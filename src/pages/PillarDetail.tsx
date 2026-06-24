@@ -14,6 +14,9 @@ import {
   X, BookOpen, ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePillarUnits, useUserUnitProgress } from "@/hooks/useUnits";
+import UnitCard from "@/components/learning/UnitCard";
+import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 
 const pillarIcons: Record<string, React.ReactNode> = {
   brain: <Brain className="w-8 h-8" />,
@@ -39,6 +42,11 @@ const PillarDetail = () => {
   const [assessmentComplete, setAssessmentComplete] = useState(false);
   const [archetype, setArchetype] = useState<LearnerArchetype | null>(null);
   const hasAssessment = pillarId ? !!pillarAssessments[pillarId] : false;
+
+  const { data: units = [] } = usePillarUnits(pillarId);
+  const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
+  const specializedUnits = units.filter((u) => u.track_type === "specialized");
+  const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
 
   if (!pillar) return <Navigate to="/courses" replace />;
 
@@ -201,6 +209,31 @@ const PillarDetail = () => {
               </div>
             )}
 
+            {/* Learning Path Units — primary track */}
+            {learningPathUnits.length > 0 && (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-2xl font-bold">Learning Path</h2>
+                  <p className="text-sm text-muted-foreground">The 7-unit core curriculum for this pillar.</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {learningPathUnits.map((unit) => {
+                    const prog = progressMap[unit.id];
+                    const completed = prog?.sessions_completed ?? 0;
+                    const prevUnit = learningPathUnits.find((u) => u.order_index === unit.order_index - 1);
+                    const prevDone = !prevUnit || (progressMap[prevUnit.id]?.sessions_completed ?? 0) >= prevUnit.session_count;
+                    let state: "locked" | "current" | "completed" | "available";
+                    if (completed >= unit.session_count && unit.session_count > 0) state = "completed";
+                    else if (unit.order_index === 1 || prevDone) state = completed > 0 ? "current" : (prevDone ? "current" : "available");
+                    else state = "locked";
+                    return (
+                      <UnitCard key={unit.id} unit={unit} progress={prog} state={state} pillarId={pillar.id} />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Compare Selection Bar */}
             {showCompare && (
               <div className="bg-muted rounded-lg p-4 flex items-center gap-4 flex-wrap">
@@ -316,35 +349,15 @@ const PillarDetail = () => {
         </div>
 
         {/* Units Section */}
-        {pillar.units && pillar.units.length > 0 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Specialized Units</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {pillar.units.map((unit) => (
-                <Card key={unit.id} className="group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
-                        <BookOpen className="w-5 h-5" />
-                      </div>
-                      <CardTitle className="text-lg group-hover:text-accent transition-colors">
-                        {unit.title}
-                      </CardTitle>
-                    </div>
-                    <CardDescription>{unit.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Layers className="w-4 h-4 text-accent" />
-                      <span>{unit.learningPaths.length} learning paths inside</span>
-                    </div>
-                    <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="sm">
-                      <Link to={`/pillar/${pillar.id}/unit/${unit.id}`}>
-                        Explore Unit <ArrowRight className="w-4 h-4 ml-1" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+        {specializedUnits.length > 0 && (
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-lg font-semibold text-muted-foreground">Bonus & Deep Dives</h3>
+              <p className="text-xs text-muted-foreground">Optional enrichment — not part of the core path.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {specializedUnits.map((unit) => (
+                <SpecializedUnitCard key={unit.id} unit={unit} pillarId={pillar.id} />
               ))}
             </div>
           </div>
