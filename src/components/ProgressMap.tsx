@@ -103,6 +103,16 @@ const ProgressMap = () => {
     }, 1400);
   };
 
+  // SMIL "endEvent" is not exposed via React props — bind it imperatively.
+  useEffect(() => {
+    const el = motionRef.current;
+    if (!el || travelFromIdx === null) return;
+    const handler = () => onOrbArrive(travelFromIdx + 1);
+    el.addEventListener("endEvent", handler);
+    return () => el.removeEventListener("endEvent", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [travelFromIdx]);
+
   const handleClick = (stop: PillarStop) => {
     if (stop.status === "locked") {
       toast.error("Complete previous Pillar to unlock");
@@ -334,7 +344,6 @@ const ProgressMap = () => {
                     keySplines="0.42 0 0.58 1"
                     keyTimes="0;1"
                     begin="indefinite"
-                    onEnd={() => onOrbArrive(travelFromIdx + 1)}
                   >
                     <mpath href="#pm-road-path" />
                   </animateMotion>
