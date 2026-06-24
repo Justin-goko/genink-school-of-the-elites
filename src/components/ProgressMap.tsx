@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { playUnlockChime } from "@/lib/journeySound";
 import {
   Coins,
   MessageCircle,
@@ -10,6 +12,7 @@ import {
   Landmark,
   Check,
   Lock,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +65,53 @@ const pathD = stops
 
 const ProgressMap = () => {
   const navigate = useNavigate();
+  // The next index that just unlocked (renders bounce + particles).
+  const [unlockedIdx, setUnlockedIdx] = useState<number | null>(null);
+  // The index from which the orb is travelling. The orb renders only when this is set.
+  const [travelFromIdx, setTravelFromIdx] = useState<number | null>(null);
+  const motionRef = useRef<SVGAnimateMotionElement | null>(null);
+
+  // Auto-detect: when a stop is completed and the next is locked, queue an unlock animation.
+  useEffect(() => {
+    if (travelFromIdx !== null || unlockedIdx !== null) return;
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (stops[i].status === "completed" && stops[i + 1].status === "locked") {
+        // Don't auto-fire — wait for explicit trigger (data hasn't actually changed mid-session).
+        break;
+      }
+    }
+  }, []);
+
+  const triggerUnlock = (fromIdx: number) => {
+    if (fromIdx < 0 || fromIdx >= stops.length - 1) return;
+    if (travelFromIdx !== null) return;
+    setUnlockedIdx(null);
+    setTravelFromIdx(fromIdx);
+    // Kick the SMIL animateMotion via begin attribute change.
+    requestAnimationFrame(() => {
+      try { motionRef.current?.beginElement(); } catch { /* ignore */ }
+    });
+  };
+
+  const onOrbArrive = (toIdx: number) => {
+    setUnlockedIdx(toIdx);
+    playUnlockChime();
+    // Clear the travelling orb after the unlock animation completes.
+    window.setTimeout(() => {
+      setTravelFromIdx(null);
+      setUnlockedIdx(null);
+    }, 1400);
+  };
+
+  // SMIL "endEvent" is not exposed via React props — bind it imperatively.
+  useEffect(() => {
+    const el = motionRef.current;
+    if (!el || travelFromIdx === null) return;
+    const handler = () => onOrbArrive(travelFromIdx + 1);
+    el.addEventListener("endEvent", handler);
+    return () => el.removeEventListener("endEvent", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [travelFromIdx]);
 
   const handleClick = (stop: PillarStop) => {
     if (stop.status === "locked") {
@@ -70,6 +120,12 @@ const ProgressMap = () => {
     }
     navigate(`/pillar/${stop.id}`);
   };
+
+  // Find first locked index for demo trigger.
+  const firstLockedIdx = stops.findIndex((s) => s.status === "locked");
+  const demoFromIdx = firstLockedIdx > 0 ? firstLockedIdx - 1 : -1;
+  const targetIdx = travelFromIdx !== null ? travelFromIdx + 1 : -1;
+  const target = targetIdx >= 0 ? stops[targetIdx] : null;
 
   return (
     <section
@@ -115,7 +171,41 @@ const ProgressMap = () => {
                     transform-box: fill-box;
                     animation: pm-pulse 2s ease-out infinite;
                   }
+                  @keyframes pm-unlock {
+                    0%   { transform: scale(0.8); opacity: 0.3; }
+                    60%  { transform: scale(1.1); opacity: 1; }
+                    100% { transform: scale(1);   opacity: 1; }
+                  }
+                  .pm-unlock {
+                    transform-origin: center;
+                    transform-box: fill-box;
+                    animation: pm-unlock 0.6s cubic-bezier(.34,1.56,.64,1) 1 both;
+                  }
+                  @keyframes pm-particle {
+                    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+                    100% { transform: translate(var(--pm-dx), var(--pm-dy)) scale(0.3); opacity: 0; }
+                  }
+                  .pm-particle {
+                    transform-origin: center;
+                    transform-box: fill-box;
+                    animation: pm-particle 0.9s ease-out forwards;
+                  }
+                  @keyframes pm-orb-pulse {
+                    0%,100% { opacity: 0.95; }
+                    50%     { opacity: 0.7;  }
+                  }
+                  .pm-orb-pulse { animation: pm-orb-pulse 1.2s ease-in-out infinite; }
                 `}</style>
+                <radialGradient id="pm-orb-grad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%"   stopColor="#FFF6D8" stopOpacity="1" />
+                  <stop offset="45%"  stopColor="#F1CF6A" stopOpacity="0.95" />
+                  <stop offset="80%"  stopColor="#C9A84C" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#C9A84C" stopOpacity="0" />
+                </radialGradient>
+                <filter id="pm-orb-blur" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" />
+                </filter>
+                <path id="pm-road-path" d={pathD} fill="none" />
               </defs>
 
               {/* Sky band */}
@@ -158,6 +248,7 @@ const ProgressMap = () => {
                 const isCompleted = s.status === "completed";
                 const isCurrent = s.status === "current";
                 const isLocked = s.status === "locked";
+                const isUnlocking = unlockedIdx === s.num - 1;
 
                 const fill = isCompleted ? "#C9A84C" : isCurrent ? "#1B2A4A" : "#C9C4BA";
                 const stroke = isCompleted ? "#A8862F" : isCurrent ? "#0F1B33" : "#A8A498";
@@ -182,7 +273,14 @@ const ProgressMap = () => {
                       />
                     )}
 
-                    <circle r="26" fill={fill} stroke={stroke} strokeWidth="3" />
+                    <g className={isUnlocking ? "pm-unlock" : undefined}>
+                      <circle
+                        r="26"
+                        fill={isUnlocking ? "#C9A84C" : fill}
+                        stroke={isUnlocking ? "#A8862F" : stroke}
+                        strokeWidth="3"
+                      />
+                    </g>
 
                     {/* Icon / state mark inside the circle */}
                     <g transform="translate(-10 -10)" pointerEvents="none">
@@ -232,6 +330,50 @@ const ProgressMap = () => {
                   </g>
                 );
               })}
+
+              {/* Travelling orb — only renders while an unlock animation is in flight */}
+              {travelFromIdx !== null && (
+                <g className="pm-orb-pulse">
+                  <circle r="22" fill="url(#pm-orb-grad)" filter="url(#pm-orb-blur)" />
+                  <circle r="10" fill="#FFF6D8" opacity="0.9" />
+                  <animateMotion
+                    ref={motionRef}
+                    dur="1.5s"
+                    fill="freeze"
+                    calcMode="spline"
+                    keySplines="0.42 0 0.58 1"
+                    keyTimes="0;1"
+                    begin="indefinite"
+                  >
+                    <mpath href="#pm-road-path" />
+                  </animateMotion>
+                </g>
+              )}
+
+              {/* Particle burst at the newly-unlocked node */}
+              {target && unlockedIdx === targetIdx && (
+                <g transform={`translate(${target.x} ${target.y})`}>
+                  {Array.from({ length: 12 }).map((_, i) => {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const dist = 60 + (i % 3) * 12;
+                    const dx = Math.cos(angle) * dist;
+                    const dy = Math.sin(angle) * dist;
+                    return (
+                      <circle
+                        key={i}
+                        r={3 + (i % 2)}
+                        fill="#C9A84C"
+                        className="pm-particle"
+                        style={{
+                          ["--pm-dx" as any]: `${dx}px`,
+                          ["--pm-dy" as any]: `${dy}px`,
+                          animationDelay: `${(i % 4) * 30}ms`,
+                        }}
+                      />
+                    );
+                  })}
+                </g>
+              )}
             </svg>
           </div>
         </div>
@@ -251,6 +393,22 @@ const ProgressMap = () => {
             Locked
           </span>
         </div>
+
+        {/* Demo: trigger the unlock animation for the first locked pillar */}
+        {demoFromIdx >= 0 && (
+          <div className="mt-4 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => triggerUnlock(demoFromIdx)}
+              disabled={travelFromIdx !== null}
+              className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border border-[#1B2A4A]/20 text-[#1B2A4A] hover:bg-[#1B2A4A] hover:text-white transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#1B2A4A]"
+              aria-label="Preview the next pillar unlock animation"
+            >
+              <Sparkles className="w-3 h-3" />
+              Preview next-pillar unlock
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

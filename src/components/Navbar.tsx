@@ -3,6 +3,7 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import genlinkLogo from "@/assets/genlink-logo.png";
 import NavbarXPCounter from "@/components/xp/NavbarXPCounter";
+import SoundToggle from "@/components/SoundToggle";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +19,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-6">
             <NavbarXPCounter />
+            <SoundToggle />
             <a href="/#courses" className="text-foreground/80 hover:text-accent transition-colors">
               Courses
             </a>
