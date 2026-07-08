@@ -147,7 +147,8 @@ const ProgressMap = () => {
         </div>
 
         {/* Horizontal scroll on mobile, fits on desktop */}
-        <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4">
+        {/* DESKTOP LAYOUT — horizontal winding road (hidden below md) */}
+        <div className="hidden md:block overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4">
           <div className="min-w-[900px] md:min-w-0">
             <svg
               viewBox={`0 0 ${VB_W} ${VB_H}`}
@@ -377,6 +378,14 @@ const ProgressMap = () => {
             </svg>
           </div>
         </div>
+
+        {/* MOBILE LAYOUT — vertical zigzag road (shown below md) */}
+        <MobileJourney
+          stops={PILLARS}
+          travelFromIdx={travelFromIdx}
+          unlockedIdx={unlockedIdx}
+          onSelect={handleClick}
+        />
 
         {/* Legend */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: "#1B2A4A" }}>
