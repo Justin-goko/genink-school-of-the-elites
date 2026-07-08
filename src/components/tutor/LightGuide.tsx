@@ -16,7 +16,7 @@ export default function LightGuide({ size = 56, className, intense, static: isSt
   return (
     <span
       aria-hidden
-      className={cn("lg-orb inline-block relative", !isStatic && "lg-pulse", intense && "lg-intense", className)}
+      className={cn("lg-orb inline-block relative", !isStatic && "lg-breathe", intense && "lg-intense", className)}
       style={{ width: size, height: size }}
     >
       <span className="lg-core" />
