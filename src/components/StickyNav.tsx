@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
