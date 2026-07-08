@@ -24,12 +24,11 @@ export default function RouteTransition({ children }: { children: ReactNode }) {
     const t = window.setTimeout(() => {
       setDisplayed(children);
       setPhase("enter");
-    }, 260); // slightly under duration-quick to avoid a gap
+    }, 260);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // Keep displayed in sync when children reference changes without a route change
   useEffect(() => {
     if (phase === "enter") setDisplayed(children);
   }, [children, phase]);
