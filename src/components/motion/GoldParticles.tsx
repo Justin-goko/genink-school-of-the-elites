@@ -1,9 +1,21 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Props { count?: number; className?: string; opacity?: number; }
 
-/** Ambient gold particle field. GPU-only, 20-30s drift loops. */
-export default function GoldParticles({ count = 28, className = "", opacity = 0.35 }: Props) {
+/**
+ * Ambient gold particle field. GPU-only, 20-30s drift loops.
+ * Default opacity is intentionally low (0.10) so it reads as texture, not decor.
+ * Fully disabled under prefers-reduced-motion.
+ */
+export default function GoldParticles({ count = 28, className = "", opacity = 0.10 }: Props) {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, []);
   const particles = useMemo(() => {
     return Array.from({ length: count }).map((_, i) => {
       const seed = (i * 9301 + 49297) % 233280;
@@ -19,6 +31,8 @@ export default function GoldParticles({ count = 28, className = "", opacity = 0.
       };
     });
   }, [count]);
+
+  if (reduced) return null;
 
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`} style={{ opacity }}>
