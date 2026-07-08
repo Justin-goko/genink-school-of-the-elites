@@ -490,6 +490,41 @@ export type Database = {
         }
         Relationships: []
       }
+      session_blocks: {
+        Row: {
+          block_type: Database["public"]["Enums"]["session_block_type"]
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          session_id: string
+        }
+        Insert: {
+          block_type: Database["public"]["Enums"]["session_block_type"]
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index: number
+          session_id: string
+        }
+        Update: {
+          block_type?: Database["public"]["Enums"]["session_block_type"]
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_blocks_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "unit_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutor_usage: {
         Row: {
           created_at: string
@@ -910,6 +945,20 @@ export type Database = {
         | "entrepreneurship"
         | "creator"
         | "civic"
+      session_block_type:
+        | "heading"
+        | "paragraph"
+        | "callout"
+        | "quote"
+        | "table"
+        | "warning"
+        | "reflection"
+        | "exercise"
+        | "video"
+        | "image"
+        | "divider"
+        | "key_terms"
+        | "stat_grid"
       track_type: "learning_path" | "specialized"
     }
     CompositeTypes: {
@@ -1066,6 +1115,21 @@ export const Constants = {
         "entrepreneurship",
         "creator",
         "civic",
+      ],
+      session_block_type: [
+        "heading",
+        "paragraph",
+        "callout",
+        "quote",
+        "table",
+        "warning",
+        "reflection",
+        "exercise",
+        "video",
+        "image",
+        "divider",
+        "key_terms",
+        "stat_grid",
       ],
       track_type: ["learning_path", "specialized"],
     },
