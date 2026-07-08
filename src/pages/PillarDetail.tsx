@@ -452,6 +452,49 @@ const PillarDetail = () => {
         )}
           </>
         )}
+
+        {/* Enrol CTA — visible to unauthenticated visitors and signed-in-but-not-enrolled users */}
+        <div className="pt-6">
+          <div
+            className="rounded-2xl p-8 md:p-10 text-center relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${pillar.color}18, hsl(var(--accent) / 0.08))`,
+              border: `1px solid ${pillar.color}40`,
+            }}
+          >
+            <div
+              className="w-14 h-14 rounded-xl flex items-center justify-center text-white mx-auto mb-4"
+              style={{ backgroundColor: pillar.color }}
+            >
+              {iconEl}
+            </div>
+            <h3 className="text-2xl md:text-3xl font-bold mb-2">Ready to begin {pillar.name}?</h3>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6">
+              {user
+                ? userHasAssessment
+                  ? "You're all set — enrol to unlock the 7 units, XP tracking and mentor access."
+                  : "Complete the Pathway Intelligence assessment first — it makes sure this pillar is the right starting point for you."
+                : "Start with the Pathway Intelligence assessment. You'll get a personalised profile, then unlock this pillar."}
+            </p>
+            <Button
+              onClick={handleEnrol}
+              disabled={enrollmentLoading}
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md"
+            >
+              {user && userHasAssessment ? "Enrol in this Pillar" : "Enrol in this Pillar"}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            {!user && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Already have an account?{" "}
+                <Link to="/auth" className="text-accent hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
