@@ -78,8 +78,11 @@ export default function AdminImport() {
     try {
       if (/\.docx$/i.test(f.name)) {
         const buf = await f.arrayBuffer();
-        const { value } = await mammoth.convertToMarkdown({ arrayBuffer: buf });
-        setRaw(value);
+        // mammoth types don't advertise convertToMarkdown but it exists at runtime.
+        const convert = (mammoth as any).convertToMarkdown ?? (mammoth as any).convertToHtml;
+        const { value } = await convert({ arrayBuffer: buf });
+        // If convertToMarkdown wasn't available we fall back to HTML — strip tags for a rough textual pass.
+        setRaw(String(value).replace(/<[^>]+>/g, ""));
       } else {
         setRaw(await f.text());
       }
