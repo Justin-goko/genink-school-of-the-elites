@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import type { DepartmentRole } from "@/lib/ops/departments";
 
 export type AppRole = "admin" | "moderator" | "user";
 
@@ -28,28 +29,64 @@ export const useUserRole = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const deptQuery = useQuery({
+    queryKey: ["departmentRole", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("department_role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) return null;
+      return (data?.department_role ?? null) as DepartmentRole | null;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const roles = query.data ?? [];
   const isAdmin = roles.includes("admin");
   const isModerator = roles.includes("moderator");
-  const isTeam = isAdmin || isModerator;
+  const departmentRole = deptQuery.data ?? null;
+  const isDepartmentMember = departmentRole !== null;
+  // "Team" now covers both admin/moderator and any department_role holder.
+  const isTeam = isAdmin || isModerator || isDepartmentMember;
 
   let tier: "guest" | "student" | "team" = "guest";
   if (user) tier = isTeam ? "team" : "student";
 
+  const deptLabelMap: Record<string, string> = {
+    ceo: "CEO",
+    ops_manager: "Ops Manager",
+    marketing: "Marketing",
+    curriculum: "Curriculum",
+    digital_services: "Digital Services",
+    finance: "Finance",
+    tech: "Tech",
+  };
   const roleLabel = isAdmin
     ? "Admin"
-    : isModerator
-      ? "Curriculum Lead"
-      : "Student";
+    : departmentRole
+      ? (deptLabelMap[departmentRole] ?? "Team")
+      : isModerator
+        ? "Curriculum Lead"
+        : "Student";
+
+  // Post-login destination: team roles land in ops, students in the journey.
+  const landingPath = isTeam ? "/ops-dashboard" : "/journey";
 
   return {
     tier,
     roles,
+    departmentRole,
+    isDepartmentMember,
     isAdmin,
     isModerator,
     isTeam,
     roleLabel,
-    loading: authLoading || query.isLoading,
+    landingPath,
+    loading: authLoading || query.isLoading || deptQuery.isLoading,
   };
 };
 
