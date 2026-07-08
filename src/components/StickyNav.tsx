@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
+import NavbarXPCounter from "@/components/xp/NavbarXPCounter";
 import genlinkLogo from "@/assets/genlink-logo.png";
 
 const StickyNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { tier, roleLabel } = useUserRole();
+  const { data: badgeCount = 0 } = useAchievementCount();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,15 +24,101 @@ const StickyNav = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Courses", href: "/courses" },
-    { name: "Events", href: "/events" },
-    { name: "Resources", href: "/resources" },
-  ];
+  // Context-aware primary nav links
+  const navLinks: Array<{ name: string; href: string }> =
+    tier === "team"
+      ? [
+          { name: "My Journey", href: "/journey" },
+          { name: "Operations Dashboard", href: "/dashboard" },
+        ]
+      : tier === "student"
+        ? [
+            { name: "My Journey", href: "/journey" },
+            { name: "Community", href: "/events" },
+            { name: "Resources", href: "/resources" },
+          ]
+        : [
+            { name: "About", href: "/#why-us" },
+            { name: "How It Works", href: "/#features" },
+            { name: "Pillars Preview", href: "/#courses" },
+          ];
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const initials = user?.email?.slice(0, 2).toUpperCase() ?? "";
+
+  const renderRightSide = () => {
+    // Layer 3 — team / admin
+    if (tier === "team") {
+      return (
+        <>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-3 py-1 text-xs font-semibold text-[#C9A84C]">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            {roleLabel}
+          </span>
+          <button
+            onClick={handleSignOut}
+            title={`${user?.email} — Sign out`}
+            className="h-9 w-9 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs font-semibold flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+          >
+            {initials}
+          </button>
+        </>
+      );
+    }
+
+    // Layer 2 — authenticated student
+    if (tier === "student") {
+      return (
+        <>
+          <NavbarXPCounter />
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"
+            style={{
+              background: "rgba(201,168,76,0.12)",
+              color: "#C9A84C",
+              border: "1px solid rgba(201,168,76,0.35)",
+            }}
+            aria-label={`${badgeCount} badges earned`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            <span className="tabular-nums">{badgeCount}</span>
+          </span>
+          <button
+            onClick={handleSignOut}
+            title={`${user?.email} — Sign out`}
+            className="h-9 w-9 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs font-semibold flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+          >
+            {initials}
+          </button>
+        </>
+      );
+    }
+
+    // Layer 1 — public visitor
+    return (
+      <>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/auth")}
+          className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+        >
+          <LogIn className="w-4 h-4 mr-1" />
+          Sign In
+        </Button>
+        <Button
+          onClick={() => navigate("/pathway-intelligence")}
+          className="group bg-[#C9A84C] text-[#0F1B33] hover:bg-[#C9A84C]/90 font-semibold"
+        >
+          Start Your Assessment
+          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+        </Button>
+      </>
+    );
   };
 
   return (
@@ -65,44 +155,7 @@ const StickyNav = () => {
               ))}
             </div>
 
-            <div className="hidden md:flex items-center gap-3">
-              {user ? (
-                <>
-                  <div className="flex items-center gap-2 text-primary-foreground/80 text-sm">
-                    <User className="w-4 h-4" />
-                    <span className="max-w-[120px] truncate">{user.email}</span>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSignOut}
-                    className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <LogOut className="w-4 h-4 mr-1" />
-                    Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("/auth")}
-                    className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <LogIn className="w-4 h-4 mr-1" />
-                    Sign In
-                  </Button>
-                  <Button 
-                    className="group bg-accent hover:bg-accent/90 text-accent-foreground"
-                    onClick={() => navigate("/auth")}
-                  >
-                    <Sparkles className="w-4 h-4 mr-2 group-hover:animate-spin" />
-                    Start Learning
-                  </Button>
-                </>
-              )}
-            </div>
+            <div className="hidden md:flex items-center gap-3">{renderRightSide()}</div>
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -128,16 +181,38 @@ const StickyNav = () => {
                 {link.name}
               </Link>
             ))}
-            {user ? (
-              <Button onClick={handleSignOut} variant="outline" className="w-full border-primary-foreground/30 text-primary-foreground">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
+            {tier === "guest" ? (
+              <>
+                <Button
+                  onClick={() => { navigate("/auth"); setIsMobileMenuOpen(false); }}
+                  variant="outline"
+                  className="w-full border-primary-foreground/30 text-primary-foreground"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button
+                  onClick={() => { navigate("/pathway-intelligence"); setIsMobileMenuOpen(false); }}
+                  className="w-full bg-[#C9A84C] text-[#0F1B33] hover:bg-[#C9A84C]/90 font-semibold"
+                >
+                  Start Your Assessment
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </>
             ) : (
-              <Button onClick={() => { navigate("/auth"); setIsMobileMenuOpen(false); }} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Start Learning
-              </Button>
+              <div className="flex items-center justify-between pt-2 border-t border-primary-foreground/10">
+                <div className="flex items-center gap-2 text-primary-foreground/80 text-sm">
+                  <User className="w-4 h-4" />
+                  <span className="max-w-[160px] truncate">{user?.email}</span>
+                  {tier === "team" && (
+                    <span className="ml-2 text-xs text-[#C9A84C]">{roleLabel}</span>
+                  )}
+                </div>
+                <Button onClick={handleSignOut} variant="outline" size="sm" className="border-primary-foreground/30 text-primary-foreground">
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Sign Out
+                </Button>
+              </div>
             )}
           </div>
         </div>

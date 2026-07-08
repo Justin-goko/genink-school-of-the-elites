@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { pillars } from "@/data/courses";
 import { ArrowRight, Compass, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Navigate } from "react-router-dom";
 
 /**
  * Layer 1 — public marketing surface.
@@ -18,6 +20,14 @@ import { useAuth } from "@/contexts/AuthContext";
  */
 const MarketingHome = () => {
   const { user } = useAuth();
+  const { tier, loading } = useUserRole();
+
+  // Route "/" is Layer 1 for guests. Authenticated visitors are routed to
+  // their appropriate surface: students -> /journey, team -> /dashboard.
+  if (!loading && user) {
+    if (tier === "team") return <Navigate to="/dashboard" replace />;
+    if (tier === "student") return <Navigate to="/journey" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background scroll-smooth">
