@@ -147,7 +147,8 @@ const ProgressMap = () => {
         </div>
 
         {/* Horizontal scroll on mobile, fits on desktop */}
-        <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4">
+        {/* DESKTOP LAYOUT — horizontal winding road (hidden below md) */}
+        <div className="hidden md:block overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4">
           <div className="min-w-[900px] md:min-w-0">
             <svg
               viewBox={`0 0 ${VB_W} ${VB_H}`}
@@ -378,6 +379,14 @@ const ProgressMap = () => {
           </div>
         </div>
 
+        {/* MOBILE LAYOUT — vertical zigzag road (shown below md) */}
+        <MobileJourney
+          stops={PILLARS}
+          travelFromIdx={travelFromIdx}
+          unlockedIdx={unlockedIdx}
+          onSelect={handleClick}
+        />
+
         {/* Legend */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: "#1B2A4A" }}>
           <span className="flex items-center gap-2">
@@ -415,3 +424,148 @@ const ProgressMap = () => {
 };
 
 export default ProgressMap;
+
+// ============================================================
+// Mobile vertical zigzag layout
+// ============================================================
+
+interface MobileJourneyProps {
+  stops: PillarStop[];
+  travelFromIdx: number | null;
+  unlockedIdx: number | null;
+  onSelect: (s: PillarStop) => void;
+}
+
+const CARD_STEP = 140; // vertical spacing between nodes (px)
+const CARD_TOP = 40;   // offset before first node
+
+function MobileJourney({ stops, travelFromIdx, unlockedIdx, onSelect }: MobileJourneyProps) {
+  const totalHeight = CARD_TOP + stops.length * CARD_STEP;
+  // Vertical winding path down the centre with subtle left/right sway.
+  const pathPoints = stops.map((_, i) => {
+    const y = CARD_TOP + i * CARD_STEP;
+    const sway = Math.sin(i * 0.9) * 18;
+    return { x: 50 + sway, y };
+  });
+  const verticalPath = pathPoints
+    .map((p, i) => {
+      if (i === 0) return `M ${p.x} ${p.y}`;
+      const prev = pathPoints[i - 1];
+      const cy = (prev.y + p.y) / 2;
+      return `C ${prev.x} ${cy}, ${p.x} ${cy}, ${p.x} ${p.y}`;
+    })
+    .join(" ");
+
+  return (
+    <div className="md:hidden relative mx-auto" style={{ maxWidth: 480, height: totalHeight }}>
+      {/* Road svg spans the full column */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox={`0 0 100 ${totalHeight}`}
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <path id="pm-road-path-v" d={verticalPath} fill="none" />
+          <radialGradient id="pm-orb-grad-v" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFF6D8" stopOpacity="1" />
+            <stop offset="45%" stopColor="#F1CF6A" stopOpacity="0.95" />
+            <stop offset="80%" stopColor="#C9A84C" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#C9A84C" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <path d={verticalPath} stroke="#1B2A4A" strokeWidth="3" fill="none" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={verticalPath} stroke="#F9F6F0" strokeWidth="1" strokeDasharray="4 6" fill="none" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        {travelFromIdx !== null && (
+          <g className="pm-orb-pulse">
+            <circle r="4" fill="url(#pm-orb-grad-v)" />
+            <circle r="1.6" fill="#FFF6D8" opacity="0.9" />
+            <animateMotion dur="1.5s" fill="freeze" begin="0s">
+              <mpath href="#pm-road-path-v" />
+            </animateMotion>
+          </g>
+        )}
+      </svg>
+
+      {/* Alternating zigzag cards */}
+      <ol className="relative">
+        {stops.map((s, i) => {
+          const Icon = s.icon;
+          const isLocked = s.status === "locked";
+          const isCompleted = s.status === "completed";
+          const isCurrent = s.status === "current";
+          const isUnlocking = unlockedIdx === i;
+          const side = i % 2 === 0 ? "left" : "right";
+          const nodeFill = isCompleted ? "#C9A84C" : isCurrent ? "#1B2A4A" : "#C9C4BA";
+
+          return (
+            <li
+              key={s.id}
+              className="absolute inset-x-0 flex items-center"
+              style={{
+                top: CARD_TOP + i * CARD_STEP - 40,
+                height: 80,
+                flexDirection: side === "left" ? "row" : "row-reverse",
+              }}
+            >
+              {/* Card */}
+              <button
+                type="button"
+                onClick={() => onSelect(s)}
+                disabled={isLocked}
+                aria-label={`Pillar ${s.num}: ${s.title}${isLocked ? " (locked)" : ""}`}
+                className={`w-[42%] rounded-xl border p-3 text-left shadow-sm transition-all ${
+                  isLocked
+                    ? "opacity-50 cursor-not-allowed bg-[#EFE7D5] border-[#C9C4BA]"
+                    : "bg-white border-[#1B2A4A]/15 hover:shadow-md active:scale-[0.98]"
+                } ${isUnlocking ? "ring-2 ring-[#C9A84C]" : ""}`}
+                style={{ color: "#1B2A4A" }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold"
+                    style={{ background: nodeFill, color: "#fff" }}
+                  >
+                    {s.num}
+                  </span>
+                  {isLocked ? (
+                    <Lock className="w-4 h-4" />
+                  ) : isCompleted ? (
+                    <Check className="w-4 h-4" style={{ color: "#C9A84C" }} />
+                  ) : (
+                    <Icon className="w-4 h-4" style={{ color: "#C9A84C" }} />
+                  )}
+                </div>
+                <div className="text-sm font-semibold leading-tight">{s.title}</div>
+                <div className="text-[11px] mt-1 opacity-70">
+                  {s.xp.toLocaleString()} XP · {s.completion}%
+                </div>
+              </button>
+
+              {/* Spacer for road column */}
+              <div className="w-[16%]" />
+
+              {/* Node circle on the road (visual anchor) */}
+              <div
+                className="w-[42%] flex"
+                style={{ justifyContent: side === "left" ? "flex-start" : "flex-end" }}
+              >
+                <span
+                  className={`block w-4 h-4 rounded-full border-2 ${
+                    isCurrent ? "animate-pulse" : ""
+                  }`}
+                  style={{
+                    background: nodeFill,
+                    borderColor: isCompleted ? "#A8862F" : isCurrent ? "#0F1B33" : "#A8A498",
+                    marginLeft: side === "left" ? "-12px" : 0,
+                    marginRight: side === "right" ? "-12px" : 0,
+                  }}
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
