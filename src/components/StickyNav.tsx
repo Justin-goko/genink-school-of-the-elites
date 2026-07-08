@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
@@ -24,12 +24,17 @@ const StickyNav = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Context-aware primary nav links
-  const navLinks: Array<{ name: string; href: string }> =
+  // Context-aware primary nav links. Team members always see Operations
+  // Dashboard first (with icon) so they never have to type the URL, and keep
+  // access to the Student Journey for previewing what learners experience.
+  type NavLink = { name: string; href: string; icon?: React.ComponentType<{ className?: string }> };
+  const navLinks: NavLink[] =
     tier === "team"
       ? [
-          { name: "My Journey", href: "/journey" },
-          { name: "Operations Dashboard", href: "/ops-dashboard" },
+          { name: "Operations Dashboard", href: "/ops-dashboard", icon: LayoutDashboard },
+          { name: "Student Journey", href: "/journey", icon: Compass },
+          { name: "Community", href: "/events" },
+          { name: "Resources", href: "/resources" },
         ]
       : tier === "student"
         ? [
@@ -149,7 +154,10 @@ const StickyNav = () => {
                   to={link.href}
                   className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground transition-colors relative group"
                 >
-                  {link.name}
+                  <span className="inline-flex items-center gap-1.5">
+                    {link.icon ? <link.icon className="w-4 h-4" /> : null}
+                    {link.name}
+                  </span>
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
@@ -176,9 +184,10 @@ const StickyNav = () => {
                 key={link.name}
                 to={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors"
+                className="flex items-center gap-2 py-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors"
               >
-                {link.name}
+                {link.icon ? <link.icon className="w-4 h-4" /> : null}
+                <span>{link.name}</span>
               </Link>
             ))}
             {tier === "guest" ? (
