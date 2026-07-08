@@ -2,23 +2,44 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUnit, useUnitSessions } from "@/hooks/useUnits";
+import { useSessionBlocks } from "@/hooks/useSessionBlocks";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useXPReward } from "@/contexts/XPRewardContext";
-import SessionContentBlock, { type Block } from "@/components/learning/SessionContentBlock";
+import BlockRenderer from "@/components/reader/BlockRenderer";
+import { estimateReadMinutes, type SessionBlock } from "@/lib/blocks/types";
+import { READER } from "@/components/reader/readerTheme";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import StickyNav from "@/components/StickyNav";
 import { toast } from "sonner";
 import TutorButton from "@/components/tutor/TutorButton";
 
-const FALLBACK_BLOCKS: Block[] = [
-  { type: "heading", text: "Welcome to this session" },
-  { type: "paragraph", text: "This session's content is being prepared. Use the controls below to mark progress while we finalise the material." },
-  { type: "callout", title: "AI Prompt", text: "Ask yourself: what is the single most important thing I want to take away from this session?" },
-  { type: "reflection", prompt: "In one paragraph, write what you already know about this topic and what you hope to learn." },
-  { type: "exercise", title: "Practice exercise", steps: ["Review your notes from the previous session.", "Set a measurable goal for this unit.", "Block 30 minutes in your calendar this week to act on it."] },
+// If a session has no imported blocks and no legacy JSONB content, show a
+// gentle placeholder rather than a blank page.
+const PLACEHOLDER_BLOCKS: SessionBlock[] = [
+  { order_index: 0, block_type: "heading", content: { level: 1, text: "Session content coming soon" } },
+  { order_index: 1, block_type: "paragraph", content: { text: "This session hasn't been imported yet. Use the controls below to mark progress while we finalise the material." } },
 ];
+
+// Convert the legacy unit_sessions.content shape (used before the block
+// importer existed) into the new SessionBlock format so nothing breaks for
+// sessions that were populated by hand.
+function legacyToBlocks(raw: any[]): SessionBlock[] {
+  return raw.map((b, i) => {
+    switch (b.type) {
+      case "heading":    return { order_index: i, block_type: "heading",    content: { level: b.level ?? 1, text: b.text ?? "" } };
+      case "paragraph":  return { order_index: i, block_type: "paragraph",  content: { text: b.text ?? "" } };
+      case "callout":    return { order_index: i, block_type: "callout",    content: { variant: "key_idea", title: b.title, body: b.text ?? "" } };
+      case "quote":      return { order_index: i, block_type: "quote",      content: { text: b.text ?? "", attribution: b.attribution } };
+      case "table":      return { order_index: i, block_type: "table",      content: { headers: b.headers ?? [], rows: b.rows ?? [] } };
+      case "warning":    return { order_index: i, block_type: "warning",    content: { title: "Warning", body: b.text ?? "" } };
+      case "reflection": return { order_index: i, block_type: "reflection", content: { prompt: b.prompt ?? "" } };
+      case "exercise":   return { order_index: i, block_type: "exercise",   content: { title: b.title ?? "Exercise", steps: b.steps ?? [], xp: 150 } };
+      default:           return { order_index: i, block_type: "paragraph",  content: { text: b.text ?? "" } };
+    }
+  });
+}
 
 export default function SessionReader() {
   const { pillarId, unitId, sessionIndex } = useParams<{ pillarId: string; unitId: string; sessionIndex?: string }>();
@@ -30,6 +51,8 @@ export default function SessionReader() {
 
   const { data: unit } = useUnit(unitId);
   const { data: sessions } = useUnitSessions(unitId);
+  const session = sessions?.[idx];
+  const { data: importedBlocks } = useSessionBlocks(session?.id);
 
   const [scrollPct, setScrollPct] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -47,14 +70,17 @@ export default function SessionReader() {
 
   useEffect(() => { window.scrollTo(0, 0); }, [idx]);
 
-  const session = sessions?.[idx];
   const totalSessions = unit?.session_count ?? sessions?.length ?? 5;
   const isLast = idx + 1 >= totalSessions;
 
-  const blocks: Block[] = useMemo(() => {
-    const raw = (session?.content as any[]) ?? [];
-    return raw.length > 0 ? (raw as Block[]) : FALLBACK_BLOCKS;
-  }, [session]);
+  const blocks: SessionBlock[] = useMemo(() => {
+    if (importedBlocks && importedBlocks.length > 0) return importedBlocks;
+    const legacy = (session?.content as any[]) ?? [];
+    if (legacy.length > 0) return legacyToBlocks(legacy);
+    return PLACEHOLDER_BLOCKS;
+  }, [importedBlocks, session]);
+
+  const readMinutes = useMemo(() => estimateReadMinutes(blocks), [blocks]);
 
   async function callAwardXP(action_type: string, extra: Record<string, any> = {}) {
     if (!user || !unitId) { toast.error("Sign in to track progress"); return; }
@@ -84,38 +110,46 @@ export default function SessionReader() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: READER.cream }}>
       <StickyNav />
 
       {/* reading progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-foreground/5">
-        <div className="h-full bg-amber-500 transition-all" style={{ width: `${scrollPct}%` }} />
+      <div className="fixed top-0 left-0 right-0 z-50 h-[3px]" style={{ background: `${READER.gold}22` }}>
+        <div className="h-full transition-[width] duration-100 ease-out" style={{ width: `${scrollPct}%`, background: READER.gold }} />
       </div>
 
-      <div className="container mx-auto max-w-3xl px-4 py-10">
-        <Link to={`/pillar/${pillarId}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <div className="container mx-auto max-w-[720px] px-5 md:px-6 py-12 md:py-16">
+        <Link to={`/pillar/${pillarId}`} className="inline-flex items-center text-sm mb-8 hover:opacity-80" style={{ color: READER.inkSoft }}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to pillar
         </Link>
 
-        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-          {unit?.title} · Session {idx + 1} of {totalSessions}
-        </p>
-        <h1 className="text-3xl md:text-4xl font-bold mb-8">
+        <div className="text-[11px] uppercase tracking-[0.24em] mb-3" style={{ color: READER.gold }}>
+          {unit?.title ?? "Unit"} · Session {idx + 1} of {totalSessions}
+        </div>
+        <h1
+          className="text-4xl md:text-5xl leading-tight mb-4"
+          style={{ fontFamily: READER.serif, color: READER.ink }}
+        >
           {session?.title ?? `Session ${idx + 1}`}
         </h1>
-
-        <div className="prose prose-lg max-w-none">
-          {blocks.map((b, i) => (
-            <SessionContentBlock
-              key={i}
-              block={b}
-              onAwardReflection={() => callAwardXP("reflection", { bucket: `r${i}` })}
-              onAwardExercise={() => callAwardXP("exercise", { bucket: `e${i}` })}
-            />
-          ))}
+        <div className="inline-flex items-center gap-1.5 text-xs mb-10" style={{ color: READER.inkSoft }}>
+          <Clock className="w-3.5 h-3.5" />
+          <span>~{readMinutes} min read</span>
         </div>
 
-        <div className="mt-12 border-t pt-6 flex items-center justify-between">
+        <article>
+          {blocks.map((b, i) => (
+            <BlockRenderer
+              key={b.id ?? i}
+              index={i}
+              block={b}
+              onAwardReflection={(k) => callAwardXP("reflection", { bucket: k })}
+              onAwardExercise={(k) => callAwardXP("exercise", { bucket: k })}
+            />
+          ))}
+        </article>
+
+        <div className="mt-14 border-t pt-6 flex items-center justify-between" style={{ borderColor: `${READER.ink}14` }}>
           <Button
             variant="outline"
             disabled={idx === 0}
@@ -123,12 +157,17 @@ export default function SessionReader() {
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Previous
           </Button>
-          <Button onClick={completeSession} disabled={busy} className="bg-amber-600 hover:bg-amber-700 text-white">
+          <Button
+            onClick={completeSession}
+            disabled={busy}
+            className="font-semibold"
+            style={{ background: READER.gold, color: READER.navy }}
+          >
             {busy && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
             {isLast ? (
-              <>Complete Unit <CheckCircle2 className="w-4 h-4 ml-1" /></>
+              <>Complete Unit (+500 XP) <CheckCircle2 className="w-4 h-4 ml-1" /></>
             ) : (
-              <>Complete Session <ArrowRight className="w-4 h-4 ml-1" /></>
+              <>Complete Session (+50 XP) <ArrowRight className="w-4 h-4 ml-1" /></>
             )}
             <Sparkles className="w-3 h-3 ml-1" />
           </Button>
