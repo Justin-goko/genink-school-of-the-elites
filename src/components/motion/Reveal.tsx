@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
+import { createElement, useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
 
 interface Props {
   children: ReactNode;
@@ -30,9 +30,13 @@ export default function Reveal({
   }, [onScroll, shown]);
 
   const s: CSSProperties = shown ? { animationDelay: `${index * 70}ms`, ...style } : (style ?? {});
-  return (
-    <Tag ref={ref as never} className={`${shown ? "reveal-in" : "reveal-init"} ${className}`} style={s}>
-      {children}
-    </Tag>
+  return createElement(
+    Tag as string,
+    {
+      ref,
+      className: `${shown ? "reveal-in" : "reveal-init"} ${className}`,
+      style: s,
+    },
+    children,
   );
 }
