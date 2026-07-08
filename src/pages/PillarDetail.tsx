@@ -48,7 +48,7 @@ const PillarDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
-  const { data: hasAssessment = false } = useHasAssessment();
+  const { data: userHasAssessment = false } = useHasAssessment();
   const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false);
@@ -70,7 +70,7 @@ const PillarDetail = () => {
       navigate("/pathway-intelligence");
       return;
     }
-    if (!hasAssessment) {
+    if (!userHasAssessment) {
       navigate("/pathway-intelligence");
       return;
     }
