@@ -18,6 +18,12 @@ import { usePillarUnits, useUserUnitProgress } from "@/hooks/useUnits";
 import UnitCard from "@/components/learning/UnitCard";
 import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 import PillarHeader, { type PillarTheme, pillarThemes } from "@/components/learning/PillarHeader";
+import PillarLearningView from "@/components/learning/PillarLearningView";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePillarEnrollment, useHasAssessment, enrollInPillar } from "@/hooks/usePillarEnrollment";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const pillarIcons: Record<string, React.ReactNode> = {
   brain: <Brain className="w-8 h-8" />,
@@ -38,6 +44,11 @@ const skillColors: Record<string, string> = {
 const PillarDetail = () => {
   const { pillarId } = useParams<{ pillarId: string }>();
   const pillar = getPillarById(pillarId || "");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
+  const { data: userHasAssessment = false } = useHasAssessment();
   const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false);
@@ -50,6 +61,45 @@ const PillarDetail = () => {
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
 
   if (!pillar) return <Navigate to="/courses" replace />;
+
+  const iconEl = pillarIcons[pillar.icon];
+
+  const handleEnrol = async () => {
+    if (!user) {
+      // Anonymous → assessment first (which captures lead + creates account)
+      navigate("/pathway-intelligence");
+      return;
+    }
+    if (!userHasAssessment) {
+      navigate("/pathway-intelligence");
+      return;
+    }
+    const { error } = await enrollInPillar(user.id, pillar.id);
+    if (error) {
+      toast.error(error.message ?? "Could not enrol. Please try again.");
+      return;
+    }
+    toast.success(`You're enrolled in ${pillar.name}.`);
+    queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
+  };
+
+  // ── AUTHENTICATED + ENROLLED → learning view ──────────────────
+  if (user && isEnrolled) {
+    return (
+      <div className="min-h-screen bg-background">
+        <StickyNav />
+        <div className="container mx-auto px-4 py-8">
+          <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2 text-muted-foreground">
+            <Link to="/journey">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Journey
+            </Link>
+          </Button>
+          <PillarLearningView pillar={pillar} icon={iconEl} />
+        </div>
+      </div>
+    );
+  }
 
   const toggleCompare = (path: LearningPath) => {
     setComparePaths((prev) => {
@@ -402,6 +452,49 @@ const PillarDetail = () => {
         )}
           </>
         )}
+
+        {/* Enrol CTA — visible to unauthenticated visitors and signed-in-but-not-enrolled users */}
+        <div className="pt-6">
+          <div
+            className="rounded-2xl p-8 md:p-10 text-center relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${pillar.color}18, hsl(var(--accent) / 0.08))`,
+              border: `1px solid ${pillar.color}40`,
+            }}
+          >
+            <div
+              className="w-14 h-14 rounded-xl flex items-center justify-center text-white mx-auto mb-4"
+              style={{ backgroundColor: pillar.color }}
+            >
+              {iconEl}
+            </div>
+            <h3 className="text-2xl md:text-3xl font-bold mb-2">Ready to begin {pillar.name}?</h3>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6">
+              {user
+                ? userHasAssessment
+                  ? "You're all set — enrol to unlock the 7 units, XP tracking and mentor access."
+                  : "Complete the Pathway Intelligence assessment first — it makes sure this pillar is the right starting point for you."
+                : "Start with the Pathway Intelligence assessment. You'll get a personalised profile, then unlock this pillar."}
+            </p>
+            <Button
+              onClick={handleEnrol}
+              disabled={enrollmentLoading}
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md"
+            >
+              {user && userHasAssessment ? "Enrol in this Pillar" : "Enrol in this Pillar"}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            {!user && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Already have an account?{" "}
+                <Link to="/auth" className="text-accent hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
