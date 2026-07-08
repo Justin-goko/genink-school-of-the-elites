@@ -29,7 +29,7 @@ const StickyNav = () => {
     tier === "team"
       ? [
           { name: "My Journey", href: "/journey" },
-          { name: "Operations Dashboard", href: "/dashboard" },
+          { name: "Operations Dashboard", href: "/ops-dashboard" },
         ]
       : tier === "student"
         ? [

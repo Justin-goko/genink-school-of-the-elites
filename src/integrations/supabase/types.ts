@@ -217,6 +217,78 @@ export type Database = {
           },
         ]
       }
+      issues: {
+        Row: {
+          assigned_department:
+            | Database["public"]["Enums"]["department_role"]
+            | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          priority: string
+          resolved_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_department?:
+            | Database["public"]["Enums"]["department_role"]
+            | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_department?:
+            | Database["public"]["Enums"]["department_role"]
+            | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kpi_targets: {
+        Row: {
+          comparison: string
+          created_at: string
+          department: Database["public"]["Enums"]["department_role"]
+          id: string
+          kpi_key: string
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          comparison?: string
+          created_at?: string
+          department: Database["public"]["Enums"]["department_role"]
+          id?: string
+          kpi_key: string
+          target_value: number
+          updated_at?: string
+        }
+        Update: {
+          comparison?: string
+          created_at?: string
+          department?: Database["public"]["Enums"]["department_role"]
+          id?: string
+          kpi_key?: string
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           assessment_snapshot: Json | null
@@ -310,6 +382,8 @@ export type Database = {
           assessment_results: Json | null
           avatar_url: string | null
           created_at: string | null
+          department: string | null
+          department_role: Database["public"]["Enums"]["department_role"] | null
           full_name: string | null
           goals: string | null
           id: string
@@ -323,6 +397,10 @@ export type Database = {
           assessment_results?: Json | null
           avatar_url?: string | null
           created_at?: string | null
+          department?: string | null
+          department_role?:
+            | Database["public"]["Enums"]["department_role"]
+            | null
           full_name?: string | null
           goals?: string | null
           id?: string
@@ -336,6 +414,10 @@ export type Database = {
           assessment_results?: Json | null
           avatar_url?: string | null
           created_at?: string | null
+          department?: string | null
+          department_role?:
+            | Database["public"]["Enums"]["department_role"]
+            | null
           full_name?: string | null
           goals?: string | null
           id?: string
@@ -699,6 +781,51 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_reports: {
+        Row: {
+          attachment_name: string | null
+          attachment_url: string | null
+          created_at: string
+          department: Database["public"]["Enums"]["department_role"]
+          id: string
+          kpi_data: Json
+          notes: string | null
+          status: string | null
+          submitted_at: string
+          submitted_by: string
+          updated_at: string
+          week_starting: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          department: Database["public"]["Enums"]["department_role"]
+          id?: string
+          kpi_data?: Json
+          notes?: string | null
+          status?: string | null
+          submitted_at?: string
+          submitted_by: string
+          updated_at?: string
+          week_starting: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          department?: Database["public"]["Enums"]["department_role"]
+          id?: string
+          kpi_data?: Json
+          notes?: string | null
+          status?: string | null
+          submitted_at?: string
+          submitted_by?: string
+          updated_at?: string
+          week_starting?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       modules_public: {
@@ -739,11 +866,34 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_department_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["department_role"]
+      }
+      has_ops_access: { Args: { _user_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      ops_submission_open: {
+        Args: { _week_starting: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
       badge_type: "completion" | "streak" | "mastery" | "speed" | "explorer"
+      department_role:
+        | "ceo"
+        | "ops_manager"
+        | "marketing"
+        | "curriculum"
+        | "digital_services"
+        | "finance"
+        | "tech"
       exercise_type:
         | "simulation"
         | "drag_drop"
@@ -890,6 +1040,15 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       badge_type: ["completion", "streak", "mastery", "speed", "explorer"],
+      department_role: [
+        "ceo",
+        "ops_manager",
+        "marketing",
+        "curriculum",
+        "digital_services",
+        "finance",
+        "tech",
+      ],
       exercise_type: [
         "simulation",
         "drag_drop",

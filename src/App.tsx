@@ -23,6 +23,7 @@ import UnitDetail from "./pages/UnitDetail";
 import SessionReader from "./pages/SessionReader";
 import PathwayIntelligence from "./pages/PathwayIntelligence";
 import OperationsDashboard from "./pages/OperationsDashboard";
+import OpsDashboard from "./pages/OpsDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/financial-intelligence" element={<ProtectedRoute><FinancialIntelligence /></ProtectedRoute>} />
             {/* Layer 3 — team / admin operations */}
             <Route path="/dashboard" element={<ProtectedRoute><OperationsDashboard /></ProtectedRoute>} />
+            <Route path="/ops-dashboard" element={<ProtectedRoute><OpsDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
