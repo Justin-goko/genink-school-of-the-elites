@@ -26,6 +26,7 @@ import OperationsDashboard from "./pages/OperationsDashboard";
 import OpsDashboard from "./pages/OpsDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import AdminImport from "./pages/AdminImport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
             {/* Layer 3 — team / admin operations */}
             <Route path="/dashboard" element={<ProtectedRoute><OperationsDashboard /></ProtectedRoute>} />
             <Route path="/ops-dashboard" element={<ProtectedRoute><OpsDashboard /></ProtectedRoute>} />
+            <Route path="/admin/import" element={<ProtectedRoute><AdminImport /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
