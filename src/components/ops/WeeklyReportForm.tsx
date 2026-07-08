@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { DEPARTMENTS, type DepartmentMeta, type DepartmentRole, type KpiField } from "@/lib/ops/departments";
+import type { Json } from "@/integrations/supabase/types";
 import { submissionOpen, currentWeekISO } from "@/lib/ops/week";
 import { SubmissionClosedNotice, TrafficLight } from "./shared";
 import AttachmentUpload from "./AttachmentUpload";
@@ -102,7 +103,7 @@ export default function WeeklyReportForm({ meta, weekStarting = currentWeekISO()
       if (!notes.trim()) throw new Error(`Please fill: ${meta.notesLabel}`);
 
       // Coerce values
-      const kpi: Record<string, unknown> = {};
+      const kpi: Record<string, Json> = {};
       for (const f of meta.fields) {
         const raw = values[f.key];
         if (f.kind === "status" || f.kind === "text") kpi[f.key] = raw;
