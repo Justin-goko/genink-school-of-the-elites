@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { XPRewardProvider } from "@/contexts/XPRewardContext";
 import XPRewardOverlay from "@/components/xp/XPRewardOverlay";
+import { RouteTransition, FirstLoginCinematic } from "@/components/motion";
 import Index from "./pages/Index";
 import MarketingHome from "./pages/MarketingHome";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -40,6 +41,8 @@ const App = () => (
           <Sonner />
           <XPRewardOverlay />
           <BrowserRouter>
+          <FirstLoginCinematic />
+          <RouteTransition>
           <Routes>
             {/* Layer 1 — public marketing */}
             <Route path="/" element={<MarketingHome />} />
@@ -68,6 +71,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
+          </RouteTransition>
           </BrowserRouter>
         </TooltipProvider>
       </XPRewardProvider>
