@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import ProgressMap from "@/components/ProgressMap";
 import TrendingPicks from "@/components/TrendingPicks";
@@ -11,8 +13,11 @@ import { pillars } from "@/data/courses";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
-  Sparkles, Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark, ArrowRight,
+  Sparkles, Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark, ArrowRight, Star,
 } from "lucide-react";
 
 const pillarIcons: Record<string, React.ReactNode> = {
@@ -26,6 +31,31 @@ const pillarIcons: Record<string, React.ReactNode> = {
 };
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const recommendedId = searchParams.get("recommended");
+  const { user } = useAuth();
+
+  // On first authenticated arrival, persist any pending assessment snapshot.
+  useEffect(() => {
+    if (!user) return;
+    const raw = localStorage.getItem("genlink_pending_assessment");
+    if (!raw) return;
+    (async () => {
+      try {
+        const snapshot = JSON.parse(raw);
+        const { error } = await supabase.from("assessment_results").insert({
+          user_id: user.id,
+          ...snapshot,
+        });
+        if (error) throw error;
+        localStorage.removeItem("genlink_pending_assessment");
+        toast.success("Your pathway profile is saved.");
+      } catch (err) {
+        console.error("Failed to persist assessment result:", err);
+      }
+    })();
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-background scroll-smooth">
       <StickyNav />
@@ -64,9 +94,19 @@ const Index = () => {
               <Link
                 key={pillar.id}
                 to={`/pillar/${pillar.id}`}
-                className="group p-5 rounded-xl border border-border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-fade-in"
+                className={`group relative p-5 rounded-xl border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-fade-in ${
+                  recommendedId === pillar.id
+                    ? "border-accent ring-2 ring-accent/40 shadow-lg"
+                    : "border-border"
+                }`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
+                {recommendedId === pillar.id && (
+                  <Badge className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-[10px] px-2 py-0.5 shadow-md">
+                    <Star className="w-3 h-3 mr-1" />
+                    Recommended for you
+                  </Badge>
+                )}
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center text-accent-foreground"
