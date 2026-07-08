@@ -163,7 +163,38 @@ export type Database = {
             referencedRelation: "modules"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exercises_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      leads: {
+        Row: {
+          assessment_snapshot: Json | null
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+        }
+        Insert: {
+          assessment_snapshot?: Json | null
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          assessment_snapshot?: Json | null
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+        }
+        Relationships: []
       }
       learning_paths: {
         Row: {
@@ -230,32 +261,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          assessment_completed_at: string | null
+          assessment_results: Json | null
           avatar_url: string | null
           created_at: string | null
           full_name: string | null
           goals: string | null
           id: string
           interests: string[] | null
+          recommended_pillars: string[] | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          assessment_completed_at?: string | null
+          assessment_results?: Json | null
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           goals?: string | null
           id?: string
           interests?: string[] | null
+          recommended_pillars?: string[] | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          assessment_completed_at?: string | null
+          assessment_results?: Json | null
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           goals?: string | null
           id?: string
           interests?: string[] | null
+          recommended_pillars?: string[] | null
           updated_at?: string | null
           user_id?: string
         }
@@ -320,6 +360,122 @@ export type Database = {
           id?: string
           questions?: Json
           title?: string
+        }
+        Relationships: []
+      }
+      tutor_usage: {
+        Row: {
+          created_at: string
+          id: string
+          message_count: number
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      unit_sessions: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          summary: string | null
+          title: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          summary?: string | null
+          title: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          summary?: string | null
+          title?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_sessions_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      units: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_minutes: number
+          id: string
+          is_locked_by_default: boolean
+          order_index: number
+          pillar_id: string
+          session_count: number
+          theme: Database["public"]["Enums"]["pillar_theme"]
+          title: string
+          total_xp: number
+          track_type: Database["public"]["Enums"]["track_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_locked_by_default?: boolean
+          order_index?: number
+          pillar_id: string
+          session_count?: number
+          theme: Database["public"]["Enums"]["pillar_theme"]
+          title: string
+          total_xp?: number
+          track_type?: Database["public"]["Enums"]["track_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_locked_by_default?: boolean
+          order_index?: number
+          pillar_id?: string
+          session_count?: number
+          theme?: Database["public"]["Enums"]["pillar_theme"]
+          title?: string
+          total_xp?: number
+          track_type?: Database["public"]["Enums"]["track_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -394,6 +550,78 @@ export type Database = {
             referencedRelation: "modules"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_unit_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          last_session_index: number
+          sessions_completed: number
+          unit_id: string
+          updated_at: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_session_index?: number
+          sessions_completed?: number
+          unit_id: string
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_session_index?: number
+          sessions_completed?: number
+          unit_id?: string
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_unit_progress_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_xp: {
@@ -428,12 +656,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      modules_public: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          module_type: Database["public"]["Enums"]["module_type"] | null
+          order_index: number | null
+          title: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          module_type?: Database["public"]["Enums"]["module_type"] | null
+          order_index?: number | null
+          title?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          module_type?: Database["public"]["Enums"]["module_type"] | null
+          order_index?: number | null
+          title?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       badge_type: "completion" | "streak" | "mastery" | "speed" | "explorer"
       exercise_type:
         | "simulation"
@@ -443,6 +707,15 @@ export type Database = {
         | "quiz"
         | "video"
       module_type: "free" | "premium"
+      pillar_theme:
+        | "financial"
+        | "communication"
+        | "digital"
+        | "leadership"
+        | "entrepreneurship"
+        | "creator"
+        | "civic"
+      track_type: "learning_path" | "specialized"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -570,6 +843,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       badge_type: ["completion", "streak", "mastery", "speed", "explorer"],
       exercise_type: [
         "simulation",
@@ -580,6 +854,16 @@ export const Constants = {
         "video",
       ],
       module_type: ["free", "premium"],
+      pillar_theme: [
+        "financial",
+        "communication",
+        "digital",
+        "leadership",
+        "entrepreneurship",
+        "creator",
+        "civic",
+      ],
+      track_type: ["learning_path", "specialized"],
     },
   },
 } as const
