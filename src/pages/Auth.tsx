@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, GraduationCap, Sparkles, Trophy } from "lucide-react";
 import { z } from "zod";
+import { Link } from "react-router-dom";
 import genlinkLogo from "@/assets/genlink-logo.png";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -183,6 +184,11 @@ const Auth = () => {
                       "Sign In"
                     )}
                   </Button>
+                  <div className="text-center">
+                    <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-accent hover:underline">
+                      Forgot your password?
+                    </Link>
+                  </div>
                 </form>
               </TabsContent>
 
