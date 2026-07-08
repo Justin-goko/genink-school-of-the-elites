@@ -18,6 +18,12 @@ import { usePillarUnits, useUserUnitProgress } from "@/hooks/useUnits";
 import UnitCard from "@/components/learning/UnitCard";
 import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 import PillarHeader, { type PillarTheme, pillarThemes } from "@/components/learning/PillarHeader";
+import PillarLearningView from "@/components/learning/PillarLearningView";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePillarEnrollment, useHasAssessment, enrollInPillar } from "@/hooks/usePillarEnrollment";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const pillarIcons: Record<string, React.ReactNode> = {
   brain: <Brain className="w-8 h-8" />,
@@ -38,6 +44,11 @@ const skillColors: Record<string, string> = {
 const PillarDetail = () => {
   const { pillarId } = useParams<{ pillarId: string }>();
   const pillar = getPillarById(pillarId || "");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
+  const { data: hasAssessment = false } = useHasAssessment();
   const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false);
@@ -50,6 +61,45 @@ const PillarDetail = () => {
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
 
   if (!pillar) return <Navigate to="/courses" replace />;
+
+  const iconEl = pillarIcons[pillar.icon];
+
+  const handleEnrol = async () => {
+    if (!user) {
+      // Anonymous → assessment first (which captures lead + creates account)
+      navigate("/pathway-intelligence");
+      return;
+    }
+    if (!hasAssessment) {
+      navigate("/pathway-intelligence");
+      return;
+    }
+    const { error } = await enrollInPillar(user.id, pillar.id);
+    if (error) {
+      toast.error(error.message ?? "Could not enrol. Please try again.");
+      return;
+    }
+    toast.success(`You're enrolled in ${pillar.name}.`);
+    queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
+  };
+
+  // ── AUTHENTICATED + ENROLLED → learning view ──────────────────
+  if (user && isEnrolled) {
+    return (
+      <div className="min-h-screen bg-background">
+        <StickyNav />
+        <div className="container mx-auto px-4 py-8">
+          <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2 text-muted-foreground">
+            <Link to="/journey">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Journey
+            </Link>
+          </Button>
+          <PillarLearningView pillar={pillar} icon={iconEl} />
+        </div>
+      </div>
+    );
+  }
 
   const toggleCompare = (path: LearningPath) => {
     setComparePaths((prev) => {
