@@ -128,6 +128,138 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* ============================================================
+     CINEMATIC MOTION SYSTEM
+     One shared motion language across the entire platform.
+     Expensive & calm — nothing bounces, nothing rushes.
+     ============================================================ */
+  :root {
+    --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration-quick: 0.3s;
+    --duration-base: 0.5s;
+    --duration-slow: 0.8s;
+    --stagger-base: 70ms;
+    --gold: 45 100% 55%;
+  }
+
+  .ease-cinematic { transition-timing-function: var(--ease-cinematic); }
+  .duration-quick { transition-duration: var(--duration-quick); }
+  .duration-base  { transition-duration: var(--duration-base); }
+  .duration-slow  { transition-duration: var(--duration-slow); }
+
+  /* Reveal on scroll */
+  @keyframes cinematic-rise {
+    from { opacity: 0; transform: translate3d(0, 30px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  .reveal-init { opacity: 0; will-change: transform, opacity; }
+  .reveal-in   { animation: cinematic-rise var(--duration-base) var(--ease-cinematic) both; }
+
+  /* Route transitions */
+  @keyframes route-in {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes route-out {
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
+    to   { opacity: 0; transform: translate3d(0, 12px, 0); }
+  }
+  .route-enter { animation: route-in var(--duration-base) var(--ease-cinematic) both; }
+  .route-exit  { animation: route-out var(--duration-quick) var(--ease-cinematic) both; }
+
+  /* Gold progress line for route transitions */
+  @keyframes gold-sweep {
+    0%   { transform: translate3d(-100%, 0, 0); opacity: 0.9; }
+    100% { transform: translate3d(100%, 0, 0);  opacity: 0.9; }
+  }
+  .route-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      hsl(var(--gold) / 0.0) 5%,
+      hsl(var(--gold) / 0.95) 50%,
+      hsl(var(--gold) / 0.0) 95%,
+      transparent 100%);
+    z-index: 9999; pointer-events: none;
+    animation: gold-sweep 0.7s var(--ease-cinematic) both;
+  }
+
+  /* Tactile hover — cinematic card lift */
+  .card-cinematic {
+    transition: transform var(--duration-quick) var(--ease-cinematic),
+                box-shadow var(--duration-quick) var(--ease-cinematic);
+    will-change: transform;
+  }
+  .card-cinematic:hover {
+    transform: translate3d(0, -6px, 0);
+    box-shadow: 0 18px 40px -18px hsl(var(--gold) / 0.45),
+                0 0 0 1px hsl(var(--gold) / 0.12);
+  }
+
+  /* Tactile press */
+  .press-cinematic { transition: transform 120ms var(--ease-cinematic); }
+  .press-cinematic:active { transform: scale(0.97); }
+
+  /* Gold shimmer sweep on hover */
+  .btn-shimmer {
+    position: relative; overflow: hidden; isolation: isolate;
+  }
+  .btn-shimmer::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(115deg,
+      transparent 30%,
+      hsl(var(--gold) / 0.35) 50%,
+      transparent 70%);
+    transform: translate3d(-120%, 0, 0);
+    transition: transform var(--duration-slow) var(--ease-cinematic);
+    pointer-events: none;
+  }
+  .btn-shimmer:hover::after { transform: translate3d(120%, 0, 0); }
+
+  /* Ambient orb breathing (LightGuide) — 4s calm loop */
+  @keyframes lg-breathe {
+    0%, 100% { transform: scale(1);    filter: brightness(1); }
+    50%      { transform: scale(1.05); filter: brightness(1.08); }
+  }
+  .lg-breathe { animation: lg-breathe 4s var(--ease-cinematic) infinite; }
+
+  /* Gold particle drift (marketing hero ambient) */
+  @keyframes gold-drift-a {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(40px, -60px, 0); }
+  }
+  @keyframes gold-drift-b {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-30px, -80px, 0); }
+  }
+
+  /* Pillar zoom transition */
+  @keyframes pillar-zoom-out {
+    0%   { transform: scale(1);   opacity: 1; }
+    100% { transform: scale(8);   opacity: 0; }
+  }
+  @keyframes pillar-zoom-in {
+    0%   { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  .pillar-zoom-out { animation: pillar-zoom-out 0.8s var(--ease-cinematic) both; }
+  .pillar-zoom-in  { animation: pillar-zoom-in 0.6s var(--ease-cinematic) both; }
+
+  /* Respect user preference — kill all decorative motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-init, .reveal-in,
+    .route-enter, .route-exit,
+    .route-progress,
+    .lg-breathe, .lg-pulse,
+    .card-cinematic, .press-cinematic, .btn-shimmer::after,
+    .pillar-zoom-out, .pillar-zoom-in {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
   /* Custom scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
