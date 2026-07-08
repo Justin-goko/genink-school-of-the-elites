@@ -101,12 +101,16 @@ const AssessmentResult = ({ result, onRetake }: Props) => {
       };
       localStorage.setItem("genlink_pending_assessment", JSON.stringify(snapshot));
 
-      // Best-effort lead capture — the leads table exists in the project.
+      // Best-effort lead capture.
       await supabase.from("leads").insert({
-        first_name: parsed.data.firstName,
-        phone: parsed.data.phone,
         email: parsed.data.email,
-      } as any);
+        source: "pathway-intelligence-engine",
+        assessment_snapshot: {
+          first_name: parsed.data.firstName,
+          phone: parsed.data.phone,
+          ...snapshot,
+        },
+      });
 
       const redirectTo = `${window.location.origin}/journey?recommended=${profile.primaryPillarId}`;
       const { error } = await supabase.auth.signInWithOtp({
