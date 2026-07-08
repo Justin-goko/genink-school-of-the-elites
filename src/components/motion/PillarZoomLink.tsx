@@ -6,11 +6,16 @@ interface Props {
   glyphs?: string[];
   className?: string;
   children: ReactNode;
+  /** Hex color for burst glyphs (preferred). */
+  color?: string;
+  /** Fallback: HSL hue if no color given. */
   hue?: number;
 }
 
 /** Journey-map landmark link. Zooms in, particles rush, then navigates. <1s total. */
-export default function PillarZoomLink({ to, glyphs = ["✦"], className = "", hue = 45, children }: Props) {
+export default function PillarZoomLink({ to, glyphs = ["✦"], className = "", hue = 45, color, children }: Props) {
+  const tint = color ?? `hsl(${hue} 100% 65%)`;
+  const glow = color ?? `hsl(${hue} 100% 55%)`;
   const navigate = useNavigate();
   const [zooming, setZooming] = useState(false);
 
@@ -35,8 +40,8 @@ export default function PillarZoomLink({ to, glyphs = ["✦"], className = "", h
             return (
               <span key={i} className="absolute left-1/2 top-1/2 text-2xl"
                 style={{
-                  color: `hsl(${hue} 100% 65%)`,
-                  textShadow: `0 0 12px hsl(${hue} 100% 55% / 0.9)`,
+                  color: tint,
+                  textShadow: `0 0 12px ${glow}`,
                   transform: "translate(-50%, -50%)",
                   animation: `zoom-burst 0.8s var(--ease-cinematic) both`,
                   ["--tx" as never]: `${Math.cos(angle) * dist}px`,
