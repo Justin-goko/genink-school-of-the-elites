@@ -47,6 +47,51 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_results: {
+        Row: {
+          cognitive_style: string
+          completed_at: string
+          created_at: string
+          execution_preference: string
+          id: string
+          motivation_driver: string
+          primary_pillar_recommended: string
+          raw_dimensions: Json | null
+          risk_orientation: string
+          secondary_pillar_recommended: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cognitive_style: string
+          completed_at?: string
+          created_at?: string
+          execution_preference: string
+          id?: string
+          motivation_driver: string
+          primary_pillar_recommended: string
+          raw_dimensions?: Json | null
+          risk_orientation: string
+          secondary_pillar_recommended: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cognitive_style?: string
+          completed_at?: string
+          created_at?: string
+          execution_preference?: string
+          id?: string
+          motivation_driver?: string
+          primary_pillar_recommended?: string
+          raw_dimensions?: Json | null
+          risk_orientation?: string
+          secondary_pillar_recommended?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           completed: boolean | null

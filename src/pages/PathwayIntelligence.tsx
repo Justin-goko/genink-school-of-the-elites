@@ -1,7 +1,7 @@
 import { useState } from "react";
 import StickyNav from "@/components/StickyNav";
 import PathwayAssessment from "@/components/pathway/PathwayAssessment";
-import PathwayResults from "@/components/pathway/PathwayResults";
+import AssessmentResult from "@/components/pathway/AssessmentResult";
 import { computePIEResult, type PIEResult } from "@/data/pathwayIntelligence";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -157,7 +157,7 @@ const PathwayIntelligence = () => {
         {/* Results */}
         {result && (
           <div className="max-w-3xl mx-auto">
-            <PathwayResults result={result} onRetake={handleRetake} />
+            <AssessmentResult result={result} onRetake={handleRetake} />
           </div>
         )}
       </div>
