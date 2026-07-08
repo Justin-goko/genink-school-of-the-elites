@@ -25,7 +25,7 @@ const MarketingHome = () => {
   // Route "/" is Layer 1 for guests. Authenticated visitors are routed to
   // their appropriate surface: students -> /journey, team -> /dashboard.
   if (!loading && user) {
-    if (tier === "team") return <Navigate to="/dashboard" replace />;
+    if (tier === "team") return <Navigate to="/ops-dashboard" replace />;
     if (tier === "student") return <Navigate to="/journey" replace />;
   }
 
