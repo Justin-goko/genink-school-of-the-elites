@@ -24,6 +24,8 @@ import SessionReader from "./pages/SessionReader";
 import PathwayIntelligence from "./pages/PathwayIntelligence";
 import OperationsDashboard from "./pages/OperationsDashboard";
 import OpsDashboard from "./pages/OpsDashboard";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => (
             {/* Layer 1 — public marketing */}
             <Route path="/" element={<MarketingHome />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/pillar/:pillarId" element={<PillarDetail />} />
             <Route path="/pathway-intelligence" element={<PathwayIntelligence />} />
