@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import GoldParticles from "@/components/motion/GoldParticles";
 import "./pillarHeader.css";
 
 export type PillarTheme =
@@ -59,6 +60,7 @@ export default function PillarHeader({
         <Motif kind={cfg.motif} />
       </div>
       <div className="ph-glow" aria-hidden />
+      <GoldParticles count={22} opacity={0.10} />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-start gap-4 mb-4">
