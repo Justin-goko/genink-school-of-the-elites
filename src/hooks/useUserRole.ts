@@ -30,7 +30,7 @@ export const useUserRole = () => {
   });
 
   const deptQuery = useQuery({
-    queryKey: ["departmentRole", user?.id],
+    queryKey: ["profileDepartmentRole", user?.id],
     queryFn: async () => {
       if (!user) return null;
       const { data, error } = await supabase
