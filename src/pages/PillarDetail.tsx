@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import { getPillarById, comparisonMetrics, type LearningPath } from "@/data/courses";
 import { pillarAssessments } from "@/data/orientationAssessments";
 import type { LearnerArchetype } from "@/data/orientationAssessments";
-import PillarOrientation from "@/components/PillarOrientation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
   ArrowRight, Clock, Target, Layers, Users, CheckCircle2, ArrowLeft, GitCompare,
-  X, BookOpen, ClipboardCheck,
+  X, BookOpen,
 } from "lucide-react";
+import { GoldParticles } from "@/components/motion";
 import { cn } from "@/lib/utils";
 import { usePillarUnits, useUserUnitProgress } from "@/hooks/useUnits";
 import UnitCard from "@/components/learning/UnitCard";
@@ -51,14 +51,23 @@ const PillarDetail = () => {
   const { data: userHasAssessment = false } = useHasAssessment();
   const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
   const [showCompare, setShowCompare] = useState(false);
-  const [assessmentComplete, setAssessmentComplete] = useState(false);
-  const [archetype, setArchetype] = useState<LearnerArchetype | null>(null);
-  const hasAssessment = pillarId ? !!pillarAssessments[pillarId] : false;
+  const [archetype] = useState<LearnerArchetype | null>(null);
 
   const { data: units = [] } = usePillarUnits(pillarId);
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
   const specializedUnits = units.filter((u) => u.track_type === "specialized");
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
+
+  // FIX 4: if the learner already has the master pathway assessment, auto-enrol
+  // silently when they land on a pillar — no second questionnaire.
+  useEffect(() => {
+    if (!user || !pillar) return;
+    if (isEnrolled || enrollmentLoading) return;
+    if (!userHasAssessment) return;
+    enrollInPillar(user.id, pillar.id).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
+    });
+  }, [user, pillar, isEnrolled, enrollmentLoading, userHasAssessment, queryClient]);
 
   if (!pillar) return <Navigate to="/courses" replace />;
 
@@ -86,7 +95,8 @@ const PillarDetail = () => {
   // ── AUTHENTICATED + ENROLLED → learning view ──────────────────
   if (user && isEnrolled) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-cinematic-surface relative">
+        <GoldParticles count={14} opacity={0.06} />
         <StickyNav />
         <div className="container mx-auto px-4 py-8">
           <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2 text-muted-foreground">
@@ -114,7 +124,8 @@ const PillarDetail = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-cinematic-surface relative">
+      <GoldParticles count={14} opacity={0.06} />
       <StickyNav />
 
       {/* Themed Pillar Header */}
@@ -180,36 +191,9 @@ const PillarDetail = () => {
           </Card>
         </div>
 
-        {/* Orientation Assessment Section */}
-        {hasAssessment && !assessmentComplete && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4">
-                <ClipboardCheck className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-foreground">Orientation Assessment Required</span>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Discover Your Learning Direction</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Complete the orientation assessment to receive a personalized pathway recommendation. 
-                This diagnostic evaluates your cognitive style, execution preference, risk orientation, 
-                and motivation drivers to identify your optimal learning direction.
-              </p>
-            </div>
-            <div className="max-w-2xl mx-auto">
-              <PillarOrientation
-                pillarId={pillarId || ""}
-                pillarColor={pillar.color}
-                onComplete={(result) => {
-                  setArchetype(result);
-                  setAssessmentComplete(true);
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Learning Paths — visible only after assessment or if no assessment exists */}
-        {(assessmentComplete || !hasAssessment) && (
+        {/* Learning Paths — always visible; the master pathway assessment
+            (Layer 1) is the single diagnostic. No secondary questionnaire. */}
+        {true && (
           <>
             {/* Archetype Result Banner */}
             {archetype && (
