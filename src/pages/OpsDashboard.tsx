@@ -1,7 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDepartmentRole } from "@/hooks/useDepartmentRole";
+import { useUserRole } from "@/hooks/useUserRole";
 import { DEPARTMENTS, type DepartmentRole } from "@/lib/ops/departments";
+import { GoldParticles } from "@/components/motion";
 import CeoView from "@/components/ops/views/CeoView";
 import OpsManagerView from "@/components/ops/views/OpsManagerView";
 import DepartmentMemberView from "@/components/ops/views/DepartmentMemberView";
@@ -13,6 +15,7 @@ import { Link } from "react-router-dom";
 export default function OpsDashboard() {
   const { user, loading: authLoading } = useAuth();
   const { departmentRole, loading: roleLoading } = useDepartmentRole();
+  const { isAdmin } = useUserRole();
 
   if (authLoading || roleLoading) {
     return (
@@ -23,17 +26,22 @@ export default function OpsDashboard() {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-  if (!departmentRole) return <Navigate to="/journey" replace />;
+  // FIX 1: only bounce a user who has no ops-relevant role. An admin without
+  // a department_role still deserves to see the ops shell (empty state).
+  if (!departmentRole && !isAdmin) return <Navigate to="/journey" replace />;
 
   return (
-    <div className="min-h-screen" style={{ background: "#F9F6F0" }}>
+    <div className="min-h-screen bg-cinematic-surface relative">
+      <GoldParticles count={14} opacity={0.06} />
       <div className="flex flex-col lg:flex-row">
-        <Sidebar role={departmentRole} email={user.email ?? ""} />
+        <Sidebar role={departmentRole ?? ("ceo" as DepartmentRole)} email={user.email ?? ""} />
         <main className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
-          {departmentRole === "ceo" && <CeoView />}
+          {(departmentRole === "ceo" || (!departmentRole && isAdmin)) && <CeoView />}
           {departmentRole === "ops_manager" && <OpsManagerView />}
           {departmentRole !== "ceo" && departmentRole !== "ops_manager" && (
+            departmentRole && (
             <DepartmentMemberView role={departmentRole as Exclude<DepartmentRole, "ceo" | "ops_manager">} />
+            )
           )}
         </main>
       </div>
