@@ -110,7 +110,7 @@ export default function SessionReader() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: READER.cream }}>
+    <div className="min-h-screen bg-cinematic-surface relative">
       <StickyNav />
 
       {/* reading progress bar */}
