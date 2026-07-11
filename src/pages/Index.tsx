@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import ProgressMap from "@/components/ProgressMap";
 import TrendingPicks from "@/components/TrendingPicks";
@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { GoldParticles, Reveal } from "@/components/motion";
+import { enrollInPillar } from "@/hooks/usePillarEnrollment";
 import {
   Sparkles, Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark, ArrowRight, Star,
 } from "lucide-react";
@@ -34,13 +36,14 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const recommendedId = searchParams.get("recommended");
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // On first authenticated arrival, persist any pending assessment snapshot.
   useEffect(() => {
     if (!user) return;
     const raw = localStorage.getItem("genlink_pending_assessment");
-    if (!raw) return;
     (async () => {
+      if (raw) {
       try {
         const snapshot = JSON.parse(raw);
         const { error } = await supabase.from("assessment_results").insert({
@@ -53,11 +56,36 @@ const Index = () => {
       } catch (err) {
         console.error("Failed to persist assessment result:", err);
       }
+      }
+
+      // FIX 3: on the very first authenticated arrival, if the learner has
+      // a recommended pillar from the pathway assessment, auto-enrol them and
+      // land them straight inside that pillar (Session 1 ready).
+      const firstLoginKey = `genlink_first_pillar_redirect_${user.id}`;
+      if (localStorage.getItem(firstLoginKey)) return;
+      try {
+        const { data: ar } = await supabase
+          .from("assessment_results")
+          .select("primary_pillar_recommended")
+          .eq("user_id", user.id)
+          .order("completed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const pillar = ar?.primary_pillar_recommended;
+        if (!pillar) return;
+        // auto-enrol (idempotent — errors ignored if already enrolled)
+        await enrollInPillar(user.id, pillar);
+        localStorage.setItem(firstLoginKey, "1");
+        navigate(`/pillar/${pillar}`, { replace: true });
+      } catch (err) {
+        console.warn("First-pillar redirect skipped:", err);
+      }
     })();
-  }, [user]);
+  }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background scroll-smooth">
+    <div className="min-h-screen scroll-smooth relative bg-cinematic-surface">
+      <GoldParticles count={16} opacity={0.07} />
       <StickyNav />
       <ProgressMap />
       
