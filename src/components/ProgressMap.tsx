@@ -131,14 +131,11 @@ const ProgressMap = () => {
     <section
       aria-label="Learning journey progress map"
       className="w-full"
-      style={{ background: "#F9F6F0" }}
+      style={{ background: "transparent" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="mb-8 text-center">
-          <h1
-            className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight"
-            style={{ color: "#1B2A4A" }}
-          >
+          <h1 className="h-serif-gold center text-3xl md:text-4xl lg:text-5xl tracking-tight reveal-in">
             Your Journey
           </h1>
           <p className="mt-2 text-sm md:text-base" style={{ color: "#1B2A4A", opacity: 0.7 }}>
@@ -161,6 +158,13 @@ const ProgressMap = () => {
                   <stop offset="0%" stopColor="#F9F6F0" />
                   <stop offset="100%" stopColor="#EFE7D5" />
                 </linearGradient>
+                <radialGradient id="horizonGlow" cx="90%" cy="80%" r="45%">
+                  <stop offset="0%" stopColor="#F5D98A" stopOpacity="0.55" />
+                  <stop offset="70%" stopColor="#F5D98A" stopOpacity="0" />
+                </radialGradient>
+                <filter id="road-glow" x="-20%" y="-50%" width="140%" height="200%">
+                  <feGaussianBlur stdDeviation="6" />
+                </filter>
                 <style>{`
                   @keyframes pm-pulse {
                     0% { transform: scale(1); opacity: 0.6; }
@@ -211,6 +215,8 @@ const ProgressMap = () => {
 
               {/* Sky band */}
               <rect x="0" y="0" width={VB_W} height={BASE_Y - 60} fill="url(#skyFade)" />
+              {/* Sunrise/horizon glow behind the city */}
+              <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#horizonGlow)" pointerEvents="none" />
 
               {/* Village (left) */}
               <g opacity="0.9">
@@ -232,6 +238,8 @@ const ProgressMap = () => {
               {/* Ground line */}
               <line x1="0" y1="290" x2={VB_W} y2="290" stroke="#1B2A4A" strokeWidth="1" opacity="0.15" />
 
+              {/* Road — soft gold aura */}
+              <path d={pathD} fill="none" stroke="#C9A84C" strokeWidth="16" strokeLinecap="round" opacity="0.35" filter="url(#road-glow)" />
               {/* Road — dashed under-layer */}
               <path d={pathD} fill="none" stroke="#1B2A4A" strokeWidth="10" strokeLinecap="round" />
               <path
@@ -280,6 +288,7 @@ const ProgressMap = () => {
                         fill={isUnlocking ? "#C9A84C" : fill}
                         stroke={isUnlocking ? "#A8862F" : stroke}
                         strokeWidth="3"
+                        className={isCompleted ? "node-completed-glow" : isCurrent ? "node-breathe" : undefined}
                       />
                     </g>
 

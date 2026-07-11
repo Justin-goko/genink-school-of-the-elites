@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass, UserCircle2, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
 import NavbarXPCounter from "@/components/xp/NavbarXPCounter";
 import genlinkLogo from "@/assets/genlink-logo.png";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const StickyNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { tier, roleLabel } = useUserRole();
+  const { tier, roleLabel, isAdmin, isDepartmentMember } = useUserRole();
   const { data: badgeCount = 0 } = useAchievementCount();
   const navigate = useNavigate();
 
@@ -55,6 +59,44 @@ const StickyNav = () => {
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "";
 
+  const ProfileMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Open profile menu"
+          className="h-9 w-9 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs font-semibold flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+        >
+          {initials}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="font-normal">
+          <div className="text-sm font-semibold truncate">{user?.user_metadata?.full_name ?? "Learner"}</div>
+          <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/profile")}>
+          <UserCircle2 className="w-4 h-4 mr-2" /> My Profile
+        </DropdownMenuItem>
+        {isDepartmentMember && (
+          <DropdownMenuItem onClick={() => navigate("/ops-dashboard")}>
+            <LayoutDashboard className="w-4 h-4 mr-2" /> Operations Dashboard
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate("/admin/import")}>
+            <Upload className="w-4 h-4 mr-2" /> Content Importer
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+          <LogOut className="w-4 h-4 mr-2" /> Sign Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   const renderRightSide = () => {
     // Layer 3 — team / admin
     if (tier === "team") {
@@ -64,13 +106,7 @@ const StickyNav = () => {
             <ShieldCheck className="w-3.5 h-3.5" />
             {roleLabel}
           </span>
-          <button
-            onClick={handleSignOut}
-            title={`${user?.email} — Sign out`}
-            className="h-9 w-9 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs font-semibold flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
-          >
-            {initials}
-          </button>
+          <ProfileMenu />
         </>
       );
     }
@@ -92,13 +128,7 @@ const StickyNav = () => {
             <Award className="w-3.5 h-3.5" />
             <span className="tabular-nums">{badgeCount}</span>
           </span>
-          <button
-            onClick={handleSignOut}
-            title={`${user?.email} — Sign out`}
-            className="h-9 w-9 rounded-full bg-primary-foreground/15 text-primary-foreground text-xs font-semibold flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
-          >
-            {initials}
-          </button>
+          <ProfileMenu />
         </>
       );
     }
