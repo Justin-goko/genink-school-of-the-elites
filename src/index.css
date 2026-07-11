@@ -291,4 +291,46 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ============================================================
+     PREMIUM AUTHENTICATED SURFACE
+     Warm cream easing to a deeper tone with a soft gold horizon.
+     Applied to journey, pillar, session reader, ops, profile.
+     ============================================================ */
+  .bg-cinematic-surface {
+    background:
+      radial-gradient(1200px 600px at 50% -200px, hsl(45 90% 82% / 0.35), transparent 60%),
+      linear-gradient(180deg, #FBF7EE 0%, #F3ECDA 55%, #E9DFC6 100%);
+    background-attachment: fixed;
+  }
+
+  /* Serif heading with short gold underline accent */
+  .h-serif-gold {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #1B2A4A;
+    position: relative;
+    display: inline-block;
+  }
+  .h-serif-gold::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: 10px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #C9A84C, #E8C97A);
+  }
+  .h-serif-gold.center::after { margin-left: auto; margin-right: auto; }
+
+  /* Journey map — extra atmosphere */
+  @keyframes node-breathe {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(201,168,76,0.35)); }
+    50%      { filter: drop-shadow(0 0 14px rgba(201,168,76,0.65)); }
+  }
+  .node-breathe { animation: node-breathe 3.2s var(--ease-cinematic) infinite; }
+  .node-completed-glow { filter: drop-shadow(0 0 6px rgba(201,168,76,0.45)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .node-breathe { animation: none !important; }
+  }
 }
