@@ -38,10 +38,8 @@ export default function OpsDashboard() {
         <main className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
           {(departmentRole === "ceo" || (!departmentRole && isAdmin)) && <CeoView />}
           {departmentRole === "ops_manager" && <OpsManagerView />}
-          {departmentRole !== "ceo" && departmentRole !== "ops_manager" && (
-            departmentRole && (
+          {departmentRole && departmentRole !== "ceo" && departmentRole !== "ops_manager" && (
             <DepartmentMemberView role={departmentRole as Exclude<DepartmentRole, "ceo" | "ops_manager">} />
-            )
           )}
         </main>
       </div>
