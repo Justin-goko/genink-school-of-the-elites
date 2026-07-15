@@ -55,7 +55,7 @@ export default function TeamManagement() {
     queryKey: ["pending_role_assignments"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("pending_role_assignments" as never)
+        .from("pending_role_assignments")
         .select("email, department_role, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
