@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass, UserCircle2, Upload } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass, UserCircle2, Upload, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
@@ -15,7 +15,8 @@ const StickyNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { tier, roleLabel, isAdmin, isDepartmentMember } = useUserRole();
+  const { tier, roleLabel, isAdmin, isDepartmentMember, departmentRole } = useUserRole();
+  const canManageTeam = isAdmin || departmentRole === "ceo";
   const { data: badgeCount = 0 } = useAchievementCount();
   const navigate = useNavigate();
 
@@ -87,6 +88,11 @@ const StickyNav = () => {
         {isAdmin && (
           <DropdownMenuItem onClick={() => navigate("/admin/import")}>
             <Upload className="w-4 h-4 mr-2" /> Content Importer
+          </DropdownMenuItem>
+        )}
+        {canManageTeam && (
+          <DropdownMenuItem onClick={() => navigate("/team-management")}>
+            <Users className="w-4 h-4 mr-2" /> Team Management
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
