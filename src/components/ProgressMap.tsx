@@ -28,15 +28,18 @@ interface PillarStop {
   status: Status;
 }
 
-// Pillar slugs map to /pillar/:pillarId. Adjust IDs if data slugs differ later.
+// Pillar slugs map to /pillar/:pillarId.
+// Progress starts at 0 for every learner — real completion and XP are only written
+// by the server-side award-xp Edge Function when a session is genuinely finished.
+// The first pillar is the entry point ("current"); the rest unlock as they complete.
 const PILLARS: PillarStop[] = [
-  { num: 1, id: "financial-intelligence", title: "Financial Intelligence", icon: Coins, xp: 1200, completion: 100, status: "completed" },
-  { num: 2, id: "communication-networking", title: "Communication & Networking", icon: MessageCircle, xp: 950, completion: 100, status: "completed" },
-  { num: 3, id: "digital-literacy", title: "Digital Skills & Technology", icon: Laptop, xp: 1400, completion: 45, status: "current" },
-  { num: 4, id: "personal-mastery", title: "Leadership & Personal Development", icon: Crown, xp: 1100, completion: 0, status: "locked" },
-  { num: 5, id: "entrepreneurship", title: "Entrepreneurship & Innovation", icon: Rocket, xp: 1500, completion: 0, status: "locked" },
-  { num: 6, id: "creator-economy", title: "Creator Economy & Monetisation", icon: TrendingUp, xp: 1300, completion: 0, status: "locked" },
-  { num: 7, id: "civic-leadership", title: "Civic Leadership & Governance", icon: Landmark, xp: 1000, completion: 0, status: "locked" },
+  { num: 1, id: "financial-intelligence", title: "Financial Intelligence", icon: Coins, xp: 0, completion: 0, status: "current" },
+  { num: 2, id: "communication-networking", title: "Communication & Networking", icon: MessageCircle, xp: 0, completion: 0, status: "locked" },
+  { num: 3, id: "digital-literacy", title: "Digital Skills & Technology", icon: Laptop, xp: 0, completion: 0, status: "locked" },
+  { num: 4, id: "personal-mastery", title: "Leadership & Personal Development", icon: Crown, xp: 0, completion: 0, status: "locked" },
+  { num: 5, id: "entrepreneurship", title: "Entrepreneurship & Innovation", icon: Rocket, xp: 0, completion: 0, status: "locked" },
+  { num: 6, id: "creator-economy", title: "Creator Economy & Monetisation", icon: TrendingUp, xp: 0, completion: 0, status: "locked" },
+  { num: 7, id: "civic-leadership", title: "Civic Leadership & Governance", icon: Landmark, xp: 0, completion: 0, status: "locked" },
 ];
 
 // Layout constants for the SVG viewBox.

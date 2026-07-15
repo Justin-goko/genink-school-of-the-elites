@@ -376,6 +376,30 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_role_assignments: {
+        Row: {
+          created_at: string
+          department_role: Database["public"]["Enums"]["department_role"]
+          email: string
+          id: string
+          invited_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          department_role: Database["public"]["Enums"]["department_role"]
+          email: string
+          id?: string
+          invited_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          department_role?: Database["public"]["Enums"]["department_role"]
+          email?: string
+          id?: string
+          invited_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           assessment_completed_at: string | null
@@ -912,6 +936,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_ceo_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_team_roster: {
+        Args: never
+        Returns: {
+          department_role: Database["public"]["Enums"]["department_role"]
+          email: string
+          full_name: string
+          is_admin: boolean
+          joined_at: string
+          user_id: string
+        }[]
       }
       ops_submission_open: {
         Args: { _week_starting: string }
