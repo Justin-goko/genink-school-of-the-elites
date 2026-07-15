@@ -9,7 +9,7 @@ import OpsManagerView from "@/components/ops/views/OpsManagerView";
 import DepartmentMemberView from "@/components/ops/views/DepartmentMemberView";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function OpsDashboard() {
@@ -48,6 +48,7 @@ export default function OpsDashboard() {
 }
 
 function Sidebar({ role, email }: { role: DepartmentRole; email: string }) {
+  const canManage = role === "ceo";
   const meta = role === "ceo"
     ? { label: "CEO", color: "#C9A84C" }
     : { label: DEPARTMENTS[role as keyof typeof DEPARTMENTS].label, color: DEPARTMENTS[role as keyof typeof DEPARTMENTS].color };
@@ -70,6 +71,14 @@ function Sidebar({ role, email }: { role: DepartmentRole; email: string }) {
         </div>
         <div className="text-xs text-white/60 mt-4 break-words">{email}</div>
       </div>
+      {canManage && (
+        <div className="hidden lg:flex flex-col gap-1 mt-6 w-full">
+          <div className="text-[10px] uppercase tracking-widest text-white/50 mb-1">Manage</div>
+          <Link to="/team-management" className="flex items-center gap-2 text-sm text-white/85 hover:text-white py-1.5 px-2 rounded hover:bg-white/10">
+            <Users className="w-4 h-4" /> Team Management
+          </Link>
+        </div>
+      )}
       <div className="lg:mt-auto flex flex-col gap-2 items-start">
         <Link to="/journey" className="text-xs text-white/70 hover:text-white">← Back to Journey</Link>
         <Button
