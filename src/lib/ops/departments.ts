@@ -95,8 +95,8 @@ export const DEPARTMENTS: Record<Exclude<DepartmentRole, "ceo">, DepartmentMeta>
   finance: {
     role: "finance",
     label: "Finance",
-    color: "#8B4A00",
-    softBg: "#F5EBDD",
+    color: "#D97706",
+    softBg: "#FCEED0",
     textOnColor: "#FFFFFF",
     notesLabel: "Weekly update",
     primary: { key: "revenue_kes", label: "Total revenue this week (KES)", kind: "currency" },
