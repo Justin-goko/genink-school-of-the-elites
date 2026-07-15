@@ -5,6 +5,8 @@ import { currentWeekISO, pastWeeksISO } from "@/lib/ops/week";
 import { WeekSelector, OrgHealthDots } from "../shared";
 import WeeklyReportForm from "../WeeklyReportForm";
 import Sparkline from "../Sparkline";
+import { CheckCircle2 } from "lucide-react";
+import { submissionOpen } from "@/lib/ops/week";
 
 export default function DepartmentMemberView({ role }: { role: Exclude<DepartmentRole, "ceo" | "ops_manager"> }) {
   const [week, setWeek] = useState(currentWeekISO());
@@ -18,22 +20,42 @@ export default function DepartmentMemberView({ role }: { role: Exclude<Departmen
       .map((d) => [d, allReports?.[d]?.status ?? null] as const),
   ) as Partial<Record<DepartmentRole, "green"|"amber"|"red"|null>>;
 
+  const own = allReports?.[role];
+  const submitted = !!own;
+  const locked = !submissionOpen(week);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-widest" style={{ color: meta.color }}>{meta.label}</p>
-          <h1 className="text-3xl font-serif text-[#0D2B55]">Your weekly submission</h1>
+          <h1 className="h-serif-gold text-3xl md:text-4xl">This Week's Report</h1>
         </div>
         <WeekSelector value={week} onChange={setWeek} />
       </div>
 
-      <div className="rounded-xl bg-white p-5 border" style={{ borderTop: `4px solid ${meta.color}` }}>
-        <WeeklyReportForm meta={meta} weekStarting={week} />
-      </div>
+      {submitted && locked ? (
+        <div
+          className="rounded-xl bg-white p-6 border shadow-sm flex items-start gap-3"
+          style={{ borderTop: `4px solid ${meta.color}` }}
+        >
+          <CheckCircle2 className="w-6 h-6 mt-0.5" style={{ color: meta.color }} />
+          <div>
+            <div className="font-semibold text-[#0D2B55] text-lg">Submitted ✓</div>
+            <div className="text-sm text-[#0D2B55]/70">Next submission window opens Monday.</div>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="rounded-xl bg-white/95 p-5 md:p-6 border shadow-sm"
+          style={{ borderTop: `4px solid ${meta.color}`, boxShadow: `0 6px 30px -20px ${meta.color}55` }}
+        >
+          <WeeklyReportForm meta={meta} weekStarting={week} />
+        </div>
+      )}
 
       {/* Own 4-week trend */}
-      <section className="rounded-xl bg-white p-5 border">
+      <section className="rounded-xl bg-white/95 p-5 border">
         <h2 className="font-semibold text-[#0D2B55] mb-3">Your last 4 weeks</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {meta.fields.filter((f) => f.kind !== "status").slice(0, 6).map((f) => {
@@ -57,7 +79,7 @@ export default function DepartmentMemberView({ role }: { role: Exclude<Departmen
       </section>
 
       {/* Org health */}
-      <section className="rounded-xl bg-white p-5 border">
+      <section className="rounded-xl bg-white/95 p-5 border">
         <h2 className="font-semibold text-[#0D2B55] mb-3">Org health this week</h2>
         <OrgHealthDots statuses={orgStatuses} />
       </section>
