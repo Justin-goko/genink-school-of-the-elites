@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { playUnlockChime } from "@/lib/journeySound";
+import PillarLandmark from "@/components/journey/PillarLandmark";
 import {
   Coins,
   MessageCircle,
@@ -134,14 +135,14 @@ const ProgressMap = () => {
     <section
       aria-label="Learning journey progress map"
       className="w-full"
-      style={{ background: "transparent" }}
+      style={{ background: "linear-gradient(180deg,#0A1226 0%,#0F1B33 55%,#152647 100%)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="mb-8 text-center">
-          <h1 className="h-serif-gold center text-3xl md:text-4xl lg:text-5xl tracking-tight reveal-in">
+          <h1 className="h-serif-gold center text-3xl md:text-4xl lg:text-5xl tracking-tight reveal-in" style={{ color: "#F1CF6A" }}>
             Your Journey
           </h1>
-          <p className="mt-2 text-sm md:text-base" style={{ color: "#1B2A4A", opacity: 0.7 }}>
+          <p className="mt-2 text-sm md:text-base" style={{ color: "#E9DFC6", opacity: 0.7 }}>
             From the village to the city — seven landmarks of mastery.
           </p>
         </div>
@@ -158,12 +159,12 @@ const ProgressMap = () => {
             >
               <defs>
                 <linearGradient id="skyFade" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#F9F6F0" />
-                  <stop offset="100%" stopColor="#EFE7D5" />
+                  <stop offset="0%" stopColor="#08101F" />
+                  <stop offset="100%" stopColor="#152647" />
                 </linearGradient>
-                <radialGradient id="horizonGlow" cx="90%" cy="80%" r="45%">
-                  <stop offset="0%" stopColor="#F5D98A" stopOpacity="0.55" />
-                  <stop offset="70%" stopColor="#F5D98A" stopOpacity="0" />
+                <radialGradient id="horizonGlow" cx="82%" cy="88%" r="55%">
+                  <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.28" />
+                  <stop offset="70%" stopColor="#C9A84C" stopOpacity="0" />
                 </radialGradient>
                 <filter id="road-glow" x="-20%" y="-50%" width="140%" height="200%">
                   <feGaussianBlur stdDeviation="6" />
@@ -216,54 +217,84 @@ const ProgressMap = () => {
                 <path id="pm-road-path" d={pathD} fill="none" />
               </defs>
 
-              {/* Sky band */}
-              <rect x="0" y="0" width={VB_W} height={BASE_Y - 60} fill="url(#skyFade)" />
-              {/* Sunrise/horizon glow behind the city */}
+              {/* Night sky band */}
+              <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#skyFade)" />
+              {/* Warm horizon glow toward the city */}
               <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#horizonGlow)" pointerEvents="none" />
+              {/* Stars — fixed pseudo-random positions, deterministic */}
+              {Array.from({ length: 42 }).map((_, i) => {
+                const seed = (i * 9301 + 49297) % 233280;
+                const r = (n: number) => ((seed * (n + 1)) % 1000) / 1000;
+                const cx = r(1) * VB_W;
+                const cy = r(2) * (BASE_Y - 80);
+                const rad = 0.6 + r(3) * 1.2;
+                const op = 0.35 + r(4) * 0.5;
+                return <circle key={i} cx={cx} cy={cy} r={rad} fill="#F9F6F0" opacity={op} />;
+              })}
 
-              {/* Village (left) */}
+              {/* Village silhouette (left) */}
               <g opacity="0.9">
-                <polygon points="20,260 50,220 80,260" fill="#8B6F3A" />
-                <rect x="30" y="258" width="40" height="30" fill="#A8814A" />
-                <rect x="44" y="270" width="12" height="18" fill="#1B2A4A" />
-                <polygon points="0,260 20,240 40,260" fill="#6B5530" opacity="0.8" />
+                <polygon points="20,260 50,220 80,260" fill="#0A1226" stroke="#3A4A6E" strokeWidth="1" />
+                <rect x="30" y="258" width="40" height="30" fill="#0A1226" stroke="#3A4A6E" strokeWidth="1" />
+                <rect x="44" y="270" width="12" height="18" fill="#C9A84C" opacity="0.7" />
+                <polygon points="0,260 20,240 40,260" fill="#0A1226" opacity="0.9" />
               </g>
 
-              {/* City skyline (right) */}
+              {/* City skyline silhouette (right) */}
               <g opacity="0.9">
-                <rect x={VB_W - 110} y="200" width="22" height="90" fill="#1B2A4A" />
-                <rect x={VB_W - 84} y="170" width="26" height="120" fill="#1B2A4A" />
-                <rect x={VB_W - 54} y="190" width="20" height="100" fill="#1B2A4A" />
-                <rect x={VB_W - 30} y="215" width="24" height="75" fill="#1B2A4A" />
+                <rect x={VB_W - 110} y="200" width="22" height="90" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
+                <rect x={VB_W - 84} y="170" width="26" height="120" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
+                <rect x={VB_W - 54} y="190" width="20" height="100" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
+                <rect x={VB_W - 30} y="215" width="24" height="75" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
                 <rect x={VB_W - 84} y="160" width="4" height="14" fill="#C9A84C" />
+                {/* window lights */}
+                <rect x={VB_W - 105} y="220" width="3" height="3" fill="#F1CF6A" />
+                <rect x={VB_W - 98} y="240" width="3" height="3" fill="#F1CF6A" opacity="0.8" />
+                <rect x={VB_W - 78} y="200" width="3" height="3" fill="#F1CF6A" />
+                <rect x={VB_W - 70} y="230" width="3" height="3" fill="#F1CF6A" opacity="0.7" />
+                <rect x={VB_W - 48} y="220" width="3" height="3" fill="#F1CF6A" />
+                <rect x={VB_W - 22} y="240" width="3" height="3" fill="#F1CF6A" opacity="0.8" />
               </g>
 
               {/* Ground line */}
-              <line x1="0" y1="290" x2={VB_W} y2="290" stroke="#1B2A4A" strokeWidth="1" opacity="0.15" />
+              <line x1="0" y1="290" x2={VB_W} y2="290" stroke="#C9A84C" strokeWidth="1" opacity="0.15" />
 
-              {/* Road — soft gold aura */}
-              <path d={pathD} fill="none" stroke="#C9A84C" strokeWidth="16" strokeLinecap="round" opacity="0.35" filter="url(#road-glow)" />
-              {/* Road — dashed under-layer */}
-              <path d={pathD} fill="none" stroke="#1B2A4A" strokeWidth="10" strokeLinecap="round" />
+              {/* Road — gold aura */}
+              <path d={pathD} fill="none" stroke="#C9A84C" strokeWidth="18" strokeLinecap="round" opacity="0.35" filter="url(#road-glow)" />
+              {/* Road — dark inner ribbon */}
+              <path d={pathD} fill="none" stroke="#08101F" strokeWidth="10" strokeLinecap="round" />
               <path
                 d={pathD}
                 fill="none"
-                stroke="#F9F6F0"
+                stroke="#F1CF6A"
                 strokeWidth="2"
                 strokeDasharray="10 14"
                 strokeLinecap="round"
+                opacity="0.85"
               />
 
               {/* Stops */}
               {stops.map((s) => {
-                const Icon = s.icon;
                 const isCompleted = s.status === "completed";
                 const isCurrent = s.status === "current";
                 const isLocked = s.status === "locked";
                 const isUnlocking = unlockedIdx === s.num - 1;
 
-                const fill = isCompleted ? "#C9A84C" : isCurrent ? "#1B2A4A" : "#C9C4BA";
-                const stroke = isCompleted ? "#A8862F" : isCurrent ? "#0F1B33" : "#A8A498";
+                const platformFill = isCompleted
+                  ? "#1B2A4A"
+                  : isCurrent
+                  ? "#0F1B33"
+                  : "#0A1226";
+                const platformStroke = isCompleted
+                  ? "#C9A84C"
+                  : isCurrent
+                  ? "#F1CF6A"
+                  : "#3A4A6E";
+                const landmarkStatus: "completed" | "current" | "locked" = isCompleted
+                  ? "completed"
+                  : isCurrent
+                  ? "current"
+                  : "locked";
 
                 return (
                   <g
@@ -276,57 +307,56 @@ const ProgressMap = () => {
                   >
                     {isCurrent && (
                       <circle
-                        r="26"
+                        r="32"
                         fill="none"
-                        stroke="#1B2A4A"
+                        stroke="#F1CF6A"
                         strokeWidth="2"
                         className="pm-pulse-ring"
-                        opacity="0.6"
+                        opacity="0.8"
                       />
                     )}
 
                     <g className={isUnlocking ? "pm-unlock" : undefined}>
+                      {/* Circular platform under the landmark */}
                       <circle
-                        r="26"
-                        fill={isUnlocking ? "#C9A84C" : fill}
-                        stroke={isUnlocking ? "#A8862F" : stroke}
-                        strokeWidth="3"
+                        r="30"
+                        fill={isUnlocking ? "#C9A84C" : platformFill}
+                        stroke={isUnlocking ? "#F1CF6A" : platformStroke}
+                        strokeWidth="2"
                         className={isCompleted ? "node-completed-glow" : isCurrent ? "node-breathe" : undefined}
                       />
+                      {/* Illustrated landmark */}
+                      <PillarLandmark pillar={s.num} status={landmarkStatus} />
                     </g>
 
-                    {/* Icon / state mark inside the circle */}
-                    <g transform="translate(-10 -10)" pointerEvents="none">
-                      {isCompleted ? (
-                        <Check size={20} color="#FFFFFF" strokeWidth={3} />
-                      ) : isLocked ? (
-                        <Lock size={20} color="#FFFFFF" strokeWidth={2.5} />
-                      ) : (
-                        <Icon size={20} color="#C9A84C" strokeWidth={2.5} />
-                      )}
-                    </g>
+                    {/* Locked overlay padlock */}
+                    {isLocked && (
+                      <g transform="translate(-8 -8)" pointerEvents="none" opacity="0.9">
+                        <Lock size={16} color="#F1CF6A" strokeWidth={2.5} />
+                      </g>
+                    )}
 
                     {/* Number badge */}
-                    <g transform="translate(20 -28)">
-                      <circle r="11" fill="#FFFFFF" stroke="#1B2A4A" strokeWidth="1.5" />
+                    <g transform="translate(24 -30)">
+                      <circle r="11" fill="#F1CF6A" stroke="#0F1B33" strokeWidth="1.5" />
                       <text
                         textAnchor="middle"
                         dy="4"
                         fontSize="12"
                         fontWeight="700"
-                        fill="#1B2A4A"
+                        fill="#0F1B33"
                       >
                         {s.num}
                       </text>
                     </g>
 
                     {/* Label block below */}
-                    <g transform="translate(0 48)">
+                    <g transform="translate(0 54)">
                       <text
                         textAnchor="middle"
                         fontSize="13"
                         fontWeight="600"
-                        fill="#1B2A4A"
+                        fill="#F9F6F0"
                       >
                         {s.title}
                       </text>
@@ -334,7 +364,7 @@ const ProgressMap = () => {
                         textAnchor="middle"
                         y="18"
                         fontSize="11"
-                        fill="#1B2A4A"
+                        fill="#E9DFC6"
                         opacity="0.7"
                       >
                         {s.xp.toLocaleString()} XP · {s.completion}%
@@ -400,17 +430,17 @@ const ProgressMap = () => {
         />
 
         {/* Legend */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: "#1B2A4A" }}>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: "#E9DFC6" }}>
           <span className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#C9A84C" }} />
             Completed
           </span>
           <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#1B2A4A" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#F1CF6A" }} />
             In progress
           </span>
           <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#C9C4BA" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#3A4A6E" }} />
             Locked
           </span>
         </div>
@@ -422,7 +452,7 @@ const ProgressMap = () => {
               type="button"
               onClick={() => triggerUnlock(demoFromIdx)}
               disabled={travelFromIdx !== null}
-              className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border border-[#1B2A4A]/20 text-[#1B2A4A] hover:bg-[#1B2A4A] hover:text-white transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#1B2A4A]"
+              className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border border-[#C9A84C]/40 text-[#F1CF6A] hover:bg-[#C9A84C] hover:text-[#0F1B33] transition-colors disabled:opacity-40"
               aria-label="Preview the next pillar unlock animation"
             >
               <Sparkles className="w-3 h-3" />
