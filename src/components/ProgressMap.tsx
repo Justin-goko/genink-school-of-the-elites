@@ -11,6 +11,7 @@ import {
   Rocket,
   TrendingUp,
   Landmark,
+  Check,
   Lock,
   Sparkles,
   type LucideIcon,
