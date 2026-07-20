@@ -3,9 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import ProgressMap from "@/components/ProgressMap";
 import TrendingPicks from "@/components/TrendingPicks";
-import FeaturesGrid from "@/components/FeaturesGrid";
 import QuickQuiz from "@/components/QuickQuiz";
-import BadgesShowcase from "@/components/BadgesShowcase";
 import WhySection from "@/components/WhySection";
 import Newsletter from "@/components/Newsletter";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
@@ -94,12 +92,6 @@ const Index = () => {
 
       {/* Quick Quiz for Personalization */}
       <QuickQuiz />
-
-      {/* Features Grid with Gamification */}
-      <FeaturesGrid />
-
-      {/* Badges & Achievements */}
-      <BadgesShowcase />
 
       {/* Pillars Preview Section */}
       <section id="courses" className="py-20 scroll-mt-20">

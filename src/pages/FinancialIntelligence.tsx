@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import FinancialProfile from "@/components/pillar2/FinancialProfile";
 import FinancialPathMap from "@/components/pillar2/FinancialPathMap";
-import FinancialDashboard from "@/components/pillar2/FinancialDashboard";
+// FinancialDashboard removed — it displayed hardcoded fake user metrics.
+// A real, data-driven dashboard will land when session progress data exists.
 import FinancialSimulation from "@/components/pillar2/FinancialSimulation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -142,7 +143,17 @@ const FinancialIntelligence = () => {
                 </p>
               </div>
               {user ? (
-                <FinancialDashboard />
+                <div className="text-center py-16 space-y-4 rounded-xl border border-dashed border-border bg-card/40">
+                  <Flame className="w-10 h-10 text-accent mx-auto opacity-70" />
+                  <p className="text-lg font-semibold text-foreground">Your growth dashboard begins here</p>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Complete your first Financial Intelligence session to start tracking discipline,
+                    risk literacy, and portfolio metrics.
+                  </p>
+                  <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    <Link to="/pillar/financial-intelligence">Start Session 1</Link>
+                  </Button>
+                </div>
               ) : (
                 <div className="text-center py-12 space-y-4">
                   <Flame className="w-12 h-12 text-muted-foreground mx-auto" />

@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import Hero from "@/components/Hero";
 import WhySection from "@/components/WhySection";
-import FeaturesGrid from "@/components/FeaturesGrid";
-import BadgesShowcase from "@/components/BadgesShowcase";
 import Newsletter from "@/components/Newsletter";
 import { Button } from "@/components/ui/button";
 import { pillars } from "@/data/courses";
@@ -73,8 +71,6 @@ const MarketingHome = () => {
       </section>
 
       <WhySection />
-      <FeaturesGrid />
-      <BadgesShowcase />
 
       {/* Pillars preview */}
       <section id="courses" className="py-20 scroll-mt-20">
