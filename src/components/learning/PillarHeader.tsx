@@ -19,12 +19,12 @@ interface ThemeConfig {
 }
 
 export const pillarThemes: Record<PillarTheme, ThemeConfig> = {
-  "personal-mastery":      { accent: "#7BB7E0", accentSoft: "rgba(123,183,224,0.18)", motif: "orbit" },
+  "personal-mastery":      { accent: "#7C5CBF", accentSoft: "rgba(124,92,191,0.20)", motif: "orbit" },
   "financial-intelligence":{ accent: "#C9A84C", accentSoft: "rgba(201,168,76,0.20)", motif: "candles" },
-  "digital-literacy":      { accent: "#5EE6C5", accentSoft: "rgba(94,230,197,0.18)", motif: "circuit" },
-  "cybersecurity":         { accent: "#E06D6D", accentSoft: "rgba(224,109,109,0.20)", motif: "shield" },
-  "programming-systems":   { accent: "#A78BFA", accentSoft: "rgba(167,139,250,0.20)", motif: "code" },
-  "creator-economy":       { accent: "#F472B6", accentSoft: "rgba(244,114,182,0.20)", motif: "waves" },
+  "digital-literacy":      { accent: "#3B82F6", accentSoft: "rgba(59,130,246,0.20)", motif: "circuit" },
+  "cybersecurity":         { accent: "#0E7A8A", accentSoft: "rgba(14,122,138,0.22)", motif: "shield" },
+  "programming-systems":   { accent: "#2F855A", accentSoft: "rgba(47,133,90,0.22)", motif: "code" },
+  "creator-economy":       { accent: "#E0607E", accentSoft: "rgba(224,96,126,0.20)", motif: "waves" },
   "civic-leadership":      { accent: "#C9A84C", accentSoft: "rgba(201,168,76,0.22)", motif: "pillars" },
 };
 
