@@ -1,86 +1,71 @@
+# Turn 2 — Pillar realignment + Fixes 2–5
 
-# Operations Dashboard build plan
+Before I touch code I want you to sign off on **exactly** how the pillars map, because it drives a data migration that renames pillar ids everywhere (units, enrollments, assessment_results, pillar_enrollments, session_blocks). Getting the ID mapping wrong will orphan real learner progress.
 
-A protected `/ops-dashboard` route with three role-based experiences: department member (submission form), Operations Manager (full org view + funnel + issues log), and CEO (read-only executive summary).
+## Part A — Pillar realignment
 
-## 1. Database
+### ID mapping (old → new)
 
-Extend `profiles` and add three tables (all with RLS + explicit GRANTs). Roles live on `profiles.department_role` — separate from the existing `user_roles.role` (which stays as the coarse `admin/team/user` gate used by `useUserRole`).
+| # | New pillar (canonical) | New id | Old id being renamed | Notes |
+|---|---|---|---|---|
+| 1 | Personal Mastery & Mind Renewal | `personal-mastery` | `leadership-development` | Leadership/personal-dev folds in here |
+| 2 | Financial Intelligence & Income Systems | `financial-intelligence` | `financial-intelligence` + `entrepreneurship-innovation` | Entrepreneurship units re-parented into Financial |
+| 3 | Digital Literacy & Productivity Systems | `digital-literacy` | `digital-skills` | Rename only |
+| 4 | Cybersecurity & Digital Protection | `cybersecurity` | `communication-networking` | Repurposed — existing units re-themed as cyber content (kept, not deleted, so learner progress survives) |
+| 5 | Programming & Intelligent Systems | `programming-systems` | *(none — new)* | Empty pillar seeded with 7 placeholder units so the shell renders |
+| 6 | Creator Economy & Digital Monetisation | `creator-economy` | `creator-economy` | Order change only |
+| 7 | Civic Leadership & Governance | `civic-leadership` | `civic-leadership` | Order change only |
 
-- `profiles.department_role` — enum: `ceo | ops_manager | marketing | curriculum | digital_services | finance | tech` (nullable — most users have none)
-- `profiles.department` — text, mirrors the department for convenience
-- `weekly_reports` — one row per (department, week_starting)
-  - `department`, `submitted_by`, `week_starting` (date, Monday), `submitted_at`, `kpi_data` (jsonb), `notes`, `attachment_url`, `attachment_name`, `status` (green/amber/red)
-  - unique(department, week_starting)
-- `kpi_targets` — hardcoded seed rows per department/kpi (thresholds for traffic-light calc, editable later)
-- `issues` — `title`, `description`, `assigned_department`, `priority` (high/medium/low), `created_by`, `resolved_at`
+Two things I want you to confirm before I run the migration:
 
-RLS:
-- `weekly_reports`: any team member (has role admin/team) can read; a user can only insert/update their own department's rows for the current week
-- `issues`: team members read; ops_manager + admin write/resolve
-- `profiles.department_role`: only admin can change
+1. **`communication-networking` → `cybersecurity`**: existing units keep their UUIDs and learner progress, but the pillar label + theme becomes Cybersecurity. Their titles will still read like comms/networking content until you author cyber material. OK?
+2. **Programming pillar has no existing content** — I'll create the pillar shell + 7 empty units (5 sessions each, all `is_locked_by_default=true`) so the routes work. No fake session content will be seeded.
 
-Storage bucket `ops-attachments` (private) with folder policy `department/YYYY-Wnn/filename`, 10 MB, PDF/DOCX/JPG/PNG. Signed URLs used for downloads.
+### What the migration does (one SQL migration)
 
-## 2. Edge function
+- `UPDATE units SET pillar_id = 'personal-mastery' WHERE pillar_id = 'leadership-development'`
+- `UPDATE units SET pillar_id = 'financial-intelligence' WHERE pillar_id = 'entrepreneurship-innovation'` (re-parents entrepreneurship units into Financial; order_index reflowed to append after existing Financial units)
+- `UPDATE units SET pillar_id = 'digital-literacy' WHERE pillar_id = 'digital-skills'`
+- `UPDATE units SET pillar_id = 'cybersecurity' WHERE pillar_id = 'communication-networking'`
+- Same renames on `enrollments.course_id`, `assessment_results` recommended-pillar columns, any `session_blocks` pillar refs, and the `pillar_theme` enum (add `personal-mastery`, `digital-literacy` if missing; keep old enum values around temporarily to satisfy existing rows during the rename).
+- Insert Programming pillar shell (7 units).
 
-`calculate-report-status` — invoked from the client after insert:
-- Loads `kpi_targets` for that department, compares each numeric KPI, returns `green | amber | red` per the rules (Tech uses worst of its 4 status fields)
-- Writes `status` back onto the `weekly_reports` row using the service role
+### Frontend changes
 
-## 3. Access control
+- Rewrite pillar list + order in `src/data/courses.ts` to the canonical 7 with new ids, colours, taglines, glyphs.
+- Update `src/lib/motion/pillarThemes.ts` colour/glyph map to the exact palette you specified (purple ▲, gold coin, blue </>, teal shield, emerald { }, coral ▶, navy-gold ⚖).
+- Update `src/components/journey/PillarLandmark.tsx` icon set + `ProgressMap.tsx` order.
+- Update `PillarHeader.tsx` theme keys + `pillarThemes` const.
+- Update assessment recommendation logic in `src/lib/pathwayProfile.ts` and `src/data/pathwayIntelligence.ts` to map onto new ids.
 
-- New hook `useDepartmentRole()` returns `{ departmentRole, department, loading }` from `profiles`
-- `<OpsDashboardRoute>` guard: if not authenticated → `/auth`; if authenticated but no `department_role` → redirect `/journey`
-- Renders one of three views based on role
+## Part B — Fixes 2–5
 
-## 4. UI structure
+**Fix 2 — Dead quick-quiz cards**
+`src/components/QuickQuiz.tsx` recommendation cards become `<Link to={\`/pillar/\${pillarId}\`}>` and gain a hover state. Same audit sweep across `TrendingPicks`, `WhySection`, `Hero` CTAs — any dead button gets a route or is removed.
 
-```
-src/pages/OpsDashboard.tsx           # role router + shell (navy sidebar, cream bg)
-src/components/ops/
-  WeekSelector.tsx                   # week dropdown, default = current EAT week
-  TrafficLight.tsx                   # coloured dot
-  DepartmentBadge.tsx                # colour token per department
-  AttachmentUpload.tsx               # 10 MB, format-guarded, uploads to bucket
-  SubmissionClosedNotice.tsx         # after Fri 5pm EAT
-  forms/
-    MarketingForm.tsx
-    CurriculumForm.tsx
-    DigitalServicesForm.tsx
-    FinanceForm.tsx
-    TechForm.tsx
-    OpsManagerForm.tsx               # auto-fills from Marketing/Curriculum/Finance
-  views/
-    DepartmentMemberView.tsx         # form + own 4-week sparklines + 6-dot org health
-    OpsManagerView.tsx               # all forms, funnel, issues log
-    CeoView.tsx                      # 6 metric cards, briefing note, per-dept rows, doc library
-  IssuesLog.tsx                      # add / resolve issues
-  PipelineFunnel.tsx                 # vertical funnel (SVG)
-  Sparkline.tsx                      # small trend charts
-src/lib/ops/
-  departments.ts                     # colour + label tokens, KPI metadata
-  week.ts                            # EAT week helpers (Monday start, Fri 5pm lock)
-```
+**Fix 3 — One funnel**
+- QuickQuiz result screen gains a primary "Take the full Pathway Assessment for your personalised plan →" button routing to `/pathway-intelligence`.
+- Copy on both entry points clarifies which is which (quick teaser vs full diagnostic).
 
-All forms validated with zod. Colour tokens added to `index.css` and referenced via inline style (fixed brand colours per spec) — theme kept intact.
+**Fix 4 — Remove "Learning Paths" as navigation**
+- Delete Learning Paths section + compare-paths UI from `PillarDetail.tsx`.
+- The pillar page shows only: header → 7 units in sequence → "Bonus & Deep Dives" strip at the bottom (already exists as `specializedUnits`, just made visually secondary).
+- Remove `/learning-paths` and `/path/:pillarId/:pathId` from top-level nav. Keep routes alive (redirect to pillar) to avoid breaking bookmarks.
 
-## 5. Build order
+**Fix 5 — Optional calibration card**
+- New `PillarCalibrationCard` component shown at the top of a pillar's learning view when the learner has no `pillar_calibration` row for that pillar.
+- 3 questions max, dismissible. Result stored in a lightweight `pillar_calibrations` table (`user_id`, `pillar_id`, `recommended_unit_id`, `dismissed_at`).
+- On completion, one unit gets a gold "Recommended start" badge. On skip/dismiss, row inserted with `dismissed_at` so it never returns.
+- Never gates content — units remain clickable throughout.
 
-1. Migration (schema + GRANTs + RLS + seed `kpi_targets`)
-2. Storage bucket + RLS policies on `storage.objects`
-3. Edge function `calculate-report-status`
-4. Types regen + `useDepartmentRole` + route guard
-5. Shared UI primitives (colours, week helpers, upload, week selector)
-6. Submission forms (all six)
-7. CEO view
-8. Ops Manager view (adds funnel + issues log)
-9. Department Member view (adds sparklines)
+## Not in this turn (turn 3)
 
-## 6. Deferred to a follow-up (need your confirmation)
+`learning_plans` table + generation, `/my-plan`, "Continue Learning" card, off-plan banner, auto-advance, `/learner-insights` admin dashboard, full end-to-end browser verification. Confirmed per your split.
 
-- **User seeding** — you asked for "7 user accounts" pre-created. I can create the `profiles.department_role` slots + admin UI to assign roles, but I won't auto-create real auth users with passwords. You'll assign roles by editing `profiles.department_role` once each user signs up. Confirm if you'd rather I generate 7 magic-link invitations from a specific list of emails instead.
-- **Editable KPI targets admin UI** — spec says "can be updated in an admin settings table later"; I'll ship the table + seeded defaults but not the editor.
-- **CEO metric-card historical drilldown** — the "View Full Report" modal is in; multi-week comparison isn't.
+## Confirm before I run
 
-Shall I proceed with the plan above, and how would you like the 7 user accounts handled (option A: assign roles after they sign up themselves, option B: give me 7 email addresses and I wire magic-link invites)?
+1. `communication-networking` units keep their UUIDs and become Cybersecurity — OK, or do you want them deleted and rebuilt from scratch?
+2. Programming pillar shell with 7 empty units — OK?
+3. Any users currently enrolled in old ids (`leadership-development`, `entrepreneurship-innovation`, `digital-skills`, `communication-networking`) will find their enrollments still valid under the new pillar ids — OK?
+
+Reply "go" (with any tweaks) and I run the migration + all frontend changes in the next turn.
