@@ -400,6 +400,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pillar_calibrations: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          pillar_id: string
+          recommended_unit_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          pillar_id: string
+          recommended_unit_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          pillar_id?: string
+          recommended_unit_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pillar_calibrations_recommended_unit_id_fkey"
+            columns: ["recommended_unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           assessment_completed_at: string | null
