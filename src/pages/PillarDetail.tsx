@@ -1,16 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
-import { getPillarById, comparisonMetrics, type LearningPath } from "@/data/courses";
-import { pillarAssessments } from "@/data/orientationAssessments";
-import type { LearnerArchetype } from "@/data/orientationAssessments";
+import { getPillarById } from "@/data/courses";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
-  ArrowRight, Clock, Target, Layers, Users, CheckCircle2, ArrowLeft, GitCompare,
-  X, BookOpen,
+  ArrowRight, Target, Users, CheckCircle2, ArrowLeft,
 } from "lucide-react";
 import { GoldParticles } from "@/components/motion";
 import { cn } from "@/lib/utils";
@@ -35,12 +32,6 @@ const pillarIcons: Record<string, React.ReactNode> = {
   landmark: <Landmark className="w-8 h-8" />,
 };
 
-const skillColors: Record<string, string> = {
-  beginner: "bg-accent/20 text-accent border-accent/30",
-  intermediate: "bg-premium/20 text-premium border-premium/30",
-  advanced: "bg-destructive/20 text-destructive border-destructive/30",
-};
-
 const PillarDetail = () => {
   const { pillarId } = useParams<{ pillarId: string }>();
   const pillar = getPillarById(pillarId || "");
@@ -49,9 +40,6 @@ const PillarDetail = () => {
   const queryClient = useQueryClient();
   const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
   const { data: userHasAssessment = false } = useHasAssessment();
-  const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
-  const [showCompare, setShowCompare] = useState(false);
-  const [archetype] = useState<LearnerArchetype | null>(null);
 
   const { data: units = [] } = usePillarUnits(pillarId);
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
@@ -110,18 +98,6 @@ const PillarDetail = () => {
       </div>
     );
   }
-
-  const toggleCompare = (path: LearningPath) => {
-    setComparePaths((prev) => {
-      if (prev.find((p) => p.id === path.id)) return prev.filter((p) => p.id !== path.id);
-      if (prev.length >= 3) return prev;
-      return [...prev, path];
-    });
-  };
-
-  const nonFoundationPaths = pillar.learningPaths.filter(
-    (p) => !p.id.includes("foundation")
-  );
 
   return (
     <div className="min-h-screen bg-cinematic-surface relative">
