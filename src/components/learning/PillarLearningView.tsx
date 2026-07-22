@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles, CheckCircle2, Trophy } from "lucide-react";
 import UnitCard from "@/components/learning/UnitCard";
 import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
+import PillarCalibrationCard from "@/components/learning/PillarCalibrationCard";
 import { usePillarUnits, useUserUnitProgress, type Unit, type UserUnitProgress } from "@/hooks/useUnits";
 import type { Pillar } from "@/data/courses";
 
@@ -20,6 +22,7 @@ interface Props {
 export default function PillarLearningView({ pillar, icon }: Props) {
   const { data: units = [] } = usePillarUnits(pillar.id);
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
+  const [recommendedUnitId, setRecommendedUnitId] = useState<string | null>(null);
 
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
   const specializedUnits = units.filter((u) => u.track_type === "specialized");
@@ -32,10 +35,15 @@ export default function PillarLearningView({ pillar, icon }: Props) {
     0,
   );
 
-  // Locate the first incomplete learning-path unit
-  const nextUnit: Unit | undefined = learningPathUnits.find(
+  // Locate the first incomplete learning-path unit — or the calibration's pick if untouched.
+  const firstIncomplete: Unit | undefined = learningPathUnits.find(
     (u) => (progressMap[u.id]?.sessions_completed ?? 0) < u.session_count,
   );
+  const recommended = recommendedUnitId
+    ? learningPathUnits.find((u) => u.id === recommendedUnitId)
+    : undefined;
+  const anyProgress = Object.values(progressMap).some((p) => (p?.sessions_completed ?? 0) > 0);
+  const nextUnit: Unit | undefined = !anyProgress && recommended ? recommended : firstIncomplete;
 
   const getState = (unit: Unit): "locked" | "current" | "completed" | "available" => {
     const prog = progressMap[unit.id];
@@ -94,6 +102,12 @@ export default function PillarLearningView({ pillar, icon }: Props) {
           )}
         </div>
       </div>
+
+      <PillarCalibrationCard
+        pillarId={pillar.id}
+        units={units}
+        onRecommendedUnitId={setRecommendedUnitId}
+      />
 
       {/* Learning path units */}
       {learningPathUnits.length > 0 && (
