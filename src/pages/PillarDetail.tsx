@@ -215,23 +215,8 @@ const PillarDetail = () => {
             )}
 
             {/* Compare Paths Toggle */}
-            {nonFoundationPaths.length >= 2 && (
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Available Learning Paths</h2>
-                <Button
-                  variant={showCompare ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setShowCompare(!showCompare);
-                    if (showCompare) setComparePaths([]);
-                  }}
-                  className={cn(showCompare && "bg-accent hover:bg-accent/90")}
-                >
-                  <GitCompare className="w-4 h-4 mr-2" />
-                  {showCompare ? "Exit Compare" : "Compare Paths"}
-                </Button>
-              </div>
-            )}
+            {/* Learning Paths as a navigation concept has been removed.
+                The pillar's 7-unit sequence below IS the primary structure. */}
 
             {/* Learning Path Units — primary track */}
             {learningPathUnits.length > 0 && (
