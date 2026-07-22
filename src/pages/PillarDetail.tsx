@@ -171,25 +171,6 @@ const PillarDetail = () => {
             (Layer 1) is the single diagnostic. No secondary questionnaire. */}
         {true && (
           <>
-            {/* Archetype Result Banner */}
-            {archetype && (
-              <Card className="border-accent/30 bg-accent/5">
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                    <Target className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">
-                      Your Archetype: {archetype.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Recommended path highlighted below. You may choose any path that aligns with your goals.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Compare Paths Toggle */}
             {/* Learning Paths as a navigation concept has been removed.
                 The pillar's 7-unit sequence below IS the primary structure. */}
