@@ -14,42 +14,40 @@ export interface PillarMotionTheme {
 }
 
 export const pillarMotionThemes: Record<string, PillarMotionTheme> = {
-  "financial-intelligence": {
-    label: "Financial Intelligence",
-    color: "#C9A84C",
-    glyphs: ["◉", "Ksh", "✦"],
-  },
-  // Communication & Networking — mapped onto the cybersecurity/comms surface.
-  "cybersecurity": {
-    label: "Communication & Networking",
-    color: "#2DD4BF",
-    glyphs: ["●", "○", "≋"],
-  },
-  "digital-literacy": {
-    label: "Digital Skills & Technology",
-    color: "#3B82F6",
-    glyphs: ["</>", "·", "•"],
-  },
   "personal-mastery": {
-    label: "Leadership & Personal Development",
+    label: "Personal Mastery & Mind Renewal",
     color: "#7C5CBF",
     glyphs: ["▲", "✧", "☀"],
   },
-  // Entrepreneurship & Innovation — mapped onto programming-systems surface.
+  "financial-intelligence": {
+    label: "Financial Intelligence & Income Systems",
+    color: "#C9A84C",
+    glyphs: ["◉", "Ksh", "✦"],
+  },
+  "digital-literacy": {
+    label: "Digital Literacy & Productivity",
+    color: "#3B82F6",
+    glyphs: ["</>", "·", "•"],
+  },
+  "cybersecurity": {
+    label: "Cybersecurity & Digital Protection",
+    color: "#0E7A8A",
+    glyphs: ["⛨", "◈", "✦"],
+  },
   "programming-systems": {
-    label: "Entrepreneurship & Innovation",
-    color: "#E08D3C",
-    glyphs: ["⚡", "▲", "✦"],
+    label: "Programming & Intelligent Systems",
+    color: "#2F855A",
+    glyphs: ["{ }", "λ", "✦"],
   },
   "creator-economy": {
-    label: "Creator Economy & Monetisation",
+    label: "Creator Economy & Digital Monetisation",
     color: "#E0607E",
     glyphs: ["▶", "♥", "✦"],
   },
   "civic-leadership": {
     label: "Civic Leadership & Governance",
-    color: "#2F855A",
-    glyphs: ["★", "⚖", "✦"],
+    color: "#1B2A4A",
+    glyphs: ["⚖", "★", "✦"],
   },
 };
 

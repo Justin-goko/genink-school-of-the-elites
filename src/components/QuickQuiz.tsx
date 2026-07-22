@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -11,7 +12,7 @@ import {
   CheckCircle2,
   Sparkles
 } from "lucide-react";
-import { courses } from "@/data/courses";
+import { pillars } from "@/data/courses";
 
 interface Question {
   id: number;
@@ -23,15 +24,25 @@ interface Question {
   }[];
 }
 
+// Each quick-quiz answer maps to a canonical pillar id so the recommendation
+// card links straight to the pillar page (Fix 2). The full 40-question
+// diagnostic remains the single deep funnel (Fix 3).
+const CATEGORY_TO_PILLARS: Record<string, string[]> = {
+  wealth:  ["financial-intelligence", "creator-economy", "programming-systems"],
+  tech:    ["programming-systems", "digital-literacy", "cybersecurity"],
+  mindset: ["personal-mastery", "civic-leadership", "financial-intelligence"],
+  build:   ["creator-economy", "financial-intelligence", "digital-literacy"],
+};
+
 const questions: Question[] = [
   {
     id: 1,
     question: "What's your primary learning goal?",
     options: [
-      { label: "Build wealth & financial freedom", icon: TrendingUp, category: "financial" },
-      { label: "Master tech & coding skills", icon: Code, category: "ict" },
-      { label: "Grow spiritually & mentally", icon: Brain, category: "spiritual" },
-      { label: "Start an online business", icon: Palette, category: "income" }
+      { label: "Build wealth & financial freedom", icon: TrendingUp, category: "wealth" },
+      { label: "Master tech & coding skills",      icon: Code,       category: "tech" },
+      { label: "Grow mentally & lead myself",      icon: Brain,      category: "mindset" },
+      { label: "Build something of my own",        icon: Palette,    category: "build" },
     ]
   }
 ];
@@ -48,8 +59,10 @@ const QuickQuiz = () => {
     }, 500);
   };
 
-  const recommendedCourses = selectedCategory 
-    ? courses.filter(c => c.category === selectedCategory).slice(0, 3)
+  const recommendedPillars = selectedCategory
+    ? (CATEGORY_TO_PILLARS[selectedCategory] ?? [])
+        .map((id) => pillars.find((p) => p.id === id))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p))
     : [];
 
   const resetQuiz = () => {
@@ -120,42 +133,50 @@ const QuickQuiz = () => {
                 </h3>
               </div>
 
-              <div className="space-y-4 mb-8">
-                {recommendedCourses.map((course, index) => (
-                  <div 
-                    key={course.id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group cursor-pointer"
+              <div className="space-y-3 mb-8">
+                {recommendedPillars.map((p, index) => (
+                  <Link
+                    key={p.id}
+                    to={`/pillar/${p.id}`}
+                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
                     style={{ animationDelay: `${index * 150}ms` }}
                   >
-                    <img 
-                      src={course.image} 
-                      alt={course.title}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
+                    <div
+                      className="w-14 h-14 rounded-lg flex items-center justify-center text-white text-xl font-bold flex-shrink-0"
+                      style={{ backgroundColor: p.color }}
+                    >
+                      {p.name.charAt(0)}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-foreground group-hover:text-accent transition-colors truncate">
-                        {course.title}
+                        {p.name}
                       </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {course.duration} • {course.isPremium ? course.price : 'Free'}
-                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{p.tagline}</p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                  </div>
+                  </Link>
                 ))}
               </div>
 
+              <div className="text-center mb-6">
+                <p className="text-sm text-muted-foreground">
+                  This is a 60-second preview. Ready for a personalised plan across all 7 pillars?
+                </p>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={resetQuiz}
                   className="border-accent/30"
                 >
-                  Take Quiz Again
+                  Retake Quick Quiz
                 </Button>
-                <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                  Explore All Courses
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
+                  <Link to="/pathway-intelligence">
+                    Take the full Pathway Assessment
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
                 </Button>
               </div>
             </div>

@@ -1,16 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
-import { getPillarById, comparisonMetrics, type LearningPath } from "@/data/courses";
-import { pillarAssessments } from "@/data/orientationAssessments";
-import type { LearnerArchetype } from "@/data/orientationAssessments";
+import { getPillarById } from "@/data/courses";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain, TrendingUp, Monitor, Shield, Code, Video, Landmark,
-  ArrowRight, Clock, Target, Layers, Users, CheckCircle2, ArrowLeft, GitCompare,
-  X, BookOpen,
+  ArrowRight, Target, Users, CheckCircle2, ArrowLeft,
 } from "lucide-react";
 import { GoldParticles } from "@/components/motion";
 import { cn } from "@/lib/utils";
@@ -35,12 +32,6 @@ const pillarIcons: Record<string, React.ReactNode> = {
   landmark: <Landmark className="w-8 h-8" />,
 };
 
-const skillColors: Record<string, string> = {
-  beginner: "bg-accent/20 text-accent border-accent/30",
-  intermediate: "bg-premium/20 text-premium border-premium/30",
-  advanced: "bg-destructive/20 text-destructive border-destructive/30",
-};
-
 const PillarDetail = () => {
   const { pillarId } = useParams<{ pillarId: string }>();
   const pillar = getPillarById(pillarId || "");
@@ -49,9 +40,6 @@ const PillarDetail = () => {
   const queryClient = useQueryClient();
   const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
   const { data: userHasAssessment = false } = useHasAssessment();
-  const [comparePaths, setComparePaths] = useState<LearningPath[]>([]);
-  const [showCompare, setShowCompare] = useState(false);
-  const [archetype] = useState<LearnerArchetype | null>(null);
 
   const { data: units = [] } = usePillarUnits(pillarId);
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
@@ -110,18 +98,6 @@ const PillarDetail = () => {
       </div>
     );
   }
-
-  const toggleCompare = (path: LearningPath) => {
-    setComparePaths((prev) => {
-      if (prev.find((p) => p.id === path.id)) return prev.filter((p) => p.id !== path.id);
-      if (prev.length >= 3) return prev;
-      return [...prev, path];
-    });
-  };
-
-  const nonFoundationPaths = pillar.learningPaths.filter(
-    (p) => !p.id.includes("foundation")
-  );
 
   return (
     <div className="min-h-screen bg-cinematic-surface relative">
@@ -195,43 +171,9 @@ const PillarDetail = () => {
             (Layer 1) is the single diagnostic. No secondary questionnaire. */}
         {true && (
           <>
-            {/* Archetype Result Banner */}
-            {archetype && (
-              <Card className="border-accent/30 bg-accent/5">
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                    <Target className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">
-                      Your Archetype: {archetype.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Recommended path highlighted below. You may choose any path that aligns with your goals.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Compare Paths Toggle */}
-            {nonFoundationPaths.length >= 2 && (
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Available Learning Paths</h2>
-                <Button
-                  variant={showCompare ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setShowCompare(!showCompare);
-                    if (showCompare) setComparePaths([]);
-                  }}
-                  className={cn(showCompare && "bg-accent hover:bg-accent/90")}
-                >
-                  <GitCompare className="w-4 h-4 mr-2" />
-                  {showCompare ? "Exit Compare" : "Compare Paths"}
-                </Button>
-              </div>
-            )}
+            {/* Learning Paths as a navigation concept has been removed.
+                The pillar's 7-unit sequence below IS the primary structure. */}
 
             {/* Learning Path Units — primary track */}
             {learningPathUnits.length > 0 && (
@@ -258,119 +200,7 @@ const PillarDetail = () => {
               </div>
             )}
 
-            {/* Compare Selection Bar */}
-            {showCompare && (
-              <div className="bg-muted rounded-lg p-4 flex items-center gap-4 flex-wrap">
-                <span className="text-sm font-medium">Select 2–3 paths to compare:</span>
-                {comparePaths.map((p) => (
-                  <Badge key={p.id} className="bg-accent text-accent-foreground gap-1">
-                    {p.title}
-                    <button onClick={() => toggleCompare(p)}>
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-                {comparePaths.length >= 2 && (
-                  <span className="text-xs text-muted-foreground ml-auto">Scroll down to see comparison</span>
-                )}
-              </div>
-            )}
 
-        {/* Path Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pillar.learningPaths.map((path) => {
-            const isSelected = comparePaths.some((p) => p.id === path.id);
-            const isFoundation = path.id.includes("foundation");
-
-            return (
-              <Card
-                key={path.id}
-                className={cn(
-                  "group transition-all duration-300 hover:shadow-xl hover:-translate-y-1",
-                  isSelected && "ring-2 ring-accent",
-                  isFoundation && "border-accent/40 bg-accent/5",
-                  archetype?.recommendedPathId === path.id && "ring-2 ring-accent border-accent/40 bg-accent/5"
-                )}
-              >
-                <CardHeader>
-                  {archetype?.recommendedPathId === path.id && (
-                    <Badge className="w-fit bg-accent text-accent-foreground mb-2 text-xs">
-                      ✦ Recommended for You
-                    </Badge>
-                  )}
-                  {isFoundation && (
-                    <Badge className="w-fit bg-accent text-accent-foreground mb-2 text-xs">
-                      🔓 Mandatory Foundation — Free
-                    </Badge>
-                  )}
-                  <CardTitle className="text-lg group-hover:text-accent transition-colors">
-                    {path.title}
-                  </CardTitle>
-                  <CardDescription>{path.description}</CardDescription>
-
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <Badge variant="outline" className={cn("text-xs capitalize", skillColors[path.skillLevel])}>
-                      <Layers className="w-3 h-3 mr-1" />
-                      {path.skillLevel}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {path.estimatedWeeks} weeks
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      <Target className="w-3 h-3 mr-1" />
-                      {path.targetRole}
-                    </Badge>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* Career Outcomes */}
-                  {path.careerOutcomes && (
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Career Directions</p>
-                      <div className="flex flex-wrap gap-1">
-                        {path.careerOutcomes.map((outcome) => (
-                          <Badge key={outcome} variant="secondary" className="text-xs font-normal">
-                            {outcome}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Capstone */}
-                  {path.capstoneProject && (
-                    <div className="bg-premium/10 border border-premium/20 rounded-lg p-3">
-                      <p className="text-xs font-semibold text-premium mb-1">🎯 Capstone Project</p>
-                      <p className="text-xs text-muted-foreground">{path.capstoneProject}</p>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button asChild className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground" size="sm">
-                      <Link to={`/path/${pillar.id}/${path.id}`}>
-                        View Path
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Link>
-                    </Button>
-                    {showCompare && !isFoundation && (
-                      <Button
-                        variant={isSelected ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => toggleCompare(path)}
-                        className={cn(isSelected && "bg-accent")}
-                      >
-                        {isSelected ? "✓" : "+"}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
 
         {/* Units Section */}
         {specializedUnits.length > 0 && (
@@ -385,54 +215,6 @@ const PillarDetail = () => {
               ))}
             </div>
           </div>
-        )}
-        {showCompare && comparePaths.length >= 2 && (
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-muted/50">
-              <CardTitle className="flex items-center gap-2">
-                <GitCompare className="w-5 h-5 text-accent" />
-                Path Comparison
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-4 font-semibold text-muted-foreground">Metric</th>
-                      {comparePaths.map((p) => (
-                        <th key={p.id} className="text-left p-4 font-semibold">{p.title}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparisonMetrics.map((metric) => (
-                      <tr key={metric.key} className="border-b last:border-0">
-                        <td className="p-4 text-muted-foreground font-medium">{metric.label}</td>
-                        {comparePaths.map((p) => (
-                          <td key={p.id} className="p-4">
-                            {p.comparisonData?.[metric.key] || "—"}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                    <tr className="border-b last:border-0">
-                      <td className="p-4 text-muted-foreground font-medium">Target Role</td>
-                      {comparePaths.map((p) => (
-                        <td key={p.id} className="p-4">{p.targetRole}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td className="p-4 text-muted-foreground font-medium">Capstone</td>
-                      {comparePaths.map((p) => (
-                        <td key={p.id} className="p-4 text-xs">{p.capstoneProject || "—"}</td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
         )}
           </>
         )}
