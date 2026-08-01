@@ -5,10 +5,10 @@ import { playUnlockChime } from "@/lib/journeySound";
 import PillarLandmark from "@/components/journey/PillarLandmark";
 import {
   Coins,
-  MessageCircle,
   Laptop,
   Crown,
-  Rocket,
+  Shield,
+  Code,
   TrendingUp,
   Landmark,
   Check,
