@@ -28,6 +28,8 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminImport from "./pages/AdminImport";
 import Profile from "./pages/Profile";
 import TeamManagement from "./pages/TeamManagement";
+import MyPlan from "./pages/MyPlan";
+import LearnerInsights from "./pages/LearnerInsights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +65,8 @@ const App = () => (
 
             {/* Layer 2 — authenticated journey */}
             <Route path="/journey" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/my-plan" element={<ProtectedRoute><MyPlan /></ProtectedRoute>} />
+            <Route path="/learner-insights" element={<ProtectedRoute><LearnerInsights /></ProtectedRoute>} />
             <Route path="/path/:pillarId/:pathId" element={<PathRedirect />} />
             <Route path="/pillar/:pillarId/unit/:unitId" element={<ProtectedRoute><UnitDetail /></ProtectedRoute>} />
             <Route path="/pillar/:pillarId/unit/:unitId/session/:sessionIndex" element={<ProtectedRoute><SessionReader /></ProtectedRoute>} />

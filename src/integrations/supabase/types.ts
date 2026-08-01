@@ -337,6 +337,42 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_plans: {
+        Row: {
+          created_at: string
+          current_index: number
+          id: string
+          is_active: boolean
+          pillar_id: string
+          reasoning: string | null
+          unit_order: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_index?: number
+          id?: string
+          is_active?: boolean
+          pillar_id: string
+          reasoning?: string | null
+          unit_order?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_index?: number
+          id?: string
+          is_active?: boolean
+          pillar_id?: string
+          reasoning?: string | null
+          unit_order?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           content: Json | null
@@ -982,6 +1018,18 @@ export type Database = {
         Returns: boolean
       }
       is_ceo_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_learner_insights: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          last_activity: string
+          pillar_id: string
+          total_xp: number
+          units_completed: number
+          user_id: string
+        }[]
+      }
       list_team_roster: {
         Args: never
         Returns: {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, Compass, UserCircle2, Upload, Users } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
@@ -38,12 +38,16 @@ const StickyNav = () => {
       ? [
           { name: "Operations Dashboard", href: "/ops-dashboard", icon: LayoutDashboard },
           { name: "Student Journey", href: "/journey", icon: Compass },
+          ...(canManageTeam
+            ? [{ name: "Learner Insights", href: "/learner-insights", icon: LineChart } as NavLink]
+            : []),
           { name: "Community", href: "/events" },
           { name: "Resources", href: "/resources" },
         ]
       : tier === "student"
         ? [
             { name: "My Journey", href: "/journey" },
+            { name: "My Plan", href: "/my-plan" },
             { name: "Community", href: "/events" },
             { name: "Resources", href: "/resources" },
           ]
