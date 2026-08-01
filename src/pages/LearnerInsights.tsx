@@ -8,7 +8,7 @@ import { useLearnerInsights } from "@/hooks/useLearningPlan";
 import { pillars } from "@/data/courses";
 
 const LearnerInsights = () => {
-  const { isAdmin, departmentRole, isLoading: roleLoading } = useUserRole();
+  const { isAdmin, departmentRole, loading: roleLoading } = useUserRole();
   const canView = isAdmin || departmentRole === "ceo";
   const { data: rows = [], isLoading, error } = useLearnerInsights();
 
