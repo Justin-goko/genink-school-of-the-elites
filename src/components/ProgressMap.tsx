@@ -34,12 +34,12 @@ interface PillarStop {
 // by the server-side award-xp Edge Function when a session is genuinely finished.
 // The first pillar is the entry point ("current"); the rest unlock as they complete.
 const PILLARS: PillarStop[] = [
-  { num: 1, id: "financial-intelligence", title: "Financial Intelligence", icon: Coins, xp: 0, completion: 0, status: "current" },
-  { num: 2, id: "communication-networking", title: "Communication & Networking", icon: MessageCircle, xp: 0, completion: 0, status: "locked" },
-  { num: 3, id: "digital-literacy", title: "Digital Skills & Technology", icon: Laptop, xp: 0, completion: 0, status: "locked" },
-  { num: 4, id: "personal-mastery", title: "Leadership & Personal Development", icon: Crown, xp: 0, completion: 0, status: "locked" },
-  { num: 5, id: "entrepreneurship", title: "Entrepreneurship & Innovation", icon: Rocket, xp: 0, completion: 0, status: "locked" },
-  { num: 6, id: "creator-economy", title: "Creator Economy & Monetisation", icon: TrendingUp, xp: 0, completion: 0, status: "locked" },
+  { num: 1, id: "personal-mastery", title: "Personal Mastery & Mind Renewal", icon: Crown, xp: 0, completion: 0, status: "current" },
+  { num: 2, id: "financial-intelligence", title: "Financial Intelligence & Income Systems", icon: Coins, xp: 0, completion: 0, status: "locked" },
+  { num: 3, id: "digital-literacy", title: "Digital Literacy & Productivity", icon: Laptop, xp: 0, completion: 0, status: "locked" },
+  { num: 4, id: "cybersecurity", title: "Cybersecurity & Digital Protection", icon: Shield, xp: 0, completion: 0, status: "locked" },
+  { num: 5, id: "programming-systems", title: "Programming & Intelligent Systems", icon: Code, xp: 0, completion: 0, status: "locked" },
+  { num: 6, id: "creator-economy", title: "Creator Economy & Digital Monetisation", icon: TrendingUp, xp: 0, completion: 0, status: "locked" },
   { num: 7, id: "civic-leadership", title: "Civic Leadership & Governance", icon: Landmark, xp: 0, completion: 0, status: "locked" },
 ];
 
