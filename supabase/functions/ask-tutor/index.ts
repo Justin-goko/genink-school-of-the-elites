@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
     // Signed-in user is optional: visitors get the lighter public guide.
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     if (count >= limit) {
       return json(429, { error: user_id ? "daily_limit_reached" : "visitor_limit_reached", limit, used: count });
     }
-    if (!ANTHROPIC_API_KEY) return json(503, { error: "tutor_unavailable" });
+    if (!LOVABLE_API_KEY) return json(503, { error: "tutor_unavailable" });
 
     // ---- Platform config from real tables ----
     const [{ data: xpRules }, { data: tiers }, { data: badges }, { data: unitRows }] = await Promise.all([
@@ -161,17 +161,19 @@ Deno.serve(async (req) => {
       guide,
     ].join("\n");
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 600, system, messages: [...history, { role: "user", content: message }] }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_API_KEY}` },
+      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: system }, ...history, { role: "user", content: message }] }),
     });
+    if (res.status === 429) return json(503, { error: "busy" });
+    if (res.status === 402) return json(503, { error: "credits" });
     if (!res.ok) {
-      console.error("anthropic error", res.status, await res.text());
+      console.error("gateway error", res.status, await res.text());
       return json(502, { error: "tutor_failed" });
     }
     const data = await res.json();
-    const raw: string = data?.content?.map((c: any) => (c.type === "text" ? c.text : "")).join("").trim() || "I'm here. Could you ask that again?";
+    const raw: string = (data?.choices?.[0]?.message?.content ?? "").trim() || "I'm here. Could you ask that again?";
 
     const scope: ActionScope = {
       signedIn: !!user_id,
