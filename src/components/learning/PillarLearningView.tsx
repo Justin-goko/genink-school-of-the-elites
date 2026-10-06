@@ -8,6 +8,7 @@ import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 import PillarCalibrationCard from "@/components/learning/PillarCalibrationCard";
 import { usePillarUnits, useUserUnitProgress, type Unit, type UserUnitProgress } from "@/hooks/useUnits";
 import type { Pillar } from "@/data/courses";
+import { getPillarMotion } from "@/lib/motion/pillarThemes";
 
 interface Props {
   pillar: Pillar;
@@ -20,6 +21,8 @@ interface Props {
  * and a prominent "Continue" call on the first incomplete unit.
  */
 export default function PillarLearningView({ pillar, icon }: Props) {
+  const theme = getPillarMotion(pillar.id);
+  const civic = pillar.id === "civic-leadership";
   const { data: units = [] } = usePillarUnits(pillar.id);
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
   const [recommendedUnitId, setRecommendedUnitId] = useState<string | null>(null);
@@ -87,7 +90,8 @@ export default function PillarLearningView({ pillar, icon }: Props) {
             <Button
               asChild
               size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md"
+              className="font-semibold shadow-md"
+              style={{ backgroundColor: civic ? "hsl(var(--premium))" : theme.color, color: civic ? "hsl(var(--primary))" : "hsl(var(--primary-foreground))" }}
             >
               <Link to={`/pillar/${pillar.id}/unit/${nextUnit.id}`}>
                 Continue

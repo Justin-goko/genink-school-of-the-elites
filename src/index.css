@@ -31,6 +31,8 @@ All colors MUST be HSL.
 
     --premium: 45 100% 55%;
     --premium-foreground: 220 70% 12%;
+    --tutor: 42 54% 94%;
+    --tutor-field: 42 47% 97%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
@@ -91,6 +93,8 @@ All colors MUST be HSL.
 
     --premium: 45 100% 55%;
     --premium-foreground: 220 70% 8%;
+    --tutor: 42 30% 16%;
+    --tutor-field: 42 24% 20%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -222,6 +226,15 @@ All colors MUST be HSL.
     50%      { transform: scale(1.05); filter: brightness(1.08); }
   }
   .lg-breathe { animation: lg-breathe 4s var(--ease-cinematic) infinite; }
+
+  @media (min-width: 1024px) {
+    .session-reader-content {
+      transition: transform var(--duration-base) var(--ease-cinematic);
+    }
+    body.light-guide-open .session-reader-content {
+      transform: translateX(-200px);
+    }
+  }
 
   /* Gold particle drift (marketing hero ambient) */
   @keyframes gold-drift-a {

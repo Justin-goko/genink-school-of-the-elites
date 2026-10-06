@@ -14,7 +14,8 @@ export type BlockType =
   | "image"
   | "divider"
   | "key_terms"
-  | "stat_grid";
+  | "stat_grid"
+  | "code";
 
 export type CalloutVariant = "ai_prompt" | "key_idea" | "kenya_context";
 
@@ -31,7 +32,8 @@ export type BlockContent =
   | { url: string; alt?: string; caption?: string }                                      // image
   | Record<string, never>                                                                // divider
   | { terms: Array<{ term: string; definition: string }> }                               // key_terms
-  | { stats: Array<{ value: string; label: string; source?: string }> };                 // stat_grid
+  | { stats: Array<{ value: string; label: string; source?: string }> }                  // stat_grid
+  | { code: string; language?: string };                                                  // code
 
 export interface SessionBlock {
   id?: string;

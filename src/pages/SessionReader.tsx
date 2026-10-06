@@ -118,7 +118,7 @@ export default function SessionReader() {
         <div className="h-full transition-[width] duration-100 ease-out" style={{ width: `${scrollPct}%`, background: READER.gold }} />
       </div>
 
-      <div className="container mx-auto max-w-[720px] px-5 md:px-6 py-12 md:py-16">
+      <div className="session-reader-content container mx-auto max-w-[720px] px-5 md:px-6 py-12 md:py-16">
         <Link to={`/pillar/${pillarId}`} className="inline-flex items-center text-sm mb-8 hover:opacity-80" style={{ color: READER.inkSoft }}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to pillar
         </Link>

@@ -1,0 +1,1 @@
+Session content blocks use the database-backed `session_block_type` enum; add new renderable formats there before parser and renderer support so imported content remains persistable.

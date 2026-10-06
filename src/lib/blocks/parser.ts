@@ -48,6 +48,25 @@ function tryTable(lines: string[], i: number): { block: Draft; consumed: number 
   };
 }
 
+function tryCode(lines: string[], i: number): { block: Draft; consumed: number } | null {
+  const opening = lines[i].match(/^\s*```\s*([^\s`]*)\s*$/);
+  if (!opening) return null;
+  const body: string[] = [];
+  let j = i + 1;
+  while (j < lines.length && !/^\s*```\s*$/.test(lines[j])) {
+    body.push(lines[j]);
+    j++;
+  }
+  if (j < lines.length) j++;
+  return {
+    block: {
+      block_type: "code",
+      content: { code: body.join("\n"), language: opening[1] || undefined },
+    },
+    consumed: j - i,
+  };
+}
+
 // Detect "Exercise:" followed by numbered/bulleted steps.
 function tryExercise(lines: string[], i: number): { block: Draft; consumed: number } | null {
   const m = lines[i].match(/^\s*Exercise\s*:\s*(.*)$/i);
@@ -154,6 +173,9 @@ export function parseTextToBlocks(input: string): SessionBlock[] {
       flushParagraph(paraBuf, out);
       continue;
     }
+
+    const code = tryCode(lines, i);
+    if (code) { flushParagraph(paraBuf, out); out.push(code.block); i += code.consumed - 1; continue; }
 
     const tbl = tryTable(lines, i);
     if (tbl) { flushParagraph(paraBuf, out); out.push(tbl.block); i += tbl.consumed - 1; continue; }

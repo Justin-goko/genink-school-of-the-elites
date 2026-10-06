@@ -1087,6 +1087,7 @@ export type Database = {
         | "divider"
         | "key_terms"
         | "stat_grid"
+        | "code"
       track_type: "learning_path" | "specialized"
     }
     CompositeTypes: {
@@ -1258,6 +1259,7 @@ export const Constants = {
         "divider",
         "key_terms",
         "stat_grid",
+        "code",
       ],
       track_type: ["learning_path", "specialized"],
     },
