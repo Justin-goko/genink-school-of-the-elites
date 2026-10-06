@@ -44,7 +44,10 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
         isCurrent && "ring-2 ring-offset-2 shadow-lg",
         isCompleted && "border-emerald-400/60",
       )}
-      style={isCurrent ? { borderColor: civic ? "hsl(var(--premium))" : theme.color, boxShadow: `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` } : undefined}
+      style={{
+        borderColor: civic ? "hsl(var(--premium))" : theme.color,
+        boxShadow: isCurrent ? `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` : undefined,
+      }}
     >
       {/* watermark numeral */}
       <div className="absolute -right-2 -top-6 select-none font-black text-[110px] leading-none text-foreground/5">

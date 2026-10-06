@@ -145,7 +145,10 @@ export default function UnitDetail() {
                     isCurrent && "ring-2 shadow-md",
                     isLocked && "opacity-60",
                   )}
-                  style={isCurrent ? { borderColor: civic ? "hsl(var(--premium))" : theme.color, boxShadow: `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` } : undefined}
+                  style={{
+                    borderColor: civic ? "hsl(var(--premium))" : theme.color,
+                    boxShadow: isCurrent ? `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` : undefined,
+                  }}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
