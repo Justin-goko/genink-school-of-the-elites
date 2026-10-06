@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      anon_tutor_ip_usage: {
+        Row: {
+          ip_hash: string
+          message_count: number
+          updated_at: string
+          usage_date: string
+        }
+        Insert: {
+          ip_hash: string
+          message_count?: number
+          updated_at?: string
+          usage_date: string
+        }
+        Update: {
+          ip_hash?: string
+          message_count?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Relationships: []
+      }
       anon_tutor_usage: {
         Row: {
           created_at: string
@@ -1108,6 +1129,7 @@ export type Database = {
         Args: { _week_starting: string }
         Returns: boolean
       }
+      refresh_unit_xp_totals: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
