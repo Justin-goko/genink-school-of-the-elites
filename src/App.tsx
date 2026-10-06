@@ -49,8 +49,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <XPRewardOverlay />
-           <LightGuideProvider>
            <BrowserRouter>
+           <LightGuideProvider>
           <FirstLoginCinematic />
           <RouteTransition>
           <Routes>
@@ -86,8 +86,8 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
             </Routes>
           </RouteTransition>
-          </BrowserRouter>
            </LightGuideProvider>
+          </BrowserRouter>
         </TooltipProvider>
       </XPRewardProvider>
     </AuthProvider>

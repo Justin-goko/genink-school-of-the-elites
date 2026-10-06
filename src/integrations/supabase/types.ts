@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      anon_tutor_usage: {
+        Row: {
+          created_at: string
+          message_count: number
+          session_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          message_count?: number
+          session_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          message_count?: number
+          session_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assessment_results: {
         Row: {
           cognitive_style: string
@@ -310,6 +331,27 @@ export type Database = {
           email?: string
           id?: string
           source?: string | null
+        }
+        Relationships: []
+      }
+      learner_tiers: {
+        Row: {
+          created_at: string
+          description: string | null
+          min_xp: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          min_xp: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          min_xp?: number
+          name?: string
         }
         Relationships: []
       }
@@ -962,6 +1004,27 @@ export type Database = {
           submitted_by?: string
           updated_at?: string
           week_starting?: string
+        }
+        Relationships: []
+      }
+      xp_rules: {
+        Row: {
+          action_type: string
+          created_at: string
+          label: string
+          xp: number
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          label: string
+          xp: number
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          label?: string
+          xp?: number
         }
         Relationships: []
       }
