@@ -8,6 +8,13 @@
       "when": 1791316459527,
       "tag": "0000_support_code_blocks_and_staff_session_preview",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791317949631,
+      "tag": "0001_light_guide_platform_config",
+      "breakpoints": true
     }
   ]
 }
