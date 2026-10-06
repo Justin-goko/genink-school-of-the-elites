@@ -69,7 +69,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const xp_to_award = XP_POINTS[action_type];
+    // xp_rules is the single source of truth; XP_POINTS is a fallback only.
+    const { data: rule } = await createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+      .from("xp_rules").select("xp").eq("action_type", action_type).maybeSingle();
+    const xp_to_award = rule?.xp ?? XP_POINTS[action_type];
     if (xp_to_award === undefined) {
       return new Response(JSON.stringify({ error: `Unknown action_type: ${action_type}` }), {
         status: 400,
