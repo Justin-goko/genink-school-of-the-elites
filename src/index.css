@@ -231,17 +231,25 @@ All colors MUST be HSL.
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     right: calc(20px + env(safe-area-inset-right, 0px));
   }
+  .light-guide-hint {
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
+  }
   .light-guide-input {
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /* Desktop: the open panel pushes every page left instead of covering it. */
   @media (min-width: 1024px) {
-    .session-reader-content {
-      transition: transform var(--duration-base) var(--ease-cinematic);
+    #root {
+      transition: padding-right var(--duration-base) var(--ease-cinematic);
     }
-    body.light-guide-open .session-reader-content {
-      transform: translateX(-200px);
+    body.light-guide-open #root {
+      padding-right: 400px;
     }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #root { transition: none !important; }
   }
 
   /* Gold particle drift (marketing hero ambient) */
