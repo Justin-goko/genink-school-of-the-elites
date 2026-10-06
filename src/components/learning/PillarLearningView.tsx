@@ -8,6 +8,7 @@ import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 import PillarCalibrationCard from "@/components/learning/PillarCalibrationCard";
 import { usePillarUnits, useUserUnitProgress, type Unit, type UserUnitProgress } from "@/hooks/useUnits";
 import type { Pillar } from "@/data/courses";
+import { usePillarXp } from "@/hooks/usePlatformXp";
 import { getPillarMotion } from "@/lib/motion/pillarThemes";
 
 interface Props {
@@ -22,6 +23,8 @@ interface Props {
  */
 export default function PillarLearningView({ pillar, icon }: Props) {
   const theme = getPillarMotion(pillar.id);
+  const { data: pillarXp } = usePillarXp();
+  const pillarTotalXp = pillarXp?.[pillar.id]?.total;
   const civic = pillar.id === "civic-leadership";
   const { data: units = [] } = usePillarUnits(pillar.id);
   const { data: progressMap = {} } = useUserUnitProgress(units.map((u) => u.id));
@@ -82,7 +85,7 @@ export default function PillarLearningView({ pillar, icon }: Props) {
               <span className="text-border">•</span>
               <span className="inline-flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <span className="font-medium text-foreground">{xpEarned.toLocaleString()}</span> XP earned
+                <span className="font-medium text-foreground">{xpEarned.toLocaleString()}</span>{pillarTotalXp !== undefined && <> / {pillarTotalXp.toLocaleString()}</>} XP earned
               </span>
             </div>
           </div>
