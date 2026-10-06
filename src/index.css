@@ -157,7 +157,7 @@ All colors MUST be HSL.
     to   { opacity: 1; transform: none; }
   }
   .reveal-init { opacity: 0; }
-  .reveal-in   { animation: cinematic-rise var(--duration-base) var(--ease-cinematic) both; }
+  .reveal-in   { animation: cinematic-rise var(--duration-base) var(--ease-cinematic) backwards; }
 
   /* Route transitions */
   @keyframes route-in {
@@ -168,7 +168,7 @@ All colors MUST be HSL.
     from { opacity: 1; transform: translate3d(0, 0, 0); }
     to   { opacity: 0; transform: translate3d(0, 12px, 0); }
   }
-  .route-enter { animation: route-in var(--duration-base) var(--ease-cinematic) both; }
+  .route-enter { animation: route-in var(--duration-base) var(--ease-cinematic) backwards; }
   .route-exit  { animation: route-out var(--duration-quick) var(--ease-cinematic) both; }
 
   /* Gold progress line for route transitions */
