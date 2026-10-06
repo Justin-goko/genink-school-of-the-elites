@@ -31,6 +31,7 @@ import TeamManagement from "./pages/TeamManagement";
 import MyPlan from "./pages/MyPlan";
 import LearnerInsights from "./pages/LearnerInsights";
 import NotFound from "./pages/NotFound";
+import LightGuideProvider from "./components/tutor/LightGuideProvider";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +49,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <XPRewardOverlay />
-          <BrowserRouter>
+           <LightGuideProvider>
+           <BrowserRouter>
           <FirstLoginCinematic />
           <RouteTransition>
           <Routes>
@@ -85,6 +87,7 @@ const App = () => (
             </Routes>
           </RouteTransition>
           </BrowserRouter>
+           </LightGuideProvider>
         </TooltipProvider>
       </XPRewardProvider>
     </AuthProvider>
