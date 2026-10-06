@@ -1,3 +1,3 @@
 - [x] Portal Light Guide at the app root and clear finished route/reveal transforms.
 - [x] Show display names in the panel subtitle and hide only a matching leading reader heading.
-- [ ] Verify bottom-of-session opening, fixed positioning, and unchanged page scroll.
+- [x] Verify bottom-of-session opening, fixed positioning, and unchanged page scroll.
