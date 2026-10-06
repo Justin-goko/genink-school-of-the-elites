@@ -15,7 +15,7 @@ const PILLARS: { slug: string; name: string }[] = [
   { slug: "financial-intelligence", name: "Financial Intelligence & Income Systems" },
   { slug: "digital-literacy", name: "Digital Literacy & Productivity Systems" },
   { slug: "cybersecurity", name: "Cybersecurity & Digital Protection" },
-  { slug: "programming", name: "Programming & Intelligent Systems" },
+  { slug: "programming-systems", name: "Programming & Intelligent Systems" },
   { slug: "creator-economy", name: "Creator Economy & Digital Monetisation" },
   { slug: "civic-leadership", name: "Civic Leadership & Governance" },
 ];
