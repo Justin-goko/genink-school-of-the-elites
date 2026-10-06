@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Zap } from "lucide-react";
 import { useUserXP, calculateLevel } from "@/hooks/useUserProgress";
 import { useXPReward } from "@/contexts/XPRewardContext";
+import { useTiers, tierFor } from "@/hooks/usePlatformXp";
 
 /**
  * Compact XP/level pill for the navbar.
@@ -11,6 +12,8 @@ import { useXPReward } from "@/contexts/XPRewardContext";
 const NavbarXPCounter = () => {
   const { data: userXP } = useUserXP();
   const { displayedXP, level, setBaseline } = useXPReward();
+  const { data: tiers } = useTiers();
+  const tier = tierFor(displayedXP, tiers);
 
   // Sync with server-truth on load and after invalidations.
   useEffect(() => {
@@ -29,12 +32,13 @@ const NavbarXPCounter = () => {
         color: "#C9A84C",
         border: "1px solid rgba(201,168,76,0.35)",
       }}
-      aria-label={`Level ${level}, ${displayedXP} total XP`}
+      aria-label={`${tier ? `${tier} tier, ` : ""}Level ${level}, ${displayedXP} total XP`}
     >
       <Zap size={14} fill="#C9A84C" />
       <span className="tabular-nums">{displayedXP.toLocaleString()}</span>
       <span className="opacity-60">·</span>
       <span>Lvl {level}</span>
+      {tier && (<><span className="opacity-60">·</span><span>{tier}</span></>)}
     </div>
   );
 };

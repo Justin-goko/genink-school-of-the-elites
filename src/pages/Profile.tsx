@@ -1,3 +1,4 @@
+import { useTiers, tierFor } from "@/hooks/usePlatformXp";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
@@ -22,7 +23,7 @@ interface AssessmentRow {
   cognitive_style: string | null;
   motivation_driver: string | null;
 }
-interface XPRow { total_xp: number | null; tier: string | null; }
+interface XPRow { total_xp: number | null; }
 
 export default function Profile() {
   const { user } = useAuth();
@@ -31,6 +32,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [assessment, setAssessment] = useState<AssessmentRow | null>(null);
   const [xp, setXp] = useState<XPRow | null>(null);
+  const { data: tiers } = useTiers();
 
   useEffect(() => {
     if (!user) return;
@@ -38,7 +40,7 @@ export default function Profile() {
       const [{ data: p }, { data: a }, { data: x }] = await Promise.all([
         supabase.from("profiles").select("full_name,phone,department_role").eq("user_id", user.id).maybeSingle(),
         supabase.from("assessment_results").select("primary_pillar_recommended,secondary_pillar_recommended,cognitive_style,motivation_driver").eq("user_id", user.id).order("completed_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("user_xp").select("total_xp,tier").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_xp").select("total_xp").eq("user_id", user.id).maybeSingle(),
       ]);
       setProfile(p as any);
       setAssessment(a as any);
@@ -80,7 +82,7 @@ export default function Profile() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Award className="w-4 h-4 text-[#C9A84C]" /> Progress</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center justify-between"><span>Total XP</span><span className="tabular-nums font-semibold">{xp?.total_xp ?? 0}</span></div>
-                <div className="flex items-center justify-between"><span>Mastery Tier</span><span className="font-semibold capitalize">{xp?.tier ?? "Seeker"}</span></div>
+                <div className="flex items-center justify-between"><span>Mastery Tier</span><span className="font-semibold capitalize">{tierFor(xp?.total_xp ?? 0, tiers) ?? "—"}</span></div>
                 <div className="flex items-center justify-between"><span>Badges Earned</span><span className="tabular-nums font-semibold">{badgeCount}</span></div>
               </CardContent>
             </Card>
