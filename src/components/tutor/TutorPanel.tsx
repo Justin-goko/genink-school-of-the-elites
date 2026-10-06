@@ -77,7 +77,7 @@ export default function TutorPanel({ open, onClose, context }: Props) {
       <div className="fixed inset-0 z-40 bg-primary/30 lg:hidden" onClick={onClose} />
       <aside
         className={cn(
-          "fixed z-50 border-l shadow-2xl flex flex-col bg-tutor",
+          "fixed z-50 h-dvh max-h-dvh overflow-hidden border-l shadow-2xl flex flex-col bg-tutor",
           "inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[400px]",
         )}
       >
