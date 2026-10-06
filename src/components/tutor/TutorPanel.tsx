@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Send, Loader2, Sparkles } from "lucide-react";
+import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +23,7 @@ interface Props {
 
 interface Msg { role: "user" | "assistant"; content: string }
 
-const INTRO_FLAG = "genlink:lightguide:intro-seen";
+const STARTERS = ["Explain this simply", "Give me a Gidurai example", "Quiz me on this"];
 
 export default function TutorPanel({ open, onClose, context }: Props) {
   const { user } = useAuth();
@@ -31,30 +31,14 @@ export default function TutorPanel({ open, onClose, context }: Props) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
-  const [showIntro, setShowIntro] = useState(false);
-  const [introDone, setIntroDone] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const seen = typeof window !== "undefined" && window.localStorage.getItem(INTRO_FLAG);
-    if (!seen) {
-      setShowIntro(true);
-      setIntroDone(false);
-      const t = setTimeout(() => {
-        setIntroDone(true);
-        try { window.localStorage.setItem(INTRO_FLAG, "1"); } catch {}
-      }, 1600);
-      return () => clearTimeout(t);
-    }
-  }, [open]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, busy]);
 
-  async function send() {
-    const text = input.trim();
+  async function send(message?: string) {
+    const text = (message ?? input).trim();
     if (!text || busy) return;
     if (!user) { toast.error("Sign in to chat with the Light Guide"); return; }
 
@@ -83,31 +67,40 @@ export default function TutorPanel({ open, onClose, context }: Props) {
 
   if (!open) return null;
   const limitReached = usage && usage.used >= usage.limit;
+  const used = usage?.used ?? 0;
+  const limit = usage?.limit ?? 10;
+  const remaining = Math.max(0, limit - used);
+  const subtitle = [context.pillar_name, context.unit_title, context.session_title].filter(Boolean).join(" › ");
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 md:bg-transparent" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-primary/30 lg:hidden" onClick={onClose} />
       <aside
         className={cn(
-          "fixed z-50 bg-card border-l shadow-2xl flex flex-col",
-          "inset-0 md:inset-y-0 md:right-0 md:left-auto md:w-[400px]",
+          "fixed z-50 border-l shadow-2xl flex flex-col bg-tutor",
+          "inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[400px]",
         )}
       >
-        <div className="p-5 border-b bg-gradient-to-b from-amber-50 to-card flex items-center gap-3">
-          <LightGuide size={56} className={!introDone ? "lg-intro" : ""} intense={!introDone} />
-          <div className="flex-1">
-            <p className="font-bold text-foreground">Light Guide</p>
-            <p className="text-xs text-muted-foreground">{context.session_title || context.unit_title || "Your AI tutor"}</p>
+        <div className="p-4 border-b border-primary-foreground/15 bg-primary text-primary-foreground flex items-center gap-3">
+          <LightGuide size={52} />
+          <div className="flex-1 min-w-0">
+            <p className="font-bold">Light Guide</p>
+            <p className="text-xs text-primary-foreground/70 truncate">{subtitle || "Your AI tutor"}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}><X className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close Light Guide" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"><X className="w-4 h-4" /></Button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-          {showIntro && (
-            <div className="flex items-start gap-2">
-              <LightGuide size={28} static />
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl rounded-tl-sm px-3.5 py-2 text-sm max-w-[80%]">
-                <span className="font-medium">I'm your Light Guide.</span> Ask me anything about what you're learning.
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-tutor">
+          {messages.length === 0 && !busy && (
+            <div className="h-full min-h-72 flex flex-col items-center justify-center text-center px-4">
+              <LightGuide size={72} />
+              <p className="mt-4 text-sm font-medium text-primary">I'm your Light Guide. Ask me anything about this session.</p>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {STARTERS.map((starter) => (
+                  <Button key={starter} type="button" variant="outline" size="sm" onClick={() => send(starter)} className="h-auto whitespace-normal border-premium/60 bg-tutor-field py-2 text-primary hover:bg-premium/15 hover:text-primary">
+                    {starter}
+                  </Button>
+                ))}
               </div>
             </div>
           )}
@@ -115,14 +108,14 @@ export default function TutorPanel({ open, onClose, context }: Props) {
           {messages.map((m, i) =>
             m.role === "user" ? (
               <div key={i} className="flex justify-end">
-                <div className="bg-[hsl(var(--primary))] text-primary-foreground rounded-2xl rounded-tr-sm px-3.5 py-2 text-sm max-w-[80%] whitespace-pre-wrap">
+                <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3.5 py-2 text-sm max-w-[80%] whitespace-pre-wrap">
                   {m.content}
                 </div>
               </div>
             ) : (
               <div key={i} className="flex items-start gap-2">
                 <LightGuide size={28} static />
-                <div className="bg-amber-50 border border-amber-100 rounded-2xl rounded-tl-sm px-3.5 py-2 text-sm max-w-[80%] whitespace-pre-wrap">
+                <div className="bg-card border-l-[3px] border-premium rounded-r-2xl rounded-bl-2xl px-3.5 py-2 text-sm max-w-[80%] whitespace-pre-wrap text-foreground shadow-sm">
                   {m.content}
                 </div>
               </div>
@@ -132,43 +125,29 @@ export default function TutorPanel({ open, onClose, context }: Props) {
           {busy && (
             <div className="flex items-start gap-2">
               <LightGuide size={28} intense />
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl rounded-tl-sm px-3.5 py-2 text-sm text-muted-foreground">
-                <Loader2 className="w-3 h-3 inline animate-spin mr-1" /> thinking…
+              <div className="bg-card border-l-[3px] border-premium rounded-r-2xl rounded-bl-2xl px-4 py-3 shadow-sm" aria-label="Light Guide is thinking">
+                <span className="lg-thinking-dot" /><span className="lg-thinking-dot" /><span className="lg-thinking-dot" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="border-t p-3">
-          {limitReached ? (
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-center">
-              <p className="text-sm font-medium text-amber-900 mb-2">You've used your 10 free messages today.</p>
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
-                <Sparkles className="w-3 h-3 mr-1" /> Upgrade for unlimited
-              </Button>
-            </div>
-          ) : (
-            <>
+        <div className="border-t border-premium/25 bg-tutor-field p-3">
+          <p className="mb-2 text-xs font-medium text-primary">{remaining} of {limit} free messages left today</p>
+          <div className="flex items-end gap-2">
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-                placeholder={introDone ? "Ask the Light Guide…" : "One moment…"}
-                disabled={busy || !introDone}
+                placeholder={limitReached ? "Daily message limit reached" : "Ask the Light Guide…"}
+                disabled={busy || Boolean(limitReached)}
                 rows={2}
-                className="resize-none mb-2"
+                className="min-h-[64px] resize-none border-premium/30 bg-tutor-field focus-visible:ring-premium focus-visible:ring-offset-0"
               />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {usage ? `${usage.used}/${usage.limit} today` : "10 free messages / day"}
-                </span>
-                <Button size="sm" onClick={send} disabled={busy || !input.trim() || !introDone}>
-                  {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                  <span className="ml-1">Send</span>
-                </Button>
-              </div>
-            </>
-          )}
+              <Button size="icon" onClick={() => send()} disabled={busy || !input.trim() || Boolean(limitReached)} aria-label="Send message" className="shrink-0 bg-premium text-premium-foreground hover:bg-premium/90 disabled:bg-muted disabled:text-muted-foreground">
+                <Send className="w-4 h-4" />
+              </Button>
+          </div>
         </div>
       </aside>
     </>

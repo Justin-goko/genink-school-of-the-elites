@@ -43,6 +43,8 @@ export default {
           DEFAULT: "hsl(var(--premium))",
           foreground: "hsl(var(--premium-foreground))",
         },
+        tutor: "hsl(var(--tutor))",
+        "tutor-field": "hsl(var(--tutor-field))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
