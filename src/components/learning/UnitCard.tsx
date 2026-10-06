@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Lock, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Unit, UserUnitProgress, PillarTheme } from "@/hooks/useUnits";
+import { getPillarMotion } from "@/lib/motion/pillarThemes";
 
 const THEME: Record<PillarTheme, { from: string; to: string; accent: string; text: string }> = {
   financial:        { from: "from-blue-50",    to: "to-blue-100/40",    accent: "bg-blue-600",    text: "text-blue-700" },
@@ -22,6 +23,8 @@ interface Props {
 
 export default function UnitCard({ unit, progress, state, pillarId }: Props) {
   const t = THEME[unit.theme];
+  const theme = getPillarMotion(pillarId);
+  const civic = pillarId === "civic-leadership";
   const completed = progress?.sessions_completed ?? 0;
   const pct = Math.min(100, Math.round((completed / unit.session_count) * 100));
   const xpEarned = progress?.xp_earned ?? 0;
@@ -38,9 +41,10 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
         "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
         t.from, t.to,
         isLocked && "grayscale opacity-50 pointer-events-none",
-        isCurrent && "ring-2 ring-offset-2 ring-amber-500 shadow-lg",
+        isCurrent && "ring-2 ring-offset-2 shadow-lg",
         isCompleted && "border-emerald-400/60",
       )}
+      style={isCurrent ? { borderColor: civic ? "hsl(var(--premium))" : theme.color, boxShadow: `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` } : undefined}
     >
       {/* watermark numeral */}
       <div className="absolute -right-2 -top-6 select-none font-black text-[110px] leading-none text-foreground/5">
@@ -76,8 +80,8 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
           <>
             <div className="h-2 rounded-full bg-foreground/10 overflow-hidden mb-2">
               <div
-                className={cn("h-full transition-all duration-500", t.accent)}
-                style={{ width: `${pct}%` }}
+                className="h-full transition-all duration-500"
+                style={{ width: `${pct}%`, backgroundColor: civic ? "hsl(var(--premium))" : theme.color }}
               />
             </div>
             <div className="flex items-center justify-between text-xs">

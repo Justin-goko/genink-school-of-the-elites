@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GoldParticles } from "@/components/motion";
+import { useUserRole } from "@/hooks/useUserRole";
+import { getPillarMotion } from "@/lib/motion/pillarThemes";
 
 export default function UnitDetail() {
   const { pillarId, unitId } = useParams<{ pillarId: string; unitId: string }>();
@@ -17,6 +19,7 @@ export default function UnitDetail() {
   const { data: unit, isLoading: unitLoading } = useUnit(unitId);
   const { data: sessions = [], isLoading: sessionsLoading } = useUnitSessions(unitId);
   const { data: progressMap = {} } = useUserUnitProgress(unit ? [unit.id] : []);
+  const { isAdmin, departmentRole } = useUserRole();
 
   if (unitLoading || sessionsLoading) {
     return (
@@ -38,6 +41,9 @@ export default function UnitDetail() {
   const pct = totalSessions > 0 ? Math.round((completedCount / totalSessions) * 100) : 0;
   const nextSessionIndex = Math.min(completedCount + 1, Math.max(1, totalSessions));
   const hours = Math.max(1, Math.round(unit.estimated_minutes / 60));
+  const canPreviewLocked = isAdmin || departmentRole === "ceo" || departmentRole === "curriculum";
+  const theme = getPillarMotion(pillar.id);
+  const civic = pillar.id === "civic-leadership";
 
   return (
     <div className="min-h-screen bg-cinematic-surface relative">
@@ -81,7 +87,8 @@ export default function UnitDetail() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg"
+                className="font-semibold shadow-lg"
+                style={{ background: civic ? "hsl(var(--premium))" : theme.color, color: civic ? "hsl(var(--primary))" : "hsl(var(--primary-foreground))" }}
               >
                 <Link to={`/pillar/${pillar.id}/unit/${unit.id}/session/${nextSessionIndex}`}>
                   {completedCount === 0 ? "Start Session 1" : "Continue"}
@@ -95,7 +102,7 @@ export default function UnitDetail() {
           {totalSessions > 0 && (
             <div className="mt-6 max-w-xl">
               <div className="h-2 rounded-full bg-white/15 overflow-hidden">
-                <div className="h-full bg-white/90 transition-all" style={{ width: `${pct}%` }} />
+                <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: civic ? "hsl(var(--premium))" : theme.color }} />
               </div>
               <p className="text-xs text-white/70 mt-1.5">{pct}% complete</p>
             </div>
@@ -127,16 +134,18 @@ export default function UnitDetail() {
               const oneBased = i + 1;
               const isCompleted = oneBased <= completedCount;
               const isCurrent = oneBased === completedCount + 1;
-              const isLocked = oneBased > completedCount + 1;
+              const learnerLocked = oneBased > completedCount + 1;
+              const isLocked = !canPreviewLocked && learnerLocked;
 
               return (
                 <Card
                   key={s.id}
                   className={cn(
                     "transition-all",
-                    isCurrent && "ring-2 ring-accent shadow-md",
+                    isCurrent && "ring-2 shadow-md",
                     isLocked && "opacity-60",
                   )}
+                  style={isCurrent ? { borderColor: civic ? "hsl(var(--premium))" : theme.color, boxShadow: `0 0 0 2px ${civic ? "hsl(var(--premium))" : theme.color}` } : undefined}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
@@ -145,10 +154,11 @@ export default function UnitDetail() {
                           className={cn(
                             "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold",
                             isCompleted && "bg-emerald-500 text-white",
-                            isCurrent && "bg-accent text-accent-foreground",
+                            isCurrent && "text-primary-foreground",
                             isLocked && "bg-muted text-muted-foreground",
                             !isCompleted && !isCurrent && !isLocked && "bg-muted text-foreground",
                           )}
+                          style={isCurrent ? { backgroundColor: civic ? "hsl(var(--primary))" : theme.color } : undefined}
                         >
                           {isCompleted ? <CheckCircle2 className="w-5 h-5" /> :
                            isLocked ? <Lock className="w-4 h-4" /> :
@@ -174,7 +184,8 @@ export default function UnitDetail() {
                       variant={isCurrent ? "default" : "outline"}
                       size="sm"
                       disabled={isLocked}
-                      className={cn("w-full", isCurrent && "bg-accent hover:bg-accent/90 text-accent-foreground")}
+                      className={cn("w-full", isCurrent && "text-primary-foreground")}
+                      style={isCurrent ? { backgroundColor: civic ? "hsl(var(--primary))" : theme.color } : undefined}
                     >
                       {isLocked ? (
                         <span className="inline-flex items-center justify-center">
@@ -183,7 +194,7 @@ export default function UnitDetail() {
                       ) : (
                         <Link to={`/pillar/${pillar.id}/unit/${unit.id}/session/${oneBased}`}>
                           <PlayCircle className="w-4 h-4 mr-2" />
-                          {isCompleted ? "Review" : isCurrent ? "Start" : "Open"}
+                           {isCompleted ? "Review" : learnerLocked && canPreviewLocked ? "Preview" : isCurrent ? "Start" : "Open"}
                         </Link>
                       )}
                     </Button>

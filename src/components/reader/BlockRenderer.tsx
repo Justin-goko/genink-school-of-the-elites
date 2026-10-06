@@ -66,8 +66,35 @@ function BlockBody({ block, index, onAwardReflection, onAwardExercise }: Rendere
     case "divider":       return <DividerBlock />;
     case "key_terms":     return <KeyTermsBlock terms={c.terms ?? []} />;
     case "stat_grid":     return <StatGridBlock stats={c.stats ?? []} />;
+    case "code":          return <CodeBlock code={c.code ?? ""} language={c.language} />;
     default:              return null;
   }
+}
+
+function CodeBlock({ code, language }: { code: string; language?: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success("Code copied");
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error("Could not copy code");
+    }
+  };
+  return (
+    <div className="my-8 overflow-hidden rounded-lg bg-primary text-primary-foreground shadow-lg">
+      <div className="flex min-h-10 items-center justify-between border-b border-primary-foreground/15 px-4 py-2">
+        <span className="font-mono text-xs text-primary-foreground/70">{language || "code"}</span>
+        <Button type="button" variant="ghost" size="sm" onClick={copy} className="h-7 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? "Copied" : "Copy"}
+        </Button>
+      </div>
+      <pre className="overflow-x-auto p-4 text-sm leading-relaxed"><code className="font-mono">{code}</code></pre>
+    </div>
+  );
 }
 
 // ---------------- individual block components ----------------

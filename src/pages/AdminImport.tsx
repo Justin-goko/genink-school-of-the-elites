@@ -99,6 +99,14 @@ export default function AdminImport() {
     if (parsed.length === 0) return toast.error("Nothing parsed yet — paste or upload content");
     setPublishing(true);
     try {
+      const firstH2 = parsed.find((block) => {
+        if (block.block_type !== "heading") return false;
+        const content = block.content as { level?: number; text?: string };
+        return content.level === 2 && Boolean(content.text?.trim());
+      });
+      const sessionTitle = firstH2
+        ? (firstH2.content as { text: string }).text.trim()
+        : null;
       // Replace all blocks for this session atomically enough for our purposes:
       // delete-then-insert. RLS restricts both to admins so no race with users.
       const del = await db.from("session_blocks").delete().eq("session_id", sessionId);
@@ -111,6 +119,11 @@ export default function AdminImport() {
       }));
       const ins = await db.from("session_blocks").insert(rows);
       if (ins.error) throw ins.error;
+      if (sessionTitle) {
+        const titleUpdate = await db.from("unit_sessions").update({ title: sessionTitle }).eq("id", sessionId);
+        if (titleUpdate.error) throw titleUpdate.error;
+        await sessions.refetch();
+      }
       setLastPublished(new Date().toLocaleTimeString());
       toast.success(`Published ${rows.length} blocks`);
     } catch (err: any) {
