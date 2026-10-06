@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { usePillarXp, formatPillarXp } from "@/hooks/usePlatformXp";
 import { toast } from "sonner";
 import { playUnlockChime } from "@/lib/journeySound";
 import PillarLandmark from "@/components/journey/PillarLandmark";
@@ -68,6 +69,7 @@ const pathD = stops
   .join(" ");
 
 const ProgressMap = () => {
+  const { data: pillarXp } = usePillarXp();
   const navigate = useNavigate();
   // The next index that just unlocked (renders bounce + particles).
   const [unlockedIdx, setUnlockedIdx] = useState<number | null>(null);
@@ -367,7 +369,7 @@ const ProgressMap = () => {
                         fill="#E9DFC6"
                         opacity="0.7"
                       >
-                        {s.xp.toLocaleString()} XP · {s.completion}%
+                        {formatPillarXp(pillarXp?.[s.id])} · {s.completion}%
                       </text>
                     </g>
                   </g>
@@ -482,6 +484,7 @@ const CARD_STEP = 140; // vertical spacing between nodes (px)
 const CARD_TOP = 40;   // offset before first node
 
 function MobileJourney({ stops, travelFromIdx, unlockedIdx, onSelect }: MobileJourneyProps) {
+  const { data: pillarXp } = usePillarXp();
   const totalHeight = CARD_TOP + stops.length * CARD_STEP;
   // Vertical winding path down the centre with subtle left/right sway.
   const pathPoints = stops.map((_, i) => {
@@ -580,7 +583,7 @@ function MobileJourney({ stops, travelFromIdx, unlockedIdx, onSelect }: MobileJo
                 </div>
                 <div className="text-sm font-semibold leading-tight">{s.title}</div>
                 <div className="text-[11px] mt-1 opacity-70">
-                  {s.xp.toLocaleString()} XP · {s.completion}%
+                  {formatPillarXp(pillarXp?.[s.id])} · {s.completion}%
                 </div>
               </button>
 

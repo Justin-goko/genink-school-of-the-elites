@@ -15,6 +15,13 @@
       "when": 1791317949631,
       "tag": "0001_light_guide_platform_config",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791319385018,
+      "tag": "0002_tiers_xp_totals_visitor_caps",
+      "breakpoints": true
     }
   ]
 }

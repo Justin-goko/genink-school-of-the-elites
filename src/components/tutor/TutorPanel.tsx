@@ -91,6 +91,16 @@ export default function TutorPanel({ open, onClose, route, pageContext }: Props)
       });
       if (error) {
         const status = (error as any)?.context?.status;
+        let body: any = null;
+        try { body = await (error as any)?.context?.json?.(); } catch { /* ignore */ }
+        if (status === 429 && body?.error === "visitor_cap_reached") {
+          setMessages([...next, {
+            role: "assistant",
+            content: "I've had a lot of visitors today, so I'm pausing guest chats until tomorrow. Sign in (it's free) and I can keep helping you right away.",
+            actions: [{ id: "sign_in", label: "Sign in", href: "/auth" }],
+          }]);
+          return;
+        }
         if (status === 429) {
           setUsage({ used: limit, limit });
           toast.error(user ? "You've used today's free messages." : "Visitor limit reached — sign in to keep chatting.");

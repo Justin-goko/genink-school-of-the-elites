@@ -55,3 +55,11 @@ export function extractActions(text: string, s: ActionScope): { reply: string; a
 
 export const ANON_LIMIT = 5;
 export const DAILY_LIMIT = 10;
+/** Cost safety for signed-out visitors (per UTC day). */
+export const VISITOR_GLOBAL_DAILY_CAP = 300;
+export const VISITOR_IP_DAILY_LIMIT = 20;
+export function visitorCapReason(globalUsed: number, ipUsed: number): "global" | "ip" | null {
+  if (globalUsed >= VISITOR_GLOBAL_DAILY_CAP) return "global";
+  if (ipUsed >= VISITOR_IP_DAILY_LIMIT) return "ip";
+  return null;
+}
