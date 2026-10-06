@@ -28,3 +28,13 @@ Deno.test("message limits", () => {
   assertEquals(ANON_LIMIT, 5);
   assertEquals(DAILY_LIMIT, 10);
 });
+import { visitorCapReason, VISITOR_GLOBAL_DAILY_CAP, VISITOR_IP_DAILY_LIMIT } from "./actions.ts";
+Deno.test("visitor global daily cap is 300", () => {
+  assertEquals(VISITOR_GLOBAL_DAILY_CAP, 300);
+  assertEquals(visitorCapReason(299, 0), null);
+  assertEquals(visitorCapReason(300, 0), "global");
+});
+Deno.test("visitor per-IP daily limit blocks", () => {
+  assertEquals(visitorCapReason(0, VISITOR_IP_DAILY_LIMIT - 1), null);
+  assertEquals(visitorCapReason(0, VISITOR_IP_DAILY_LIMIT), "ip");
+});

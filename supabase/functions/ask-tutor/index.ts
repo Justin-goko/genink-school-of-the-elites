@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { ANON_LIMIT, DAILY_LIMIT, extractActions, type ActionScope } from "./actions.ts";
+import { ANON_LIMIT, DAILY_LIMIT, extractActions, visitorCapReason, type ActionScope } from "./actions.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,6 +74,25 @@ Deno.serve(async (req) => {
       if (!anon_key || anon_key.length < 16) return json(400, { error: "anon_session_id required" });
       const { data } = await admin.from("anon_tutor_usage").select("message_count").eq("session_key", anon_key).maybeSingle();
       count = data?.message_count ?? 0;
+    }
+    // Visitor cost safety: global daily cap + per-IP daily limit (IP stored only as a salted hash).
+    let ipHash: string | null = null;
+    let ipUsed = 0;
+    if (!user_id) {
+      const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("cf-connecting-ip") || "unknown";
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${SERVICE_KEY.slice(-16)}:${ip}`));
+      ipHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      const { data: rows } = await admin.from("anon_tutor_ip_usage").select("ip_hash, message_count").eq("usage_date", today);
+      const globalUsed = (rows ?? []).reduce((a, r) => a + (r.message_count ?? 0), 0);
+      ipUsed = (rows ?? []).find((r) => r.ip_hash === ipHash)?.message_count ?? 0;
+      const capped = visitorCapReason(globalUsed, ipUsed);
+      if (capped) {
+        return json(429, {
+          error: "visitor_cap_reached",
+          reason: capped,
+          message: "The Light Guide is resting for visitors today. Sign in (it's free) to keep chatting.",
+        });
+      }
     }
     if (count >= limit) {
       return json(429, { error: user_id ? "daily_limit_reached" : "visitor_limit_reached", limit, used: count });
@@ -189,6 +208,7 @@ Deno.serve(async (req) => {
       await admin.from("tutor_usage").upsert({ user_id, usage_date: today, message_count: count + 1 }, { onConflict: "user_id,usage_date" });
     } else {
       await admin.from("anon_tutor_usage").upsert({ session_key: anon_key, message_count: count + 1, updated_at: new Date().toISOString() }, { onConflict: "session_key" });
+      await admin.from("anon_tutor_ip_usage").upsert({ usage_date: today, ip_hash: ipHash, message_count: ipUsed + 1, updated_at: new Date().toISOString() }, { onConflict: "usage_date,ip_hash" });
     }
 
     return json(200, { reply, actions, used: count + 1, limit, remaining: limit - (count + 1) });
