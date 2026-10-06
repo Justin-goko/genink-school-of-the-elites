@@ -70,27 +70,27 @@ export default function TutorPanel({ open, onClose, context }: Props) {
   const used = usage?.used ?? 0;
   const limit = usage?.limit ?? 10;
   const remaining = Math.max(0, limit - used);
-  const subtitle = [context.pillar_name, context.unit_title, context.session_title].filter(Boolean).join(" › ");
+  const subtitle = [context.pillar_name, context.unit_title, context.session_title].filter(Boolean).join(" > ");
 
   return (
     <>
       <div className="fixed inset-0 z-40 bg-primary/30 lg:hidden" onClick={onClose} />
       <aside
         className={cn(
-          "fixed z-50 h-dvh max-h-dvh overflow-hidden border-l shadow-2xl flex flex-col bg-tutor",
+           "fixed z-50 h-dvh max-h-dvh overflow-hidden border-l shadow-2xl flex flex-col bg-tutor",
           "inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[400px]",
         )}
       >
-        <div className="p-4 border-b border-primary-foreground/15 bg-primary text-primary-foreground flex items-center gap-3">
+         <div className="shrink-0 p-4 border-b border-primary-foreground/15 bg-primary text-primary-foreground flex items-center gap-3">
           <LightGuide size={52} />
           <div className="flex-1 min-w-0">
             <p className="font-bold">Light Guide</p>
-            <p className="text-xs text-primary-foreground/70 truncate">{subtitle || "Your AI tutor"}</p>
+             <p title={subtitle} className="text-xs text-primary-foreground/70 truncate">{subtitle || "Your AI tutor"}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close Light Guide" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"><X className="w-4 h-4" /></Button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-tutor">
+         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 bg-tutor">
           {messages.length === 0 && !busy && (
             <div className="h-full min-h-72 flex flex-col items-center justify-center text-center px-4">
               <LightGuide size={72} />
@@ -132,7 +132,7 @@ export default function TutorPanel({ open, onClose, context }: Props) {
           )}
         </div>
 
-        <div className="border-t border-premium/25 bg-tutor-field p-3">
+         <div className="light-guide-input shrink-0 border-t border-premium/25 bg-tutor-field p-3">
           <p className="mb-2 text-xs font-medium text-primary">{remaining} of {limit} free messages left today</p>
           <div className="flex items-end gap-2">
               <Textarea

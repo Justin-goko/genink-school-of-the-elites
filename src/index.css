@@ -154,15 +154,15 @@ All colors MUST be HSL.
   /* Reveal on scroll */
   @keyframes cinematic-rise {
     from { opacity: 0; transform: translate3d(0, 30px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    to   { opacity: 1; transform: none; }
   }
-  .reveal-init { opacity: 0; will-change: transform, opacity; }
+  .reveal-init { opacity: 0; }
   .reveal-in   { animation: cinematic-rise var(--duration-base) var(--ease-cinematic) both; }
 
   /* Route transitions */
   @keyframes route-in {
     from { opacity: 0; transform: translate3d(0, 24px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    to   { opacity: 1; transform: none; }
   }
   @keyframes route-out {
     from { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -226,6 +226,14 @@ All colors MUST be HSL.
     50%      { transform: scale(1.05); filter: brightness(1.08); }
   }
   .lg-breathe { animation: lg-breathe 4s var(--ease-cinematic) infinite; }
+
+  .light-guide-launcher {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
+  }
+  .light-guide-input {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
 
   @media (min-width: 1024px) {
     .session-reader-content {

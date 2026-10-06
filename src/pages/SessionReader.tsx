@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import StickyNav from "@/components/StickyNav";
 import { toast } from "sonner";
-import TutorButton from "@/components/tutor/TutorButton";
+import { useLightGuideContext } from "@/components/tutor/LightGuideProvider";
+import { pillars } from "@/data/courses";
 
 // If a session has no imported blocks and no legacy JSONB content, show a
 // gentle placeholder rather than a blank page.
@@ -48,10 +49,22 @@ export default function SessionReader() {
   const { user } = useAuth();
   const { award } = useXPReward();
   const qc = useQueryClient();
+  const setTutorContext = useLightGuideContext();
 
   const { data: unit } = useUnit(unitId);
   const { data: sessions } = useUnitSessions(unitId);
   const session = sessions?.[idx];
+  const pillarName = pillars.find((pillar) => pillar.id === pillarId)?.name;
+  useEffect(() => {
+    setTutorContext({
+      unit_id: unitId,
+      session_id: session?.id,
+      pillar_name: pillarName,
+      unit_title: unit?.title ?? `Unit ${unit ? unit.order_index + 1 : 1}`,
+      session_title: session?.title ?? `Session ${idx + 1}`,
+    });
+    return () => setTutorContext(null);
+  }, [setTutorContext, unitId, session?.id, session?.title, pillarName, unit?.title, unit?.order_index, idx]);
   const { data: importedBlocks } = useSessionBlocks(session?.id);
 
   const [scrollPct, setScrollPct] = useState(0);
@@ -81,6 +94,10 @@ export default function SessionReader() {
   }, [importedBlocks, session]);
 
   const readMinutes = useMemo(() => estimateReadMinutes(blocks), [blocks]);
+  const firstBlock = blocks[0];
+  const firstText = firstBlock?.content && "text" in firstBlock.content ? firstBlock.content.text : undefined;
+  const bodyBlocks = firstBlock?.block_type === "heading" && typeof firstText === "string"
+    && firstText.trim() === session?.title.trim() ? blocks.slice(1) : blocks;
 
   async function callAwardXP(action_type: string, extra: Record<string, any> = {}) {
     if (!user || !unitId) { toast.error("Sign in to track progress"); return; }
@@ -138,7 +155,7 @@ export default function SessionReader() {
         </div>
 
         <article>
-          {blocks.map((b, i) => (
+          {bodyBlocks.map((b, i) => (
             <BlockRenderer
               key={b.id ?? i}
               index={i}
@@ -174,15 +191,6 @@ export default function SessionReader() {
         </div>
       </div>
 
-      <TutorButton
-        context={{
-          unit_id: unitId,
-          session_id: session?.id,
-          pillar_name: pillarId,
-          unit_title: unit?.title,
-          session_title: session?.title ?? `Session ${idx + 1}`,
-        }}
-      />
     </div>
   );
 }

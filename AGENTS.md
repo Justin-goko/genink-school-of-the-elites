@@ -1,1 +1,2 @@
 Session content blocks use the database-backed `session_block_type` enum; add new renderable formats there before parser and renderer support so imported content remains persistable.
+Mount Light Guide once through the app-root provider and portal its UI into document.body; reader pages supply context only so animated ancestors cannot change its fixed positioning.
