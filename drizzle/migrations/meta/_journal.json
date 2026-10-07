@@ -22,6 +22,13 @@
       "when": 1791319385018,
       "tag": "0002_tiers_xp_totals_visitor_caps",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791358830219,
+      "tag": "0003_fix_refresh_unit_xp_where",
+      "breakpoints": true
     }
   ]
 }
