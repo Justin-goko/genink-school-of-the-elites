@@ -120,7 +120,7 @@ const Courses = () => {
                           <span>Pillar {r.order_index}: {r.current_pct}%</span>
                           <span className="text-muted-foreground">needs {r.required_pct}%</span>
                         </div>
-                        <Progress value={Math.min(100, (r.current_pct / Math.max(1, r.required_pct)) * 100)} className="h-1.5" />
+                        <Progress value={Math.min(100, (r.current_pct / Math.max(1, r.required_pct)) * 100)} className="h-1.5 bg-muted [&>div]:bg-accent" />
                       </div>
                     ))}
                     <Button asChild variant="outline" className="w-full">
