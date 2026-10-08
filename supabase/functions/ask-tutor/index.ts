@@ -42,8 +42,10 @@ Deno.serve(async (req) => {
     // Signed-in user is optional: visitors get the lighter public guide.
     let user_id: string | null = null;
     const authHeader = req.headers.get("Authorization");
+    // Caller-scoped client: get_pillar_access() reads auth.uid(), so visitors get the public view.
+    let userClient = createClient(SUPABASE_URL, ANON_KEY);
     if (authHeader && !authHeader.includes(ANON_KEY)) {
-      const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } });
+      userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } });
       const { data } = await userClient.auth.getUser();
       user_id = data?.user?.id ?? null;
     }
@@ -100,12 +102,17 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) return json(503, { error: "tutor_unavailable" });
 
     // ---- Platform config from real tables ----
-    const [{ data: xpRules }, { data: tiers }, { data: badges }, { data: unitRows }] = await Promise.all([
+    const [{ data: xpRules }, { data: tiers }, { data: badges }, { data: unitRows }, { data: access }] = await Promise.all([
       admin.from("xp_rules").select("label, xp").order("xp"),
       admin.from("learner_tiers").select("name, min_xp, description").order("min_xp"),
       admin.from("achievements").select("name, description, xp_reward"),
       admin.from("units").select("id, pillar_id, title, order_index, track_type"),
+      userClient.rpc("get_pillar_access"),
     ]);
+    // Lock state comes only from get_pillar_access() — the same source as the Explore page and journey map.
+    const accessLine = (access ?? []).map((a: any) =>
+      `${a.order_index}. ${a.name}: ${a.state}${a.state === "locked" ? ` (needs ${(a.requirements ?? []).map((r: any) => `Pillar ${r.order_index} at ${r.required_pct}%, currently ${r.current_pct}%`).join("; ")})` : ""}${user_id ? `, progress ${a.progress_pct}%` : ""}`,
+    ).join("; ");
     const unitsByPillar = new Map<string, number>();
     for (const u of unitRows ?? []) if (u.track_type === "learning_path") unitsByPillar.set(u.pillar_id, (unitsByPillar.get(u.pillar_id) ?? 0) + 1);
 
@@ -148,6 +155,8 @@ Deno.serve(async (req) => {
       "PLATFORM GUIDE (the only facts you may state):",
       "Genlink School of the Elites is a Kenyan learning platform built on 'cognitive discipline': technology enhances human reasoning. No get-rich-quick promises.",
       "The 7 pillars, in curriculum order: " + PILLARS.map((p, i) => `${i + 1}. ${p.name}${unitsByPillar.get(p.slug) ? ` (${unitsByPillar.get(p.slug)} core units)` : ""}`).join("; ") + ".",
+      "Structure: Pillars 1-3 are the compulsory Foundation, taken first. Pillars 4-7 are free-choice Specialisations that open once the Foundation is built. Unit 1 Session 1 of every pillar can be read as a free preview (no XP for previews).",
+      (user_id ? "Pillar access for this learner: " : "Pillar access for a new visitor: ") + accessLine + ".",
       "Each unit has sessions. Sessions unlock sequentially: finish one to open the next. Some units are locked until earlier units are done.",
       "XP is awarded automatically by the platform (never by the guide): " + (xpRules ?? []).map((r) => `${r.label}: ${r.xp} XP`).join("; ") + ".",
       "Tiers by total XP: " + (tiers ?? []).map((t) => `${t.name} from ${t.min_xp} XP${t.description ? ` (${t.description})` : ""}`).join("; ") + ".",

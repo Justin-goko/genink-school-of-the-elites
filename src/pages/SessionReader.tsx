@@ -15,6 +15,7 @@ import StickyNav from "@/components/StickyNav";
 import { toast } from "sonner";
 import { useLightGuideContext } from "@/components/tutor/LightGuideProvider";
 import { pillars } from "@/data/courses";
+import { usePillarEnrollment } from "@/hooks/usePillarEnrollment";
 
 // If a session has no imported blocks and no legacy JSONB content, show a
 // gentle placeholder rather than a blank page.
@@ -52,7 +53,10 @@ export default function SessionReader() {
   const setTutorContext = useLightGuideContext();
 
   const { data: unit } = useUnit(unitId);
-  const { data: sessions } = useUnitSessions(unitId);
+  const { data: sessions, isLoading: sessionsLoading } = useUnitSessions(unitId);
+  const { data: isEnrolled = false } = usePillarEnrollment(pillarId);
+  // Not enrolled → this is a public preview (Unit 1 Session 1). No XP is awarded for previews.
+  const isPreview = !user || !isEnrolled;
   const session = sessions?.[idx];
   const pillarName = pillars.find((pillar) => pillar.id === pillarId)?.name;
   useEffect(() => {
@@ -100,6 +104,7 @@ export default function SessionReader() {
     && firstText.trim() === session?.title.trim() ? blocks.slice(1) : blocks;
 
   async function callAwardXP(action_type: string, extra: Record<string, any> = {}) {
+    if (isPreview) return;
     if (!user || !unitId) { toast.error("Sign in to track progress"); return; }
     const session_id = `${unitId}:${idx}:${action_type}:${extra.bucket ?? "default"}`;
     const { data, error } = await supabase.functions.invoke("award-xp", {
@@ -124,6 +129,23 @@ export default function SessionReader() {
         navigate(`/pillar/${pillarId}/unit/${unitId}/session/${idx + 2}`);
       }
     } finally { setBusy(false); }
+  }
+
+  if (!sessionsLoading && !session) {
+    return (
+      <div className="min-h-screen bg-cinematic-surface relative">
+        <StickyNav />
+        <div className="container mx-auto max-w-[720px] px-5 py-20 text-center">
+          <h1 className="text-3xl mb-3" style={{ fontFamily: READER.serif, color: READER.ink }}>This session is locked</h1>
+          <p className="text-sm mb-6" style={{ color: READER.inkSoft }}>
+            Only the first session of each pillar is open as a preview. Unlock the pillar to keep reading.
+          </p>
+          <Button asChild style={{ background: READER.gold, color: READER.navy }}>
+            <Link to={`/pillar/${pillarId}`}>See what unlocks it</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -154,6 +176,11 @@ export default function SessionReader() {
           <span>~{readMinutes} min read</span>
         </div>
 
+        {isPreview && (
+          <div className="mb-8 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: `${READER.gold}55`, background: `${READER.gold}12`, color: READER.ink }}>
+            You're reading a free preview. Progress and XP aren't recorded for previews.
+          </div>
+        )}
         <article>
           {bodyBlocks.map((b, i) => (
             <BlockRenderer
@@ -166,6 +193,16 @@ export default function SessionReader() {
           ))}
         </article>
 
+        {isPreview ? (
+          <div className="mt-14 border-t pt-6 flex flex-col sm:flex-row gap-3 items-center justify-between" style={{ borderColor: `${READER.ink}14` }}>
+            <span className="text-sm" style={{ color: READER.inkSoft }}>End of preview.</span>
+            <Button asChild className="font-semibold" style={{ background: READER.gold, color: READER.navy }}>
+              <Link to={user ? `/pillar/${pillarId}` : "/pathway-intelligence"}>
+                {user ? "See how to unlock this pillar" : "Start your assessment"} <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+            </Button>
+          </div>
+        ) : (
         <div className="mt-14 border-t pt-6 flex items-center justify-between" style={{ borderColor: `${READER.ink}14` }}>
           <Button
             variant="outline"
@@ -189,6 +226,7 @@ export default function SessionReader() {
             <Sparkles className="w-3 h-3 ml-1" />
           </Button>
         </div>
+        )}
       </div>
 
     </div>

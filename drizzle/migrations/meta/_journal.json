@@ -29,6 +29,13 @@
       "when": 1791358830219,
       "tag": "0003_fix_refresh_unit_xp_where",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791450368052,
+      "tag": "0004_foundation_specialisation_access",
+      "breakpoints": true
     }
   ]
 }

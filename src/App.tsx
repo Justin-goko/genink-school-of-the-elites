@@ -71,7 +71,7 @@ const App = () => (
             <Route path="/learner-insights" element={<ProtectedRoute><LearnerInsights /></ProtectedRoute>} />
             <Route path="/path/:pillarId/:pathId" element={<PathRedirect />} />
             <Route path="/pillar/:pillarId/unit/:unitId" element={<ProtectedRoute><UnitDetail /></ProtectedRoute>} />
-            <Route path="/pillar/:pillarId/unit/:unitId/session/:sessionIndex" element={<ProtectedRoute><SessionReader /></ProtectedRoute>} />
+            <Route path="/pillar/:pillarId/unit/:unitId/session/:sessionIndex" element={<SessionReader />} />
             <Route path="/learn/:courseId" element={<ProtectedRoute><CourseLearning /></ProtectedRoute>} />
             <Route path="/learning-paths" element={<Navigate to="/journey" replace />} />
             <Route path="/mind-architecture" element={<ProtectedRoute><MindArchitecture /></ProtectedRoute>} />
