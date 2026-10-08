@@ -142,6 +142,7 @@ export type Database = {
           enrolled_at: string | null
           id: string
           progress: number | null
+          unlock_source: string
           user_id: string
         }
         Insert: {
@@ -151,6 +152,7 @@ export type Database = {
           enrolled_at?: string | null
           id?: string
           progress?: number | null
+          unlock_source?: string
           user_id: string
         }
         Update: {
@@ -160,6 +162,7 @@ export type Database = {
           enrolled_at?: string | null
           id?: string
           progress?: number | null
+          unlock_source?: string
           user_id?: string
         }
         Relationships: []
@@ -542,6 +545,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pillar_unlock_rules: {
+        Row: {
+          created_at: string
+          id: string
+          min_completion_pct: number
+          pillar_id: string
+          requires_pillar_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_completion_pct: number
+          pillar_id: string
+          requires_pillar_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_completion_pct?: number
+          pillar_id?: string
+          requires_pillar_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pillar_unlock_rules_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pillar_unlock_rules_requires_pillar_id_fkey"
+            columns: ["requires_pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pillars: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_index: number
+          track: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name: string
+          order_index: number
+          track: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number
+          track?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1089,9 +1155,32 @@ export type Database = {
       }
     }
     Functions: {
+      can_access_pillar: {
+        Args: { _pillar_id: string; _user_id: string }
+        Returns: boolean
+      }
       get_department_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["department_role"]
+      }
+      get_pillar_access: {
+        Args: never
+        Returns: {
+          enrolled: boolean
+          name: string
+          order_index: number
+          pillar_id: string
+          preview_unit_id: string
+          progress_pct: number
+          requirements: Json
+          state: string
+          track: string
+          unlock_source: string
+        }[]
+      }
+      grant_pillar_access: {
+        Args: { _pillar_id: string; _user_id: string }
+        Returns: undefined
       }
       has_ops_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
@@ -1102,6 +1191,8 @@ export type Database = {
         Returns: boolean
       }
       is_ceo_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_pillar_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_preview_session: { Args: { _session_id: string }; Returns: boolean }
       list_learner_insights: {
         Args: never
         Returns: {
@@ -1128,6 +1219,10 @@ export type Database = {
       ops_submission_open: {
         Args: { _week_starting: string }
         Returns: boolean
+      }
+      pillar_completion_pct: {
+        Args: { _pillar_id: string; _user_id: string }
+        Returns: number
       }
       refresh_unit_xp_totals: { Args: never; Returns: undefined }
     }

@@ -21,6 +21,8 @@ import { usePillarEnrollment, useHasAssessment, enrollInPillar } from "@/hooks/u
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { usePillarAccess } from "@/hooks/usePillarAccess";
+import LockedPillar from "@/components/learning/LockedPillar";
 
 const pillarIcons: Record<string, React.ReactNode> = {
   brain: <Brain className="w-8 h-8" />,
@@ -41,6 +43,10 @@ const PillarDetail = () => {
   const { data: isEnrolled = false, isLoading: enrollmentLoading } = usePillarEnrollment(pillarId);
   const { data: userHasAssessment = false } = useHasAssessment();
 
+  const { data: access } = usePillarAccess();
+  const pillarAccess = access?.find((a) => a.pillar_id === pillarId);
+  const isLocked = pillarAccess?.state === "locked";
+
   const { data: units = [] } = usePillarUnits(pillarId);
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
   const specializedUnits = units.filter((u) => u.track_type === "specialized");
@@ -52,10 +58,12 @@ const PillarDetail = () => {
     if (!user || !pillar) return;
     if (isEnrolled || enrollmentLoading) return;
     if (!userHasAssessment) return;
+    // Never auto-enrol into a locked pillar (the server would refuse anyway).
+    if (!pillarAccess || pillarAccess.state !== "open") return;
     enrollInPillar(user.id, pillar.id).then(() => {
       queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
     });
-  }, [user, pillar, isEnrolled, enrollmentLoading, userHasAssessment, queryClient]);
+  }, [user, pillar, isEnrolled, enrollmentLoading, userHasAssessment, queryClient, pillarAccess]);
 
   if (!pillar) return <Navigate to="/courses" replace />;
 
@@ -79,6 +87,17 @@ const PillarDetail = () => {
     toast.success(`You're enrolled in ${pillar.name}.`);
     queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
   };
+
+  // ── LOCKED (and not enrolled) → friendly locked screen with requirements + preview
+  if (pillarAccess && isLocked && !isEnrolled && !(user && enrollmentLoading)) {
+    return (
+      <div className="min-h-screen bg-cinematic-surface relative">
+        <GoldParticles count={14} opacity={0.06} />
+        <StickyNav />
+        <LockedPillar access={pillarAccess} color={pillar.color} />
+      </div>
+    );
+  }
 
   // ── AUTHENTICATED + ENROLLED → learning view ──────────────────
   if (user && isEnrolled) {

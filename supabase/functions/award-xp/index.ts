@@ -80,6 +80,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Reader XP (sessions, reflections, exercises, unit bonus) is only for learners enrolled
+    // in the unit's pillar. Preview readers (Unit 1 Session 1 of a pillar they haven't
+    // unlocked) get no XP.
+    const READER_ACTIONS = ["session", "reflection", "exercise", "unit_complete"];
+    if (READER_ACTIONS.includes(action_type)) {
+      const svc = createClient(SUPABASE_URL, SERVICE_KEY);
+      const { data: u } = typeof unit_id === "string"
+        ? await svc.from("units").select("pillar_id").eq("id", unit_id).maybeSingle()
+        : { data: null };
+      const { data: enr } = u
+        ? await svc.from("enrollments").select("id").eq("user_id", user_id).eq("course_id", u.pillar_id).maybeSingle()
+        : { data: null };
+      if (!enr) {
+        return new Response(JSON.stringify({ ok: true, preview: true, xp_awarded: 0 }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const dedupeKey = `${user_id}:${action_type}:${session_id}`;
     if (seen.has(dedupeKey)) {
       return new Response(JSON.stringify({ ok: true, deduped: true, xp_awarded: 0 }), {

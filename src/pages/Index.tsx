@@ -69,12 +69,25 @@ const Index = () => {
           .order("completed_at", { ascending: false })
           .limit(1)
           .maybeSingle();
-        const pillar = ar?.primary_pillar_recommended;
-        if (!pillar) return;
-        // auto-enrol (idempotent — errors ignored if already enrolled)
-        await enrollInPillar(user.id, pillar);
+        if (!ar) return;
+        // Never auto-enrol into a locked pillar: land on the first OPEN pillar's next session.
+        const { data: access } = await (supabase as any).rpc("get_pillar_access");
+        const open = ((access ?? []) as { pillar_id: string; state: string; enrolled: boolean }[])
+          .filter((a) => a.state === "open");
+        const target = open.find((a) => a.pillar_id === ar.primary_pillar_recommended) ?? open[0];
+        if (!target) return;
+        if (!target.enrolled) await enrollInPillar(user.id, target.pillar_id);
+        const { data: units } = await supabase
+          .from("units").select("id, order_index, session_count")
+          .eq("pillar_id", target.pillar_id).eq("track_type", "learning_path").order("order_index");
+        const { data: prog } = await supabase
+          .from("user_unit_progress").select("unit_id, sessions_completed").eq("user_id", user.id);
+        const done = new Map((prog ?? []).map((p) => [p.unit_id, p.sessions_completed]));
+        const next = (units ?? []).find((u) => (done.get(u.id) ?? 0) < u.session_count) ?? units?.[0];
         localStorage.setItem(firstLoginKey, "1");
-        navigate(`/pillar/${pillar}`, { replace: true });
+        navigate(next
+          ? `/pillar/${target.pillar_id}/unit/${next.id}/session/${(done.get(next.id) ?? 0) + 1}`
+          : `/pillar/${target.pillar_id}`, { replace: true });
       } catch (err) {
         console.warn("First-pillar redirect skipped:", err);
       }
