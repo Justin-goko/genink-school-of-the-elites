@@ -31,7 +31,7 @@ export default function LockedPillar({ access, color }: { access: PillarAccess; 
                 <span>Pillar {r.order_index}: {r.name}</span>
                 <span className="text-muted-foreground">{r.current_pct}% of {r.required_pct}%</span>
               </div>
-              <Progress value={Math.min(100, (r.current_pct / Math.max(1, r.required_pct)) * 100)} className="h-2" />
+              <Progress value={Math.min(100, (r.current_pct / Math.max(1, r.required_pct)) * 100)} className="h-2 bg-muted [&>div]:bg-accent" />
             </li>
           ))}
         </ul>

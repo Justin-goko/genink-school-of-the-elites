@@ -57,7 +57,7 @@ function toStops(access: PillarAccess[] | undefined): PillarStop[] {
 
 // Layout constants for the SVG viewBox.
 const VB_W = 1400;
-const VB_H = 600;
+const VB_H = 620;
 const ROAD_Y = 320;
 const F_X = [110, 340, 570];
 const JUNCTION = { x: 780, y: ROAD_Y };
