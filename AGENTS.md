@@ -4,3 +4,4 @@ Mount Light Guide once through the app-root provider and portal its UI into docu
 - xp_rules is the source of truth for XP amounts; award-xp reads it (code table is only a fallback) — the guide and the awarding logic never disagree.
 - units.total_xp is derived by the database (refresh_unit_xp_totals, run by triggers on session_blocks, unit_sessions and xp_rules); never seed or hand-set it, and read tier names only from learner_tiers — displays and real awards stay in sync.
 - Signed-out Light Guide usage is capped server-side per day (global total + per hashed IP) in ask-tutor; limits live in actions.ts with tests — protects AI costs from anonymous traffic.
+- Pillar lock state comes only from the get_pillar_access() RPC (rules in pillar_unlock_rules, enforced by can_access_pillar in the enrollments INSERT policy and award-xp's enrollment check) — the Explore page, journey map, pillar pages and Light Guide never compute locks themselves, so UI and server always agree.
