@@ -1,6 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { usePillarXp, formatPillarXp } from "@/hooks/usePlatformXp";
+import { usePillarAccess, requirementLabel, type PillarAccess } from "@/hooks/usePillarAccess";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { playUnlockChime } from "@/lib/journeySound";
 import PillarLandmark from "@/components/journey/PillarLandmark";
@@ -15,6 +19,7 @@ import {
   Check,
   Lock,
   Sparkles,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,113 +30,192 @@ interface PillarStop {
   id: string;
   title: string;
   icon: LucideIcon;
-  xp: number;
   completion: number;
   status: Status;
+  lockedHint?: string;
 }
 
-// Pillar slugs map to /pillar/:pillarId.
-// Progress starts at 0 for every learner — real completion and XP are only written
-// by the server-side award-xp Edge Function when a session is genuinely finished.
-// The first pillar is the entry point ("current"); the rest unlock as they complete.
-const PILLARS: PillarStop[] = [
-  { num: 1, id: "personal-mastery", title: "Personal Mastery & Mind Renewal", icon: Crown, xp: 0, completion: 0, status: "current" },
-  { num: 2, id: "financial-intelligence", title: "Financial Intelligence & Income Systems", icon: Coins, xp: 0, completion: 0, status: "locked" },
-  { num: 3, id: "digital-literacy", title: "Digital Literacy & Productivity", icon: Laptop, xp: 0, completion: 0, status: "locked" },
-  { num: 4, id: "cybersecurity", title: "Cybersecurity & Digital Protection", icon: Shield, xp: 0, completion: 0, status: "locked" },
-  { num: 5, id: "programming-systems", title: "Programming & Intelligent Systems", icon: Code, xp: 0, completion: 0, status: "locked" },
-  { num: 6, id: "creator-economy", title: "Creator Economy & Digital Monetisation", icon: TrendingUp, xp: 0, completion: 0, status: "locked" },
-  { num: 7, id: "civic-leadership", title: "Civic Leadership & Governance", icon: Landmark, xp: 0, completion: 0, status: "locked" },
+// Display metadata only — lock state and completion come from get_pillar_access().
+const META: { num: number; id: string; title: string; icon: LucideIcon }[] = [
+  { num: 1, id: "personal-mastery", title: "Personal Mastery & Mind Renewal", icon: Crown },
+  { num: 2, id: "financial-intelligence", title: "Financial Intelligence & Income Systems", icon: Coins },
+  { num: 3, id: "digital-literacy", title: "Digital Literacy & Productivity", icon: Laptop },
+  { num: 4, id: "cybersecurity", title: "Cybersecurity & Digital Protection", icon: Shield },
+  { num: 5, id: "programming-systems", title: "Programming & Intelligent Systems", icon: Code },
+  { num: 6, id: "creator-economy", title: "Creator Economy & Digital Monetisation", icon: TrendingUp },
+  { num: 7, id: "civic-leadership", title: "Civic Leadership & Governance", icon: Landmark },
 ];
+
+function toStops(access: PillarAccess[] | undefined): PillarStop[] {
+  return META.map((m) => {
+    const a = access?.find((x) => x.pillar_id === m.id);
+    const pct = a?.progress_pct ?? 0;
+    const status: Status = !a || a.state === "locked" ? "locked" : pct >= 100 ? "completed" : "current";
+    return { ...m, completion: pct, status, lockedHint: a?.requirements?.length ? requirementLabel(a.requirements) : undefined };
+  });
+}
 
 // Layout constants for the SVG viewBox.
 const VB_W = 1400;
-const VB_H = 420;
-const MARGIN_X = 90;
-const BASE_Y = 260;
+const VB_H = 600;
+const ROAD_Y = 320;
+const F_X = [110, 340, 570];
+const JUNCTION = { x: 780, y: ROAD_Y };
+const BRANCH_X = 1130;
+const BRANCH_Y = [85, 235, 385, 535];
 
-// Evenly distribute stops, undulate Y for a "winding" feel.
-const stops = PILLARS.map((p, i) => {
-  const t = i / (PILLARS.length - 1);
-  const x = MARGIN_X + t * (VB_W - MARGIN_X * 2);
-  const y = BASE_Y + Math.sin(i * 0.95) * 38;
-  return { ...p, x, y };
-});
-
-// Smooth curve through the stops.
-const pathD = stops
+const foundationPos = F_X.map((x, i) => ({ x, y: ROAD_Y + Math.sin(i * 1.3) * 34 }));
+const roadPts = [...foundationPos, JUNCTION];
+// Smooth curve through the foundation stops to the crossroads.
+const pathD = roadPts
   .map((s, i) => {
     if (i === 0) return `M ${s.x} ${s.y}`;
-    const prev = stops[i - 1];
+    const prev = roadPts[i - 1];
     const cx = (prev.x + s.x) / 2;
-    return `Q ${cx} ${prev.y}, ${cx} ${(prev.y + s.y) / 2} T ${s.x} ${s.y}`;
+    return `C ${cx} ${prev.y}, ${cx} ${s.y}, ${s.x} ${s.y}`;
   })
   .join(" ");
+// Segment the orb travels when the Foundation is completed: Pillar 3 → crossroads.
+const lastLeg = `M ${foundationPos[2].x} ${foundationPos[2].y} C ${(foundationPos[2].x + JUNCTION.x) / 2} ${foundationPos[2].y}, ${(foundationPos[2].x + JUNCTION.x) / 2} ${JUNCTION.y}, ${JUNCTION.x} ${JUNCTION.y}`;
+const branchD = BRANCH_Y.map(
+  (by) => `M ${JUNCTION.x} ${JUNCTION.y} C ${JUNCTION.x + 170} ${JUNCTION.y}, ${BRANCH_X - 190} ${by}, ${BRANCH_X} ${by}`,
+);
+
+/** The learner's recommended specialisation from their latest assessment. */
+function useDestination() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["destination", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("assessment_results")
+        .select("primary_pillar_recommended, secondary_pillar_recommended")
+        .eq("user_id", user!.id)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const spec = META.slice(3).map((m) => m.id);
+      return [data?.primary_pillar_recommended, data?.secondary_pillar_recommended].find((p) => p && spec.includes(p)) ?? null;
+    },
+  });
+}
+
+const reducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const ProgressMap = () => {
   const { data: pillarXp } = usePillarXp();
+  const { data: access } = usePillarAccess();
+  const { data: destination } = useDestination();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  // The next index that just unlocked (renders bounce + particles).
-  const [unlockedIdx, setUnlockedIdx] = useState<number | null>(null);
-  // The index from which the orb is travelling. The orb renders only when this is set.
-  const [travelFromIdx, setTravelFromIdx] = useState<number | null>(null);
+  const all = useMemo(() => toStops(access), [access]);
+  const foundation = all.slice(0, 3);
+  const branches = all.slice(3);
+  const foundationDone = foundation.every((s) => s.status === "completed");
+  const branchesOpen = branches.some((s) => s.status !== "locked");
+
+  // Orb travel to the crossroads, then all four branches light up.
+  const [travelling, setTravelling] = useState(false);
+  const [lit, setLit] = useState(false);
   const motionRef = useRef<SVGAnimateMotionElement | null>(null);
 
-  // Auto-detect: when a stop is completed and the next is locked, queue an unlock animation.
-  useEffect(() => {
-    if (travelFromIdx !== null || unlockedIdx !== null) return;
-    for (let i = 0; i < stops.length - 1; i++) {
-      if (stops[i].status === "completed" && stops[i + 1].status === "locked") {
-        // Don't auto-fire — wait for explicit trigger (data hasn't actually changed mid-session).
-        break;
-      }
-    }
-  }, []);
-
-  const triggerUnlock = (fromIdx: number) => {
-    if (fromIdx < 0 || fromIdx >= stops.length - 1) return;
-    if (travelFromIdx !== null) return;
-    setUnlockedIdx(null);
-    setTravelFromIdx(fromIdx);
-    // Kick the SMIL animateMotion via begin attribute change.
+  const runJunction = () => {
+    if (travelling) return;
+    if (reducedMotion()) { setLit(true); return; }
+    setLit(false);
+    setTravelling(true);
     requestAnimationFrame(() => {
       try { motionRef.current?.beginElement(); } catch { /* ignore */ }
     });
   };
 
-  const onOrbArrive = (toIdx: number) => {
-    setUnlockedIdx(toIdx);
-    playUnlockChime();
-    // Clear the travelling orb after the unlock animation completes.
-    window.setTimeout(() => {
-      setTravelFromIdx(null);
-      setUnlockedIdx(null);
-    }, 1400);
-  };
+  // First time the Foundation is complete, play the junction sequence once.
+  useEffect(() => {
+    if (!user || !foundationDone) return;
+    const key = `genlink_junction_seen_${user.id}`;
+    if (localStorage.getItem(key)) { setLit(true); return; }
+    localStorage.setItem(key, "1");
+    runJunction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, foundationDone]);
 
-  // SMIL "endEvent" is not exposed via React props — bind it imperatively.
   useEffect(() => {
     const el = motionRef.current;
-    if (!el || travelFromIdx === null) return;
-    const handler = () => onOrbArrive(travelFromIdx + 1);
+    if (!el || !travelling) return;
+    const handler = () => {
+      setLit(true);
+      playUnlockChime();
+      window.setTimeout(() => setTravelling(false), 1400);
+    };
     el.addEventListener("endEvent", handler);
     return () => el.removeEventListener("endEvent", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [travelFromIdx]);
+  }, [travelling]);
 
   const handleClick = (stop: PillarStop) => {
     if (stop.status === "locked") {
-      toast.error("Complete previous Pillar to unlock");
+      toast.error(stop.lockedHint ? `Locked: ${stop.lockedHint}` : "Complete the Foundation to unlock");
       return;
     }
     navigate(`/pillar/${stop.id}`);
   };
 
-  // Find first locked index for demo trigger.
-  const firstLockedIdx = stops.findIndex((s) => s.status === "locked");
-  const demoFromIdx = firstLockedIdx > 0 ? firstLockedIdx - 1 : -1;
-  const targetIdx = travelFromIdx !== null ? travelFromIdx + 1 : -1;
-  const target = targetIdx >= 0 ? stops[targetIdx] : null;
+  const junctionLit = lit || (branchesOpen && !travelling);
+
+  const renderStop = (s: PillarStop, x: number, y: number, unlocking: boolean) => {
+    const isCompleted = s.status === "completed";
+    const isCurrent = s.status === "current";
+    const isLocked = s.status === "locked";
+    const isDest = destination === s.id;
+    const platformFill = isCompleted ? "#1B2A4A" : isCurrent ? "#0F1B33" : "#0A1226";
+    const platformStroke = isCompleted ? "#C9A84C" : isCurrent ? "#F1CF6A" : "#3A4A6E";
+    return (
+      <g
+        key={s.id}
+        transform={`translate(${x} ${y})`}
+        className="cursor-pointer"
+        onClick={() => handleClick(s)}
+        role="button"
+        aria-label={`Pillar ${s.num}: ${s.title}${isLocked ? " (locked)" : ""}${isDest ? " (recommended for you)" : ""}`}
+      >
+        {isCurrent && (
+          <circle r="32" fill="none" stroke="#F1CF6A" strokeWidth="2" className="pm-pulse-ring" opacity="0.8" />
+        )}
+        <g className={unlocking ? "pm-unlock" : undefined}>
+          <circle
+            r="30"
+            fill={unlocking ? "#C9A84C" : platformFill}
+            stroke={unlocking ? "#F1CF6A" : platformStroke}
+            strokeWidth="2"
+            className={isCompleted ? "node-completed-glow" : isCurrent ? "node-breathe" : undefined}
+          />
+          <PillarLandmark pillar={s.num} status={s.status} />
+        </g>
+        {isLocked && (
+          <g transform="translate(-8 -8)" pointerEvents="none" opacity="0.9">
+            <Lock size={16} color="#F1CF6A" strokeWidth={2.5} />
+          </g>
+        )}
+        <g transform="translate(24 -30)">
+          <circle r="11" fill="#F1CF6A" stroke="#0F1B33" strokeWidth="1.5" />
+          <text textAnchor="middle" dy="4" fontSize="12" fontWeight="700" fill="#0F1B33">{s.num}</text>
+        </g>
+        {isDest && (
+          <g transform="translate(-62 -62)">
+            <rect width="124" height="20" rx="10" fill="#C9A84C" />
+            <text x="62" y="14" textAnchor="middle" fontSize="11" fontWeight="700" fill="#0F1B33">★ Recommended for you</text>
+          </g>
+        )}
+        <g transform="translate(0 50)">
+          <text textAnchor="middle" fontSize="13" fontWeight="600" fill="#F9F6F0">{s.title}</text>
+          <text textAnchor="middle" y="17" fontSize="11" fill="#E9DFC6" opacity="0.7">
+            {formatPillarXp(pillarXp?.[s.id])} · {s.completion}%{isDest ? " · Your destination" : ""}
+          </text>
+        </g>
+      </g>
+    );
+  };
 
   return (
     <section
@@ -145,275 +229,127 @@ const ProgressMap = () => {
             Your Journey
           </h1>
           <p className="mt-2 text-sm md:text-base" style={{ color: "#E9DFC6", opacity: 0.7 }}>
-            From the village to the city — seven landmarks of mastery.
+            Build the Foundation, then choose your path at the crossroads.
           </p>
         </div>
 
-        {/* Horizontal scroll on mobile, fits on desktop */}
-        {/* DESKTOP LAYOUT — horizontal winding road (hidden below md) */}
+        {/* DESKTOP LAYOUT — Foundation road to a crossroads that forks four ways (hidden below md) */}
         <div className="hidden md:block overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4">
           <div className="min-w-[900px] md:min-w-0">
-            <svg
-              viewBox={`0 0 ${VB_W} ${VB_H}`}
-              className="w-full h-auto"
-              role="img"
-              aria-label="Pillar progression path"
-            >
+            <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full h-auto" role="img" aria-label="Pillar progression path">
               <defs>
                 <linearGradient id="skyFade" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#08101F" />
                   <stop offset="100%" stopColor="#152647" />
                 </linearGradient>
-                <radialGradient id="horizonGlow" cx="82%" cy="88%" r="55%">
-                  <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.28" />
+                <radialGradient id="horizonGlow" cx="82%" cy="50%" r="55%">
+                  <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.22" />
                   <stop offset="70%" stopColor="#C9A84C" stopOpacity="0" />
                 </radialGradient>
                 <filter id="road-glow" x="-20%" y="-50%" width="140%" height="200%">
                   <feGaussianBlur stdDeviation="6" />
                 </filter>
                 <style>{`
-                  @keyframes pm-pulse {
-                    0% { transform: scale(1); opacity: 0.6; }
-                    70% { transform: scale(2.2); opacity: 0; }
-                    100% { transform: scale(2.2); opacity: 0; }
-                  }
-                  .pm-pulse-ring {
-                    transform-origin: center;
-                    transform-box: fill-box;
-                    animation: pm-pulse 2s ease-out infinite;
-                  }
-                  @keyframes pm-unlock {
-                    0%   { transform: scale(0.8); opacity: 0.3; }
-                    60%  { transform: scale(1.1); opacity: 1; }
-                    100% { transform: scale(1);   opacity: 1; }
-                  }
-                  .pm-unlock {
-                    transform-origin: center;
-                    transform-box: fill-box;
-                    animation: pm-unlock 0.6s cubic-bezier(.34,1.56,.64,1) 1 both;
-                  }
-                  @keyframes pm-particle {
-                    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-                    100% { transform: translate(var(--pm-dx), var(--pm-dy)) scale(0.3); opacity: 0; }
-                  }
-                  .pm-particle {
-                    transform-origin: center;
-                    transform-box: fill-box;
-                    animation: pm-particle 0.9s ease-out forwards;
-                  }
-                  @keyframes pm-orb-pulse {
-                    0%,100% { opacity: 0.95; }
-                    50%     { opacity: 0.7;  }
-                  }
+                  @keyframes pm-pulse { 0% { transform: scale(1); opacity: 0.6; } 70%,100% { transform: scale(2.2); opacity: 0; } }
+                  .pm-pulse-ring { transform-origin: center; transform-box: fill-box; animation: pm-pulse 2s ease-out infinite; }
+                  @keyframes pm-unlock { 0% { transform: scale(0.8); opacity: 0.3; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+                  .pm-unlock { transform-origin: center; transform-box: fill-box; animation: pm-unlock 0.6s cubic-bezier(.34,1.56,.64,1) 1 both; }
+                  @keyframes pm-particle { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--pm-dx), var(--pm-dy)) scale(0.3); opacity: 0; } }
+                  .pm-particle { transform-origin: center; transform-box: fill-box; animation: pm-particle 0.9s ease-out forwards; }
+                  @keyframes pm-orb-pulse { 0%,100% { opacity: 0.95; } 50% { opacity: 0.7; } }
                   .pm-orb-pulse { animation: pm-orb-pulse 1.2s ease-in-out infinite; }
+                  @keyframes pm-branch-light { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+                  .pm-branch-light { stroke-dasharray: 600; animation: pm-branch-light 1s ease-out both; }
+                  @media (prefers-reduced-motion: reduce) {
+                    .pm-pulse-ring, .pm-unlock, .pm-particle, .pm-orb-pulse, .pm-branch-light { animation: none !important; stroke-dasharray: none; }
+                  }
                 `}</style>
                 <radialGradient id="pm-orb-grad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%"   stopColor="#FFF6D8" stopOpacity="1" />
-                  <stop offset="45%"  stopColor="#F1CF6A" stopOpacity="0.95" />
-                  <stop offset="80%"  stopColor="#C9A84C" stopOpacity="0.6" />
+                  <stop offset="0%" stopColor="#FFF6D8" stopOpacity="1" />
+                  <stop offset="45%" stopColor="#F1CF6A" stopOpacity="0.95" />
+                  <stop offset="80%" stopColor="#C9A84C" stopOpacity="0.6" />
                   <stop offset="100%" stopColor="#C9A84C" stopOpacity="0" />
                 </radialGradient>
                 <filter id="pm-orb-blur" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="3" />
                 </filter>
-                <path id="pm-road-path" d={pathD} fill="none" />
+                <path id="pm-road-path" d={lastLeg} fill="none" />
               </defs>
 
-              {/* Night sky band */}
               <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#skyFade)" />
-              {/* Warm horizon glow toward the city */}
               <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#horizonGlow)" pointerEvents="none" />
-              {/* Stars — fixed pseudo-random positions, deterministic */}
-              {Array.from({ length: 42 }).map((_, i) => {
+              {Array.from({ length: 48 }).map((_, i) => {
                 const seed = (i * 9301 + 49297) % 233280;
                 const r = (n: number) => ((seed * (n + 1)) % 1000) / 1000;
-                const cx = r(1) * VB_W;
-                const cy = r(2) * (BASE_Y - 80);
-                const rad = 0.6 + r(3) * 1.2;
-                const op = 0.35 + r(4) * 0.5;
-                return <circle key={i} cx={cx} cy={cy} r={rad} fill="#F9F6F0" opacity={op} />;
+                return <circle key={i} cx={r(1) * VB_W} cy={r(2) * VB_H} r={0.6 + r(3) * 1.2} fill="#F9F6F0" opacity={0.25 + r(4) * 0.45} />;
               })}
 
-              {/* Village silhouette (left) */}
-              <g opacity="0.9">
+              {/* Village silhouette (start of the road) */}
+              <g opacity="0.9" transform={`translate(0 ${ROAD_Y - 260})`}>
                 <polygon points="20,260 50,220 80,260" fill="#0A1226" stroke="#3A4A6E" strokeWidth="1" />
                 <rect x="30" y="258" width="40" height="30" fill="#0A1226" stroke="#3A4A6E" strokeWidth="1" />
                 <rect x="44" y="270" width="12" height="18" fill="#C9A84C" opacity="0.7" />
-                <polygon points="0,260 20,240 40,260" fill="#0A1226" opacity="0.9" />
               </g>
 
-              {/* City skyline silhouette (right) */}
-              <g opacity="0.9">
-                <rect x={VB_W - 110} y="200" width="22" height="90" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
-                <rect x={VB_W - 84} y="170" width="26" height="120" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
-                <rect x={VB_W - 54} y="190" width="20" height="100" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
-                <rect x={VB_W - 30} y="215" width="24" height="75" fill="#0A1226" stroke="#3A4A6E" strokeWidth="0.75" />
-                <rect x={VB_W - 84} y="160" width="4" height="14" fill="#C9A84C" />
-                {/* window lights */}
-                <rect x={VB_W - 105} y="220" width="3" height="3" fill="#F1CF6A" />
-                <rect x={VB_W - 98} y="240" width="3" height="3" fill="#F1CF6A" opacity="0.8" />
-                <rect x={VB_W - 78} y="200" width="3" height="3" fill="#F1CF6A" />
-                <rect x={VB_W - 70} y="230" width="3" height="3" fill="#F1CF6A" opacity="0.7" />
-                <rect x={VB_W - 48} y="220" width="3" height="3" fill="#F1CF6A" />
-                <rect x={VB_W - 22} y="240" width="3" height="3" fill="#F1CF6A" opacity="0.8" />
-              </g>
+              {/* Group labels */}
+              <text x={F_X[1]} y={ROAD_Y - 120} textAnchor="middle" fontSize="12" letterSpacing="3" fill="#C9A84C" opacity="0.85">FOUNDATION</text>
+              <text x={BRANCH_X} y="30" textAnchor="middle" fontSize="12" letterSpacing="3" fill="#C9A84C" opacity="0.85">CHOOSE YOUR PATH</text>
 
-              {/* Ground line */}
-              <line x1="0" y1="290" x2={VB_W} y2="290" stroke="#C9A84C" strokeWidth="1" opacity="0.15" />
+              {/* Branch roads — dim until the Foundation is built, then lit */}
+              {branchD.map((d, i) => (
+                <g key={i}>
+                  {junctionLit && <path d={d} fill="none" stroke="#C9A84C" strokeWidth="14" strokeLinecap="round" opacity="0.3" filter="url(#road-glow)" />}
+                  <path d={d} fill="none" stroke="#08101F" strokeWidth="8" strokeLinecap="round" />
+                  <path
+                    d={d}
+                    fill="none"
+                    stroke={junctionLit ? "#F1CF6A" : "#3A4A6E"}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    className={lit ? "pm-branch-light" : undefined}
+                    strokeDasharray={lit ? undefined : "6 10"}
+                    opacity={junctionLit ? 0.9 : 0.6}
+                  />
+                </g>
+              ))}
 
-              {/* Road — gold aura */}
+              {/* Foundation road */}
               <path d={pathD} fill="none" stroke="#C9A84C" strokeWidth="18" strokeLinecap="round" opacity="0.35" filter="url(#road-glow)" />
-              {/* Road — dark inner ribbon */}
               <path d={pathD} fill="none" stroke="#08101F" strokeWidth="10" strokeLinecap="round" />
-              <path
-                d={pathD}
-                fill="none"
-                stroke="#F1CF6A"
-                strokeWidth="2"
-                strokeDasharray="10 14"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
+              <path d={pathD} fill="none" stroke="#F1CF6A" strokeWidth="2" strokeDasharray="10 14" strokeLinecap="round" opacity="0.85" />
 
-              {/* Stops */}
-              {stops.map((s) => {
-                const isCompleted = s.status === "completed";
-                const isCurrent = s.status === "current";
-                const isLocked = s.status === "locked";
-                const isUnlocking = unlockedIdx === s.num - 1;
+              {/* Crossroads */}
+              <g transform={`translate(${JUNCTION.x} ${JUNCTION.y})`} aria-label="Crossroads">
+                <circle r="18" fill={junctionLit ? "#C9A84C" : "#0A1226"} stroke={junctionLit ? "#F1CF6A" : "#3A4A6E"} strokeWidth="2" className={lit ? "pm-unlock" : undefined} />
+                <path d="M -7 0 L 7 0 M 0 -7 L 0 7" stroke={junctionLit ? "#0F1B33" : "#3A4A6E"} strokeWidth="2.5" strokeLinecap="round" />
+                <text y="38" textAnchor="middle" fontSize="11" fill="#E9DFC6" opacity="0.75">Crossroads</text>
+              </g>
 
-                const platformFill = isCompleted
-                  ? "#1B2A4A"
-                  : isCurrent
-                  ? "#0F1B33"
-                  : "#0A1226";
-                const platformStroke = isCompleted
-                  ? "#C9A84C"
-                  : isCurrent
-                  ? "#F1CF6A"
-                  : "#3A4A6E";
-                const landmarkStatus: "completed" | "current" | "locked" = isCompleted
-                  ? "completed"
-                  : isCurrent
-                  ? "current"
-                  : "locked";
+              {foundation.map((s, i) => renderStop(s, foundationPos[i].x, foundationPos[i].y, false))}
+              {branches.map((s, i) => renderStop(s, BRANCH_X, BRANCH_Y[i], lit && travelling))}
 
-                return (
-                  <g
-                    key={s.id}
-                    transform={`translate(${s.x} ${s.y})`}
-                    className="cursor-pointer"
-                    onClick={() => handleClick(s)}
-                    role="button"
-                    aria-label={`Pillar ${s.num}: ${s.title}${isLocked ? " (locked)" : ""}`}
-                  >
-                    {isCurrent && (
-                      <circle
-                        r="32"
-                        fill="none"
-                        stroke="#F1CF6A"
-                        strokeWidth="2"
-                        className="pm-pulse-ring"
-                        opacity="0.8"
-                      />
-                    )}
-
-                    <g className={isUnlocking ? "pm-unlock" : undefined}>
-                      {/* Circular platform under the landmark */}
-                      <circle
-                        r="30"
-                        fill={isUnlocking ? "#C9A84C" : platformFill}
-                        stroke={isUnlocking ? "#F1CF6A" : platformStroke}
-                        strokeWidth="2"
-                        className={isCompleted ? "node-completed-glow" : isCurrent ? "node-breathe" : undefined}
-                      />
-                      {/* Illustrated landmark */}
-                      <PillarLandmark pillar={s.num} status={landmarkStatus} />
-                    </g>
-
-                    {/* Locked overlay padlock */}
-                    {isLocked && (
-                      <g transform="translate(-8 -8)" pointerEvents="none" opacity="0.9">
-                        <Lock size={16} color="#F1CF6A" strokeWidth={2.5} />
-                      </g>
-                    )}
-
-                    {/* Number badge */}
-                    <g transform="translate(24 -30)">
-                      <circle r="11" fill="#F1CF6A" stroke="#0F1B33" strokeWidth="1.5" />
-                      <text
-                        textAnchor="middle"
-                        dy="4"
-                        fontSize="12"
-                        fontWeight="700"
-                        fill="#0F1B33"
-                      >
-                        {s.num}
-                      </text>
-                    </g>
-
-                    {/* Label block below */}
-                    <g transform="translate(0 54)">
-                      <text
-                        textAnchor="middle"
-                        fontSize="13"
-                        fontWeight="600"
-                        fill="#F9F6F0"
-                      >
-                        {s.title}
-                      </text>
-                      <text
-                        textAnchor="middle"
-                        y="18"
-                        fontSize="11"
-                        fill="#E9DFC6"
-                        opacity="0.7"
-                      >
-                        {formatPillarXp(pillarXp?.[s.id])} · {s.completion}%
-                      </text>
-                    </g>
-                  </g>
-                );
-              })}
-
-              {/* Travelling orb — only renders while an unlock animation is in flight */}
-              {travelFromIdx !== null && (
+              {travelling && (
                 <g className="pm-orb-pulse">
                   <circle r="22" fill="url(#pm-orb-grad)" filter="url(#pm-orb-blur)" />
                   <circle r="10" fill="#FFF6D8" opacity="0.9" />
-                  <animateMotion
-                    ref={motionRef}
-                    dur="1.5s"
-                    fill="freeze"
-                    calcMode="spline"
-                    keySplines="0.42 0 0.58 1"
-                    keyTimes="0;1"
-                    begin="indefinite"
-                  >
+                  <animateMotion ref={motionRef} dur="1.5s" fill="freeze" calcMode="spline" keySplines="0.42 0 0.58 1" keyTimes="0;1" begin="indefinite">
                     <mpath href="#pm-road-path" />
                   </animateMotion>
                 </g>
               )}
 
-              {/* Particle burst at the newly-unlocked node */}
-              {target && unlockedIdx === targetIdx && (
-                <g transform={`translate(${target.x} ${target.y})`}>
+              {lit && travelling && (
+                <g transform={`translate(${JUNCTION.x} ${JUNCTION.y})`}>
                   {Array.from({ length: 12 }).map((_, i) => {
                     const angle = (i / 12) * Math.PI * 2;
                     const dist = 60 + (i % 3) * 12;
-                    const dx = Math.cos(angle) * dist;
-                    const dy = Math.sin(angle) * dist;
                     return (
                       <circle
                         key={i}
                         r={3 + (i % 2)}
                         fill="#C9A84C"
                         className="pm-particle"
-                        style={{
-                          ["--pm-dx" as any]: `${dx}px`,
-                          ["--pm-dy" as any]: `${dy}px`,
-                          animationDelay: `${(i % 4) * 30}ms`,
-                        }}
+                        style={{ ["--pm-dx" as any]: `${Math.cos(angle) * dist}px`, ["--pm-dy" as any]: `${Math.sin(angle) * dist}px`, animationDelay: `${(i % 4) * 30}ms` }}
                       />
                     );
                   })}
@@ -423,51 +359,82 @@ const ProgressMap = () => {
           </div>
         </div>
 
-        {/* MOBILE LAYOUT — vertical zigzag road (shown below md) */}
-        <MobileJourney
-          stops={PILLARS}
-          travelFromIdx={travelFromIdx}
-          unlockedIdx={unlockedIdx}
-          onSelect={handleClick}
-        />
+        {/* MOBILE LAYOUT — vertical Foundation road, then the crossroads and four branches */}
+        <MobileJourney stops={foundation} travelFromIdx={travelling ? 2 : null} unlockedIdx={null} onSelect={handleClick} />
+        <MobileBranches stops={branches} lit={junctionLit} destination={destination ?? null} onSelect={handleClick} />
 
-        {/* Legend */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: "#E9DFC6" }}>
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#C9A84C" }} />
-            Completed
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#F1CF6A" }} />
-            In progress
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#3A4A6E" }} />
-            Locked
-          </span>
+          <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: "#C9A84C" }} />Completed</span>
+          <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: "#F1CF6A" }} />Open</span>
+          <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: "#3A4A6E" }} />Locked</span>
         </div>
 
-        {/* Demo: trigger the unlock animation for the first locked pillar */}
-        {demoFromIdx >= 0 && (
-          <div className="mt-4 flex items-center justify-center">
-            <button
-              type="button"
-              onClick={() => triggerUnlock(demoFromIdx)}
-              disabled={travelFromIdx !== null}
-              className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border border-[#C9A84C]/40 text-[#F1CF6A] hover:bg-[#C9A84C] hover:text-[#0F1B33] transition-colors disabled:opacity-40"
-              aria-label="Preview the next pillar unlock animation"
-            >
-              <Sparkles className="w-3 h-3" />
-              Preview next-pillar unlock
-            </button>
-          </div>
-        )}
+        {/* Preview the crossroads animation */}
+        <div className="mt-4 flex items-center justify-center">
+          <button
+            type="button"
+            onClick={runJunction}
+            disabled={travelling}
+            className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border border-[#C9A84C]/40 text-[#F1CF6A] hover:bg-[#C9A84C] hover:text-[#0F1B33] transition-colors disabled:opacity-40"
+            aria-label="Preview the crossroads unlock animation"
+          >
+            <Sparkles className="w-3 h-3" />
+            Preview crossroads unlock
+          </button>
+        </div>
       </div>
     </section>
   );
 };
 
 export default ProgressMap;
+
+function MobileBranches({ stops, lit, destination, onSelect }: { stops: PillarStop[]; lit: boolean; destination: string | null; onSelect: (s: PillarStop) => void }) {
+  const { data: pillarXp } = usePillarXp();
+  return (
+    <div className="md:hidden mx-auto mt-2" style={{ maxWidth: 480 }}>
+      <div className="flex flex-col items-center mb-3">
+        <span
+          className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold"
+          style={{ background: lit ? "#C9A84C" : "#0A1226", borderColor: lit ? "#F1CF6A" : "#3A4A6E", color: lit ? "#0F1B33" : "#3A4A6E" }}
+          aria-hidden="true"
+        >+</span>
+        <span className="text-[11px] tracking-[0.2em] mt-1" style={{ color: "#C9A84C" }}>CROSSROADS · CHOOSE YOUR PATH</span>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {stops.map((s) => {
+          const Icon = s.icon;
+          const isLocked = s.status === "locked";
+          const isDest = destination === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => onSelect(s)}
+              aria-label={`Pillar ${s.num}: ${s.title}${isLocked ? " (locked)" : ""}`}
+              className={`relative rounded-xl border p-3 text-left transition-all ${isLocked ? "opacity-50 bg-[#EFE7D5] border-[#C9C4BA]" : "bg-white border-[#1B2A4A]/15 active:scale-[0.98]"} ${isDest ? "ring-2 ring-[#C9A84C]" : ""}`}
+              style={{ color: "#1B2A4A" }}
+            >
+              {isDest && (
+                <span className="absolute -top-2 right-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "#C9A84C", color: "#0F1B33" }}>
+                  <Star className="w-3 h-3" /> Recommended for you
+                </span>
+              )}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold" style={{ background: isLocked ? "#C9C4BA" : "#1B2A4A", color: "#fff" }}>{s.num}</span>
+                {isLocked ? <Lock className="w-4 h-4" /> : s.status === "completed" ? <Check className="w-4 h-4" style={{ color: "#C9A84C" }} /> : <Icon className="w-4 h-4" style={{ color: "#C9A84C" }} />}
+              </div>
+              <div className="text-sm font-semibold leading-tight">{s.title}</div>
+              <div className="text-[11px] mt-1 opacity-70">{formatPillarXp(pillarXp?.[s.id])} · {s.completion}%</div>
+              {isDest && <div className="text-[11px] mt-1 font-semibold" style={{ color: "#A8862F" }}>Your destination</div>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 
 // ============================================================
 // Mobile vertical zigzag layout
