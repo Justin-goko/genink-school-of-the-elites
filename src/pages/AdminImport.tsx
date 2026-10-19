@@ -17,7 +17,7 @@ import { Loader2, Upload, FileText, CheckCircle2, ShieldCheck } from "lucide-rea
 const db = supabase as any;
 
 interface PillarOption { id: string; name: string }
-interface UnitOption { id: string; title: string; pillar_id: string }
+interface UnitOption { id: string; title: string; pillar_id: string; status: string }
 interface SessionOption { id: string; title: string; order_index: number; unit_id: string }
 
 export default function AdminImport() {
@@ -43,7 +43,7 @@ export default function AdminImport() {
     enabled: !!pillarId,
     queryFn: async (): Promise<UnitOption[]> => {
       const { data, error } = await db
-        .from("units").select("id,title,pillar_id")
+        .from("units").select("id,title,pillar_id,status")
         .eq("pillar_id", pillarId).order("order_index");
       if (error) throw error;
       return (data ?? []) as UnitOption[];
@@ -154,9 +154,16 @@ export default function AdminImport() {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
               <Select label="Pillar" value={pillarId} onChange={(v) => { setPillarId(v); setUnitId(""); setSessionId(""); }} options={(pillars.data ?? []).map((p) => ({ value: p.id, label: p.name }))} />
-              <Select label="Unit" value={unitId} onChange={(v) => { setUnitId(v); setSessionId(""); }} options={(units.data ?? []).map((u) => ({ value: u.id, label: u.title }))} disabled={!pillarId} />
+              <Select label="Unit" value={unitId} onChange={(v) => { setUnitId(v); setSessionId(""); }} options={(units.data ?? []).map((u) => ({ value: u.id, label: u.status === "hidden" ? `${u.title} (hidden)` : u.title }))} disabled={!pillarId} />
               <Select label="Session" value={sessionId} onChange={setSessionId} options={(sessions.data ?? []).map((s) => ({ value: s.id, label: `${s.order_index + 1}. ${s.title}` }))} disabled={!unitId} />
             </div>
+
+            {unitId && (
+              <UnitStatusControl
+                unit={units.data?.find((u) => u.id === unitId)}
+                onChanged={() => units.refetch()}
+              />
+            )}
 
             <div className="rounded-xl border p-4" style={{ background: "white", borderColor: `${READER.ink}14` }}>
               <div className="flex items-center justify-between mb-2">
@@ -207,6 +214,37 @@ export default function AdminImport() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function UnitStatusControl({ unit, onChanged }: { unit?: UnitOption; onChanged: () => void }) {
+  const [saving, setSaving] = useState(false);
+  if (!unit) return null;
+  const change = async (status: string) => {
+    if (status === unit.status) return;
+    setSaving(true);
+    const { error } = await db.from("units").update({ status }).eq("id", unit.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Unit marked ${status.replace("_", " ")}`);
+    onChanged();
+  };
+  return (
+    <div className="rounded-xl border p-3 flex items-center gap-3" style={{ background: "white", borderColor: `${READER.ink}14` }}>
+      <label className="text-xs uppercase tracking-widest" style={{ color: READER.inkSoft }}>Unit status</label>
+      <select
+        value={unit.status}
+        disabled={saving}
+        onChange={(e) => change(e.target.value)}
+        className="rounded-md border px-2 py-1.5 text-sm bg-white disabled:opacity-50"
+        style={{ borderColor: `${READER.ink}22`, color: READER.ink }}
+      >
+        <option value="live">Live</option>
+        <option value="coming_soon">Coming soon</option>
+        <option value="hidden">Hidden</option>
+      </select>
+      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: READER.inkSoft }} />}
     </div>
   );
 }

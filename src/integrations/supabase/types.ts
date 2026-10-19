@@ -828,6 +828,7 @@ export type Database = {
       }
       units: {
         Row: {
+          counts_toward_completion: boolean
           created_at: string
           description: string | null
           estimated_minutes: number
@@ -836,6 +837,7 @@ export type Database = {
           order_index: number
           pillar_id: string
           session_count: number
+          status: string
           theme: Database["public"]["Enums"]["pillar_theme"]
           title: string
           total_xp: number
@@ -843,6 +845,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          counts_toward_completion?: boolean
           created_at?: string
           description?: string | null
           estimated_minutes?: number
@@ -851,6 +854,7 @@ export type Database = {
           order_index?: number
           pillar_id: string
           session_count?: number
+          status?: string
           theme: Database["public"]["Enums"]["pillar_theme"]
           title: string
           total_xp?: number
@@ -858,6 +862,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          counts_toward_completion?: boolean
           created_at?: string
           description?: string | null
           estimated_minutes?: number
@@ -866,6 +871,7 @@ export type Database = {
           order_index?: number
           pillar_id?: string
           session_count?: number
+          status?: string
           theme?: Database["public"]["Enums"]["pillar_theme"]
           title?: string
           total_xp?: number

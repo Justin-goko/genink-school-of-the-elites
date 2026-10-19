@@ -30,8 +30,9 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
   const xpEarned = progress?.xp_earned ?? 0;
   const hours = Math.round(unit.estimated_minutes / 60);
 
-  const isLocked = state === "locked";
-  const isCurrent = state === "current";
+  const isComingSoon = unit.status === "coming_soon";
+  const isLocked = state === "locked" || isComingSoon;
+  const isCurrent = state === "current" && !isComingSoon;
   const isCompleted = state === "completed";
 
   const inner = (
@@ -78,6 +79,12 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
           <Clock className="w-3.5 h-3.5" />
           <span>{unit.session_count} sessions · ~{hours} hours</span>
         </div>
+
+        {isComingSoon && (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-foreground/10 text-muted-foreground">
+            Coming soon
+          </span>
+        )}
 
         {!isLocked && (
           <>

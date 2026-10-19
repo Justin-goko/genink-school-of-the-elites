@@ -27,7 +27,7 @@ const MyPlan = () => {
 
   const ordered = (plan?.unit_order ?? [])
     .map((id) => units.find((u) => u.id === id))
-    .filter(Boolean) as typeof units;
+    .filter((u) => u && u.status === "live") as typeof units;
 
   const isDone = (unitId: string, sessionCount: number) =>
     (progressMap[unitId]?.sessions_completed ?? 0) >= sessionCount && sessionCount > 0;
