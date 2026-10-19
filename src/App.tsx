@@ -32,6 +32,8 @@ import MyPlan from "./pages/MyPlan";
 import LearnerInsights from "./pages/LearnerInsights";
 import NotFound from "./pages/NotFound";
 import LightGuideProvider from "./components/tutor/LightGuideProvider";
+import { LogoSplash, RouteLoader, RouteLoaderFallback } from "./components/brand/LogoAnimation";
+import { Suspense } from "react";
 
 const queryClient = new QueryClient();
 
@@ -51,8 +53,11 @@ const App = () => (
           <XPRewardOverlay />
            <BrowserRouter>
            <LightGuideProvider>
+          <LogoSplash />
+          <RouteLoader />
           <FirstLoginCinematic />
           <RouteTransition>
+          <Suspense fallback={<RouteLoaderFallback />}>
           <Routes>
             {/* Layer 1 — public marketing */}
             <Route path="/" element={<MarketingHome />} />
@@ -85,6 +90,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
+          </Suspense>
           </RouteTransition>
            </LightGuideProvider>
           </BrowserRouter>
