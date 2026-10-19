@@ -218,6 +218,37 @@ export default function AdminImport() {
   );
 }
 
+function UnitStatusControl({ unit, onChanged }: { unit?: UnitOption; onChanged: () => void }) {
+  const [saving, setSaving] = useState(false);
+  if (!unit) return null;
+  const change = async (status: string) => {
+    if (status === unit.status) return;
+    setSaving(true);
+    const { error } = await db.from("units").update({ status }).eq("id", unit.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Unit marked ${status.replace("_", " ")}`);
+    onChanged();
+  };
+  return (
+    <div className="rounded-xl border p-3 flex items-center gap-3" style={{ background: "white", borderColor: `${READER.ink}14` }}>
+      <label className="text-xs uppercase tracking-widest" style={{ color: READER.inkSoft }}>Unit status</label>
+      <select
+        value={unit.status}
+        disabled={saving}
+        onChange={(e) => change(e.target.value)}
+        className="rounded-md border px-2 py-1.5 text-sm bg-white disabled:opacity-50"
+        style={{ borderColor: `${READER.ink}22`, color: READER.ink }}
+      >
+        <option value="live">Live</option>
+        <option value="coming_soon">Coming soon</option>
+        <option value="hidden">Hidden</option>
+      </select>
+      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: READER.inkSoft }} />}
+    </div>
+  );
+}
+
 function Select({
   label, value, onChange, options, disabled,
 }: { label: string; value: string; onChange: (v: string) => void; options: Array<{ value: string; label: string }>; disabled?: boolean }) {
