@@ -42,10 +42,16 @@ export function LogoSplash() {
     setState((s) => {
       if (s !== "play") return s;
       window.clearTimeout(exitTimer.current);
-      hideTimer.current = window.setTimeout(() => setState("hidden"), 520);
       return "exit";
     });
   };
+
+  // After the exit animation completes, remove the overlay entirely.
+  useEffect(() => {
+    if (state !== "exit") return;
+    hideTimer.current = window.setTimeout(() => setState("hidden"), 520);
+    return () => window.clearTimeout(hideTimer.current);
+  }, [state]);
 
   useEffect(() => {
     if (state !== "play") return;
