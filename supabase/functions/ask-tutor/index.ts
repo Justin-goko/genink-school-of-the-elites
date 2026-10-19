@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       admin.from("xp_rules").select("label, xp").order("xp"),
       admin.from("learner_tiers").select("name, min_xp, description").order("min_xp"),
       admin.from("achievements").select("name, description, xp_reward"),
-      admin.from("units").select("id, pillar_id, title, order_index, track_type"),
+      admin.from("units").select("id, pillar_id, title, order_index, track_type, status").neq("status", "hidden"),
       userClient.rpc("get_pillar_access"),
     ]);
     // Lock state comes only from get_pillar_access() — the same source as the Explore page and journey map.
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       `${a.order_index}. ${a.name}: ${a.state}${a.state === "locked" ? ` (needs ${(a.requirements ?? []).map((r: any) => `Pillar ${r.order_index} at ${r.required_pct}%, currently ${r.current_pct}%`).join("; ")})` : ""}${user_id ? `, progress ${a.progress_pct}%` : ""}`,
     ).join("; ");
     const unitsByPillar = new Map<string, number>();
-    for (const u of unitRows ?? []) if (u.track_type === "learning_path") unitsByPillar.set(u.pillar_id, (unitsByPillar.get(u.pillar_id) ?? 0) + 1);
+    for (const u of unitRows ?? []) if (u.track_type === "learning_path" && u.status === "live") unitsByPillar.set(u.pillar_id, (unitsByPillar.get(u.pillar_id) ?? 0) + 1);
 
     // ---- Page context (titles resolved server-side from ids) ----
     const page: string[] = [`Current page: ${route_name}.`];

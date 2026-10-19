@@ -33,7 +33,7 @@ export function usePillarXp() {
     queryKey: ["pillar_xp", user?.id ?? "anon"],
     queryFn: async () => {
       const [{ data: units }, { data: bonus }, progress] = await Promise.all([
-        supabase.from("units").select("id,pillar_id,total_xp,track_type"),
+        supabase.from("units").select("id,pillar_id,total_xp,track_type,status,counts_toward_completion"),
         supabase.from("xp_rules").select("xp").eq("action_type", "pillar_complete").maybeSingle(),
         user
           ? supabase.from("user_unit_progress").select("unit_id,xp_earned").eq("user_id", user.id)
@@ -44,7 +44,8 @@ export function usePillarXp() {
       for (const u of units ?? []) {
         unitPillar.set(u.id, u.pillar_id);
         out[u.pillar_id] ??= { earned: 0, total: bonus?.xp ?? 0 };
-        if (u.track_type === "learning_path") out[u.pillar_id].total += u.total_xp ?? 0;
+        if (u.track_type === "learning_path" && u.status === "live" && u.counts_toward_completion)
+          out[u.pillar_id].total += u.total_xp ?? 0;
       }
       for (const p of progress.data ?? []) {
         const pid = unitPillar.get(p.unit_id);
