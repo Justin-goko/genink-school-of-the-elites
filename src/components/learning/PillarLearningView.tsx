@@ -32,8 +32,10 @@ export default function PillarLearningView({ pillar, icon }: Props) {
 
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
   const specializedUnits = units.filter((u) => u.track_type === "specialized");
+  // Progress, XP and unlocking count only live units that count toward completion.
+  const countedUnits = learningPathUnits.filter((u) => u.status === "live" && u.counts_toward_completion);
 
-  const unitsComplete = learningPathUnits.filter(
+  const unitsComplete = countedUnits.filter(
     (u) => (progressMap[u.id]?.sessions_completed ?? 0) >= u.session_count && u.session_count > 0,
   ).length;
   const xpEarned = Object.values(progressMap).reduce(
@@ -42,11 +44,11 @@ export default function PillarLearningView({ pillar, icon }: Props) {
   );
 
   // Locate the first incomplete learning-path unit — or the calibration's pick if untouched.
-  const firstIncomplete: Unit | undefined = learningPathUnits.find(
+  const firstIncomplete: Unit | undefined = countedUnits.find(
     (u) => (progressMap[u.id]?.sessions_completed ?? 0) < u.session_count,
   );
   const recommended = recommendedUnitId
-    ? learningPathUnits.find((u) => u.id === recommendedUnitId)
+    ? countedUnits.find((u) => u.id === recommendedUnitId)
     : undefined;
   const anyProgress = Object.values(progressMap).some((p) => (p?.sessions_completed ?? 0) > 0);
   const nextUnit: Unit | undefined = !anyProgress && recommended ? recommended : firstIncomplete;
@@ -55,7 +57,7 @@ export default function PillarLearningView({ pillar, icon }: Props) {
     const prog = progressMap[unit.id];
     const completed = prog?.sessions_completed ?? 0;
     if (completed >= unit.session_count && unit.session_count > 0) return "completed";
-    const prev = learningPathUnits.find((u) => u.order_index === unit.order_index - 1);
+    const prev = countedUnits.find((u) => u.order_index === unit.order_index - 1);
     const prevDone = !prev || (progressMap[prev.id]?.sessions_completed ?? 0) >= prev.session_count;
     if (unit.order_index === 1 || prevDone) return unit.id === nextUnit?.id ? "current" : "available";
     return "locked";
@@ -80,7 +82,7 @@ export default function PillarLearningView({ pillar, icon }: Props) {
             <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="font-medium text-foreground">{unitsComplete}</span> of {learningPathUnits.length} units complete
+                <span className="font-medium text-foreground">{unitsComplete}</span> of {countedUnits.length} units complete
               </span>
               <span className="text-border">•</span>
               <span className="inline-flex items-center gap-1.5">
