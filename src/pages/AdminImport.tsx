@@ -17,7 +17,7 @@ import { Loader2, Upload, FileText, CheckCircle2, ShieldCheck } from "lucide-rea
 const db = supabase as any;
 
 interface PillarOption { id: string; name: string }
-interface UnitOption { id: string; title: string; pillar_id: string }
+interface UnitOption { id: string; title: string; pillar_id: string; status: string }
 interface SessionOption { id: string; title: string; order_index: number; unit_id: string }
 
 export default function AdminImport() {
@@ -43,7 +43,7 @@ export default function AdminImport() {
     enabled: !!pillarId,
     queryFn: async (): Promise<UnitOption[]> => {
       const { data, error } = await db
-        .from("units").select("id,title,pillar_id")
+        .from("units").select("id,title,pillar_id,status")
         .eq("pillar_id", pillarId).order("order_index");
       if (error) throw error;
       return (data ?? []) as UnitOption[];
@@ -154,7 +154,7 @@ export default function AdminImport() {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
               <Select label="Pillar" value={pillarId} onChange={(v) => { setPillarId(v); setUnitId(""); setSessionId(""); }} options={(pillars.data ?? []).map((p) => ({ value: p.id, label: p.name }))} />
-              <Select label="Unit" value={unitId} onChange={(v) => { setUnitId(v); setSessionId(""); }} options={(units.data ?? []).map((u) => ({ value: u.id, label: u.title }))} disabled={!pillarId} />
+              <Select label="Unit" value={unitId} onChange={(v) => { setUnitId(v); setSessionId(""); }} options={(units.data ?? []).map((u) => ({ value: u.id, label: u.status === "hidden" ? `${u.title} (hidden)` : u.title }))} disabled={!pillarId} />
               <Select label="Session" value={sessionId} onChange={setSessionId} options={(sessions.data ?? []).map((s) => ({ value: s.id, label: `${s.order_index + 1}. ${s.title}` }))} disabled={!unitId} />
             </div>
 
