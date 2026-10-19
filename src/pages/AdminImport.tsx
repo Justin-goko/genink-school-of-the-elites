@@ -158,6 +158,13 @@ export default function AdminImport() {
               <Select label="Session" value={sessionId} onChange={setSessionId} options={(sessions.data ?? []).map((s) => ({ value: s.id, label: `${s.order_index + 1}. ${s.title}` }))} disabled={!unitId} />
             </div>
 
+            {unitId && (
+              <UnitStatusControl
+                unit={units.data?.find((u) => u.id === unitId)}
+                onChanged={() => units.refetch()}
+              />
+            )}
+
             <div className="rounded-xl border p-4" style={{ background: "white", borderColor: `${READER.ink}14` }}>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-semibold" style={{ color: READER.ink }}>Paste session text</label>
