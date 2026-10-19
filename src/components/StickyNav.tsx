@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
 import NavbarXPCounter from "@/components/xp/NavbarXPCounter";
@@ -52,10 +52,28 @@ const StickyNav = () => {
             { name: "Resources", href: "/resources" },
           ]
         : [
-            { name: "About", href: "/#why-us" },
-            { name: "How It Works", href: "/#features" },
-            { name: "Pillars Preview", href: "/#courses" },
+            { name: "About", href: "/#about" },
+            { name: "How It Works", href: "/#how-it-works" },
+            { name: "Pillars Preview", href: "/#pillars-preview" },
           ];
+
+  const location = useLocation();
+
+  // Hash links: scroll smoothly when already on "/", else go home first and
+  // scroll once the section exists. Always closes the mobile menu.
+  const goToHash = (href: string) => (e: React.MouseEvent) => {
+    if (!href.includes("#")) return;
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    const id = href.split("#")[1];
+    const scroll = () => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    if (location.pathname === "/") {
+      scroll();
+    } else {
+      navigate("/");
+      window.setTimeout(scroll, 350);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -150,7 +168,7 @@ const StickyNav = () => {
           variant="outline"
           size="sm"
           onClick={() => navigate("/auth")}
-          className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+          className="bg-white text-[#0D1B33] border-white hover:bg-white/90 font-semibold"
         >
           <LogIn className="w-4 h-4 mr-1" />
           Sign In
@@ -168,11 +186,10 @@ const StickyNav = () => {
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${isScrolled 
-            ? 'bg-primary/95 backdrop-blur-lg shadow-lg border-b border-primary-foreground/10' 
-            : 'bg-primary/70 backdrop-blur-md border-b border-primary-foreground/10'}`}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-lg border-b border-primary-foreground/10
+          ${isScrolled ? 'shadow-lg' : ''}`}
+        style={{ backgroundColor: "rgba(13,27,51,0.88)" }}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -192,6 +209,7 @@ const StickyNav = () => {
                 <Link
                   key={link.name}
                   to={link.href}
+                  onClick={goToHash(link.href)}
                   className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground transition-colors relative group"
                 >
                   <span className="inline-flex items-center gap-1.5">
@@ -223,7 +241,7 @@ const StickyNav = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => { goToHash(link.href)(e); setIsMobileMenuOpen(false); }}
                 className="flex items-center gap-2 py-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors"
               >
                 {link.icon ? <link.icon className="w-4 h-4" /> : null}
@@ -235,7 +253,7 @@ const StickyNav = () => {
                 <Button
                   onClick={() => { navigate("/auth"); setIsMobileMenuOpen(false); }}
                   variant="outline"
-                  className="w-full border-primary-foreground/30 text-primary-foreground"
+                  className="w-full bg-white text-[#0D1B33] border-white hover:bg-white/90 font-semibold"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Sign In

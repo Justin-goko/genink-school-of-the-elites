@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
 import Hero from "@/components/Hero";
 import WhySection from "@/components/WhySection";
@@ -19,6 +20,16 @@ import { Navigate } from "react-router-dom";
 const MarketingHome = () => {
   const { user } = useAuth();
   const { tier, loading } = useUserRole();
+  const { hash } = useLocation();
+
+  // Landing on "/#section" directly (e.g. from another page) scrolls to it.
+  useEffect(() => {
+    if (!hash) return;
+    const t = window.setTimeout(() => {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    return () => window.clearTimeout(t);
+  }, [hash]);
 
   // Route "/" is Layer 1 for guests. Authenticated visitors are routed to
   // their appropriate surface: students -> /journey, team -> /dashboard.
@@ -33,7 +44,7 @@ const MarketingHome = () => {
       <Hero />
 
       {/* Primary CTA strip: Pathway Intelligence Engine */}
-      <section className="py-16 bg-gradient-to-br from-[#1B2A4A] to-[#0F1B33] text-white">
+      <section id="how-it-works" className="py-16 bg-gradient-to-br from-[#1B2A4A] to-[#0F1B33] text-white scroll-mt-20">
         <div className="container mx-auto px-4 max-w-4xl text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#C9A84C]/15 border border-[#C9A84C]/40 text-[#C9A84C]">
             <Compass className="w-4 h-4" />
@@ -73,7 +84,7 @@ const MarketingHome = () => {
       <WhySection />
 
       {/* Pillars preview */}
-      <section id="courses" className="py-20 scroll-mt-20">
+      <section id="pillars-preview" className="py-20 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 space-y-3">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">

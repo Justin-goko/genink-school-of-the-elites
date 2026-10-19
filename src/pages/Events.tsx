@@ -1,5 +1,5 @@
 import { Calendar, Clock, Users, Video } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import StickyNav from "@/components/StickyNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,7 +69,7 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <StickyNav />
       
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto max-w-7xl">

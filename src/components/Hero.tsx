@@ -27,7 +27,10 @@ const Hero = () => {
   }, []);
 
   const scrollToContent = () => {
-    document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('pillars-preview')?.scrollIntoView({ behavior: 'smooth' });
+  };
+  const scrollToHowItWorks = () => {
+    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -92,18 +95,19 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
-            <a href="#courses">
+            <a href="#pillars-preview">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground group hover-scale text-lg px-8 py-6">
                 Start Your Journey
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </a>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
+              onClick={scrollToHowItWorks}
               className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground border border-primary-foreground/40 hover-scale text-lg px-8 py-6 group backdrop-blur-sm"
             >
               <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-              Watch Demo
+              See How It Works
             </Button>
           </div>
 
