@@ -10,6 +10,7 @@ export type PillarTheme =
   | "entrepreneurship" | "creator" | "civic";
 
 export type TrackType = "learning_path" | "specialized";
+export type UnitStatus = "live" | "coming_soon" | "hidden";
 
 export interface Unit {
   id: string;
@@ -23,6 +24,8 @@ export interface Unit {
   track_type: TrackType;
   theme: PillarTheme;
   is_locked_by_default: boolean;
+  status: UnitStatus;
+  counts_toward_completion: boolean;
 }
 
 export interface UserUnitProgress {
@@ -42,6 +45,7 @@ export function usePillarUnits(pillarId: string | undefined) {
         .from("units")
         .select("*")
         .eq("pillar_id", pillarId!)
+        .neq("status", "hidden")
         .order("track_type", { ascending: true })
         .order("order_index", { ascending: true });
       if (error) throw error;
