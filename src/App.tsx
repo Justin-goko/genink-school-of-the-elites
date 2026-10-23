@@ -71,7 +71,6 @@ const App = () => (
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/adapt" element={<AdaptDemo />} />
-            <Route path="/tr-juz" element={<Navigate to="/adapt" replace />} />
 
             {/* Layer 2 — authenticated journey */}
             <Route path="/journey" element={<ProtectedRoute><Index /></ProtectedRoute>} />

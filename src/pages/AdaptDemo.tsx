@@ -20,7 +20,7 @@ import StickyNav from "@/components/StickyNav";
  */
 
 // ---------- edit these two lines if needed ----------
-const ENGINE_CREDIT = "Tr Juz runs on the Adapt engine, built by our teammates";
+const ENGINE_CREDIT = "Adapt engine built by our teammates";
 const LEARNER_NAME = "Amani (sample learner)";
 
 // ---------- palette (Genlink brand) ----------
@@ -268,7 +268,7 @@ export default function AdaptDemo() {
               <span className="text-xs" style={{ color: C.mute }}>Nothing on this page is saved or sent to an AI</span>
             </div>
             <h1 className="font-serif text-3xl font-bold md:text-4xl">
-              Tr Juz <span style={{ color: C.gold }}>· the AI that learns the learner</span>
+              Adapt <span style={{ color: C.gold }}>· the AI that learns the learner</span>
             </h1>
             <p className="mt-2 max-w-2xl text-sm md:text-base" style={{ color: C.soft }}>
               Adapt watches how a learner studies, notices when the content isn't landing, finds the likely cause,

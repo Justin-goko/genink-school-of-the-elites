@@ -38,7 +38,7 @@ const StickyNav = () => {
       ? [
           { name: "Operations Dashboard", href: "/ops-dashboard", icon: LayoutDashboard },
           { name: "Student Journey", href: "/journey", icon: Compass },
-          { name: "Tr Juz", href: "/adapt", icon: Brain },
+          { name: "Adapt", href: "/adapt", icon: Brain },
           ...(canManageTeam
             ? [{ name: "Learner Insights", href: "/learner-insights", icon: LineChart } as NavLink]
             : []),
@@ -49,7 +49,7 @@ const StickyNav = () => {
         ? [
             { name: "My Journey", href: "/journey" },
             { name: "My Plan", href: "/my-plan" },
-            { name: "Tr Juz", href: "/adapt" },
+            { name: "Adapt", href: "/adapt" },
             { name: "Community", href: "/events" },
             { name: "Resources", href: "/resources" },
           ]
@@ -57,7 +57,7 @@ const StickyNav = () => {
             { name: "About", href: "/#about" },
             { name: "How It Works", href: "/#how-it-works" },
             { name: "Pillars Preview", href: "/#pillars-preview" },
-            { name: "Tr Juz", href: "/adapt" },
+            { name: "Adapt", href: "/adapt" },
           ];
 
   const location = useLocation();
