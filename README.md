@@ -1,73 +1,105 @@
-# Welcome to your Lovable project
+# Genlink Hub
 
-## Project info
+Prompt for Lovable AI:
 
-**URL**: https://lovable.dev/projects/389b21b8-d117-4ba7-b3dd-1dfb7c34fbf0
+Create a visually stunning, professional, and emotionally captivating website named Genlink Hub. The site should effectively showcase a transformative curriculum grounded in spiritual wealth, financial literacy, ICT skills, and practical online income generation to empower users toward securing generational wealth.
 
-## How can I edit this code?
+Core Requirements:
+Homepage Layout:
 
-There are several ways of editing your application.
+A clean, modern, and stylish design inspired by platforms like Brilliant.org, ALUX, and Cisco. Use vibrant yet trust-building color schemes with intuitive navigation.
 
-**Use Lovable**
+Introduce the mission: “Renew the Mind, Empower the Generation — Your Journey to Spiritual and Financial Mastery Starts Here.”
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/389b21b8-d117-4ba7-b3dd-1dfb7c34fbf0) and start prompting.
+Feature an interactive hero banner illustrating spiritual-wealth growth and digital empowerment.
 
-Changes made via Lovable will be committed automatically to this repo.
+Courses Section:
 
-**Use your preferred IDE**
+Categorize courses clearly into Free Courses and Premium Courses, each with distinct styling cues (e.g., premium courses with subtle gold accent borders).
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Each course displayed as a tile/card with:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+A striking, demonstrative image reflecting the course theme (e.g., mind renewal imagery for mindset courses, forex charts for trading courses, digital code visuals for ICT).
 
-Follow these steps:
+Course title (catchy and professional as per previous outline).
+
+Short engaging course description (mock data).
+
+Duration in weeks.
+
+For premium courses, show mock prices in Kenyan Shillings (e.g., Ksh 7,999, Ksh 12,999).
+
+Interactive buttons for “Learn More” and “Enroll Now”.
+
+Tooltip or hover effects with key benefits or highlights.
+
+Course List to Include:
+
+Mindset Renewal & Spiritual Wealth Mastery (Free, 6 weeks)
+
+Foundations of Financial Wisdom and Wealth Building (Free + Premium Modules, 8 weeks)
+
+Digital Fluency & Tech Mindset Development (Free, 6 weeks)
+
+Forex Trading Fundamentals and Strategy (Free + Premium Masterclass, 10 weeks)
+
+Content Creation, Online Writing & eBook Entrepreneurship (Free + Premium, 10 weeks)
+
+YouTube Monetization & Automation Masterclass (Free + Premium, 8 weeks)
+
+Additional ICT Courses to Populate the Page:
+
+Cybersecurity Essentials (Free, 6 weeks)
+
+Introduction to Cloud Computing (Free, 6 weeks)
+
+Advanced Python Programming (Premium, Ksh 9,999, 8 weeks)
+
+Data Science & Analytics Foundations (Premium, Ksh 12,999, 10 weeks)
+
+IoT (Internet of Things) for Beginners (Free, 6 weeks)
+
+AI & Machine Learning Basics (Premium, Ksh 14,999, 10 weeks)
+
+Interactivity:
+
+Allow filtering/sorting by Free vs Premium, Duration, and Category (Spiritual, Financial, ICT, Income Skills).
+
+Click on a course tile to open a modal/popup with mock “Course Overview,” “What You'll Learn,” “Prerequisites,” and “Next Steps.”
+
+Include user review mock data with star ratings per course.
+
+Responsive design for mobile and desktop views.
+
+Subtle animations on hover and transitions for smooth engagement.
+
+Additional Features:
+
+Call to actions encouraging sign-up for newsletters with updates on upcoming courses and events.
+
+Motivational quotes related to empowerment, wealth, and spiritual growth throughout the site.
+
+A “Why Genlink Hub?” section highlighting the unique blend of spiritual renewal, tech skills, and practical wealth generation.... the attached picture is the logo
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://genink-school-of-the-elites.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/389b21b8-d117-4ba7-b3dd-1dfb7c34fbf0).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/389b21b8-d117-4ba7-b3dd-1dfb7c34fbf0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
