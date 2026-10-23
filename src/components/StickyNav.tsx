@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users, Brain } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
@@ -38,6 +38,7 @@ const StickyNav = () => {
       ? [
           { name: "Operations Dashboard", href: "/ops-dashboard", icon: LayoutDashboard },
           { name: "Student Journey", href: "/journey", icon: Compass },
+          { name: "Tr Juz", href: "/adapt", icon: Brain },
           ...(canManageTeam
             ? [{ name: "Learner Insights", href: "/learner-insights", icon: LineChart } as NavLink]
             : []),
@@ -48,6 +49,7 @@ const StickyNav = () => {
         ? [
             { name: "My Journey", href: "/journey" },
             { name: "My Plan", href: "/my-plan" },
+            { name: "Tr Juz", href: "/adapt" },
             { name: "Community", href: "/events" },
             { name: "Resources", href: "/resources" },
           ]
@@ -55,6 +57,7 @@ const StickyNav = () => {
             { name: "About", href: "/#about" },
             { name: "How It Works", href: "/#how-it-works" },
             { name: "Pillars Preview", href: "/#pillars-preview" },
+            { name: "Tr Juz", href: "/adapt" },
           ];
 
   const location = useLocation();

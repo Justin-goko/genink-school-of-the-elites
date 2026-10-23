@@ -30,6 +30,7 @@ import Profile from "./pages/Profile";
 import TeamManagement from "./pages/TeamManagement";
 import MyPlan from "./pages/MyPlan";
 import LearnerInsights from "./pages/LearnerInsights";
+import AdaptDemo from "./pages/AdaptDemo";
 import NotFound from "./pages/NotFound";
 import LightGuideProvider from "./components/tutor/LightGuideProvider";
 import { LogoSplash, RouteLoader, RouteLoaderFallback } from "./components/brand/LogoAnimation";
@@ -69,6 +70,8 @@ const App = () => (
             <Route path="/pathway-intelligence" element={<PathwayIntelligence />} />
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/adapt" element={<AdaptDemo />} />
+            <Route path="/tr-juz" element={<Navigate to="/adapt" replace />} />
 
             {/* Layer 2 — authenticated journey */}
             <Route path="/journey" element={<ProtectedRoute><Index /></ProtectedRoute>} />
