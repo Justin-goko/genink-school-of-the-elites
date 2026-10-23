@@ -9,7 +9,7 @@ export interface RouteInfo {
   label: string;
 }
 
-const HIDDEN = [/^\/auth/, /^\/forgot-password/, /^\/reset-password/, /^\/ops-dashboard/, /^\/dashboard/, /^\/team-management/, /^\/learner-insights/, /^\/admin/];
+const HIDDEN = [/^\/auth/, /^\/forgot-password/, /^\/reset-password/, /^\/ops-dashboard/, /^\/dashboard/, /^\/team-management/, /^\/learner-insights/, /^\/admin/, /^\/adapt/];
 
 /** Returns null where the Light Guide is hidden. */
 export function resolveRoute(pathname: string): RouteInfo | null {
