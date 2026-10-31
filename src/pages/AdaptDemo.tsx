@@ -4,7 +4,9 @@ import {
   Gamepad2, HelpCircle, Image as ImageIcon, Lightbulb, MessageCircle, Pause, Play,
   RotateCcw, ShieldCheck, Sparkles, Target, UserRound, Video, XCircle, Zap,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import StickyNav from "@/components/StickyNav";
+import { useUserRole } from "@/hooks/useUserRole";
 
 /**
  * Adapt demo page: "the AI that learns the learner".
@@ -264,7 +266,8 @@ export default function AdaptDemo() {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border px-3 py-0.5 text-xs font-semibold tracking-wide" style={{ borderColor: C.gold, color: C.gold }}>PROTOTYPE · SAMPLE LEARNER</span>
+              <span className="rounded-full px-3 py-0.5 text-xs font-bold tracking-wide" style={{ background: C.gold, color: C.navy }}>BETA · IN DEVELOPMENT</span>
+              <span className="rounded-full border px-3 py-0.5 text-xs font-semibold tracking-wide" style={{ borderColor: C.gold, color: C.gold }}>SCRIPTED DEMO · SAMPLE LEARNER</span>
               <span className="text-xs" style={{ color: C.mute }}>Nothing on this page is saved or sent to an AI</span>
             </div>
             <h1 className="font-serif text-3xl font-bold md:text-4xl">
@@ -379,6 +382,12 @@ export default function AdaptDemo() {
 
         {/* ---------- how it works ---------- */}
         <HowItWorks />
+
+        {/* ---------- where it is today ---------- */}
+        <BetaRoadmap />
+
+        {/* ---------- what this means for you ---------- */}
+        <AudienceBand />
 
         <div className="mt-6 flex flex-col gap-2 border-t pt-4 text-xs md:flex-row md:items-center md:justify-between" style={{ borderColor: C.line, color: C.mute }}>
           <span className="flex items-center gap-2"><ShieldCheck size={14} color={C.teal} /> Adapt reads behaviour only: scrolling, time, answers and questions. Never the camera, microphone, keystrokes or other tabs.</span>
@@ -682,6 +691,90 @@ function HowItWorks() {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+// ---------- beta: where Adapt is today ----------
+function BetaRoadmap() {
+  const stages = [
+    {
+      tag: "Now", color: C.gold, title: "This demo",
+      items: ["A scripted walk-through with a sample learner", "Shows the full loop: notice, rule out causes, ask, re-teach, check"],
+    },
+    {
+      tag: "Next", color: C.teal, title: "Inside Genlink sessions",
+      items: ["Adapt reads study signals in the session reader, with your consent", "Offers a worked example, a quick self-test or a diagram when you're stuck", "Tried first with a pilot cohort at the Mwiki Ward ICT Hub"],
+    },
+    {
+      tag: "Then", color: C.blue, title: "Your own learning path",
+      items: ["A path through your pillar's units, ordered by what you've mastered", "Shaped by your archetype's goal, not by a learning-style label"],
+    },
+    {
+      tag: "Later", color: C.orange, title: "New ways to learn",
+      items: ["Short videos made with ContentForge", "Quick games built for the exact topic, each ending with a check", "Adapt offered to other schools and platforms"],
+    },
+  ];
+  return (
+    <div className="mt-10">
+      <div className="flex flex-wrap items-baseline gap-3">
+        <h2 className="font-serif text-2xl font-bold">Where Adapt is today</h2>
+        <span className="text-sm" style={{ color: C.mute }}>A beta feature: plans may change as we test with learners</span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {stages.map((st) => (
+          <div key={st.tag} className="rounded-2xl border p-4" style={{ borderColor: st.tag === "Now" ? C.gold : C.line, background: C.panel }}>
+            <span className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider" style={{ background: st.color, color: C.navy }}>{st.tag}</span>
+            <div className="mt-3 font-semibold">{st.title}</div>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed" style={{ color: C.soft }}>
+              {st.items.map((it) => (
+                <li key={it} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: st.color }} />{it}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- beta: a message for each kind of visitor ----------
+function AudienceBand() {
+  const { tier, isAdmin, loading } = useUserRole();
+  if (loading) return null;
+
+  const content =
+    tier === "guest"
+      ? {
+          title: "Want to learn this way?",
+          body: "Adapt is being built into Genlink Hub. Start with the free pathway assessment to find your archetype, then create an account to join the pilot when it opens.",
+          primary: { to: "/pathway-intelligence", label: "Take the free assessment" },
+          secondary: { to: "/auth", label: "Create an account" },
+        }
+      : tier === "student"
+        ? {
+            title: "Adapt is coming to your sessions",
+            body: "When it arrives, Adapt will only ever suggest a change and explain why. You can say no, and you can see or delete what it has learned about how you study.",
+            primary: { to: "/journey", label: "Back to my journey" },
+            secondary: { to: "/my-plan", label: "My plan" },
+          }
+        : {
+            title: isAdmin ? "Team view · beta page" : "Team view",
+            body: "This page is public on purpose: visitors see a beta feature with a sign-up path, students see what is coming to their sessions. Use it in demos and pitches; nothing here touches learner data.",
+            primary: { to: "/learner-insights", label: "Learner insights" },
+            secondary: { to: "/ops-dashboard", label: "Operations dashboard" },
+          };
+
+  return (
+    <div className="mt-8 flex flex-col gap-4 rounded-2xl border p-5 md:flex-row md:items-center md:justify-between md:p-6" style={{ borderColor: C.gold, background: C.card }}>
+      <div className="max-w-2xl">
+        <div className="flex items-center gap-2 text-lg font-semibold"><Sparkles size={18} color={C.gold} /> {content.title}</div>
+        <p className="mt-1 text-sm leading-relaxed" style={{ color: C.soft }}>{content.body}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Link to={content.primary.to} className="rounded-xl px-5 py-3 text-sm font-semibold transition hover:brightness-110" style={{ background: C.gold, color: C.navy }}>{content.primary.label}</Link>
+        <Link to={content.secondary.to} className="rounded-xl border px-4 py-3 text-sm" style={{ borderColor: C.line, color: C.soft }}>{content.secondary.label}</Link>
       </div>
     </div>
   );
