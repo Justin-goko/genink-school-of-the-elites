@@ -434,7 +434,7 @@ const CourseLearning = () => {
                     {!isEnrolled && (
                       <Button asChild className="bg-premium hover:bg-premium/90 text-premium-foreground whitespace-nowrap">
                         <Link to={`/pillar/${course.pillarId}`}>
-                          {pillarPrice ? `Unlock for ${formatKes(pillarPrice)}` : "Enrol free"}
+                          {pillarPrice ? `Enrol free · Premium ${formatKes(pillarPrice)}` : "Enrol free"}
                         </Link>
                       </Button>
                     )}

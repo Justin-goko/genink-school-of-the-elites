@@ -3,6 +3,9 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUnit, useUnitSessions } from "@/hooks/useUnits";
 import { useSessionBlocks } from "@/hooks/useSessionBlocks";
+import { usePremiumAccess } from "@/hooks/usePillarPayments";
+import { useUserRole } from "@/hooks/useUserRole";
+import PillarUnlockCard from "@/components/payments/PillarUnlockCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useXPReward } from "@/contexts/XPRewardContext";
@@ -70,6 +73,11 @@ export default function SessionReader() {
     return () => setTutorContext(null);
   }, [setTutorContext, unitId, session?.id, session?.title, pillarName, unit?.title, unit?.order_index, idx]);
   const { data: importedBlocks } = useSessionBlocks(session?.id);
+  const { isAdmin } = useUserRole();
+  const premiumAccess = usePremiumAccess(pillarId, isAdmin);
+  // Premium unit, past the free first session, not paid for: the database
+  // returns no blocks, so show the paywall instead of placeholder or legacy text.
+  const premiumLocked = !!unit?.is_premium && idx > 0 && !!premiumAccess.price && !premiumAccess.unlocked;
 
   const [scrollPct, setScrollPct] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -129,6 +137,33 @@ export default function SessionReader() {
         navigate(`/pillar/${pillarId}/unit/${unitId}/session/${idx + 2}`);
       }
     } finally { setBusy(false); }
+  }
+
+  if (premiumLocked && session) {
+    return (
+      <div className="min-h-screen bg-cinematic-surface relative">
+        <StickyNav />
+        <div className="container mx-auto max-w-4xl px-5 pt-24 pb-16">
+          <p className="text-xs uppercase tracking-widest mb-2" style={{ color: READER.gold }}>
+            {unit?.title} · Session {idx + 1}
+          </p>
+          <h1 className="text-3xl mb-2" style={{ fontFamily: READER.serif, color: READER.ink }}>{session.title}</h1>
+          <p className="text-sm mb-8" style={{ color: READER.inkSoft }}>
+            This is a premium session. You've seen the free first session of this unit; unlock Premium to keep going.
+          </p>
+          <PillarUnlockCard
+            pillarId={pillarId!}
+            pillarName={pillarName ?? "this pillar"}
+            price={premiumAccess.price!}
+            color={pillars.find((p) => p.id === pillarId)?.color ?? "#C9A84C"}
+            premiumUnits={[`${unit?.title ?? "This unit"}`, "and every other premium unit in this pillar"]}
+          />
+          <div className="mt-6 text-center">
+            <Link to={`/pillar/${pillarId}/unit/${unitId}`} className="text-sm underline" style={{ color: READER.inkSoft }}>Back to the unit</Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!sessionsLoading && !session) {

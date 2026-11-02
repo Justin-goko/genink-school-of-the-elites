@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, ShieldCheck, XCircle, Wallet, Settings2, Tag, RefreshCw } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldCheck, XCircle, Wallet, Settings2, Tag, RefreshCw, Crown } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { pillars } from "@/data/courses";
 import { formatKes, usePaymentSettings, type PaymentSettings } from "@/hooks/usePillarPayments";
 
@@ -83,8 +84,9 @@ export default function AdminPayments() {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Pillar payments</h1>
           <p className="text-sm text-muted-foreground max-w-3xl">
+            Every pillar is free to join. Its premium units (first session free) unlock with one M-Pesa payment per pillar.
             Learners pay by M-Pesa and submit the code. Find the code and amount on the M-Pesa statement (M-Pesa app or the
-            business portal), then approve. Approving unlocks the pillar straight away. Foundation pillars stay free.
+            business portal), then approve. Approving unlocks that pillar's premium units straight away.
           </p>
         </div>
 
@@ -99,6 +101,8 @@ export default function AdminPayments() {
           <SettingsCard />
           <PricesCard />
         </div>
+
+        <PremiumUnitsCard />
 
         {/* queue */}
         <div className="rounded-2xl border bg-card">
@@ -268,34 +272,101 @@ function PricesCard() {
     qc.invalidateQueries({ queryKey: ["pillar_prices"] });
   };
 
-  const rows = prices.data ?? [];
+  const rows = pillars.map((p) => prices.data?.find((r) => r.pillar_id === p.id) ?? { pillar_id: p.id, price_kes: 0, active: false });
   return (
     <div className="rounded-2xl border bg-card p-5 space-y-3">
-      <div className="flex items-center gap-2 font-semibold"><Tag className="w-4 h-4 text-accent" /> Prices (one-time, per pillar)</div>
-      <p className="text-xs text-muted-foreground">Foundation pillars (1–3) are free. A new price applies to new submissions only.</p>
-      {rows.length === 0 && <p className="text-sm text-muted-foreground">No prices yet. The migration seeds the four specialisations.</p>}
-      {rows
-        .slice()
-        .sort((a, b) => pillars.findIndex((p) => p.id === a.pillar_id) - pillars.findIndex((p) => p.id === b.pillar_id))
-        .map((r) => (
+      <div className="flex items-center gap-2 font-semibold"><Tag className="w-4 h-4 text-accent" /> Premium price per pillar</div>
+      <p className="text-xs text-muted-foreground">
+        One payment unlocks all premium units in that pillar; the other units stay free. With no price, premium units are free
+        for everyone. A new price applies to new submissions only.
+      </p>
+      {rows.map((r) => (
           <div key={r.pillar_id} className="flex items-center gap-2">
             <div className="flex-1 text-sm">
               {pillarName(r.pillar_id)}
-              {!r.active && <span className="ml-2 text-xs text-muted-foreground">(free right now)</span>}
+              {!r.active && <span className="ml-2 text-xs text-muted-foreground">(premium free right now)</span>}
             </div>
             <span className="text-sm text-muted-foreground">Ksh</span>
             <Input
               className="w-28 h-8"
               inputMode="numeric"
-              value={draft[r.pillar_id] ?? String(r.price_kes)}
+              value={draft[r.pillar_id] ?? (r.price_kes ? String(r.price_kes) : "")}
+              placeholder="No price"
               onChange={(e) => setDraft((d) => ({ ...d, [r.pillar_id]: e.target.value.replace(/[^\d]/g, "") }))}
             />
             <Button size="sm" variant="outline" disabled={saving === r.pillar_id} onClick={() => save(r.pillar_id, true)}>Save</Button>
-            <Button size="sm" variant="ghost" disabled={saving === r.pillar_id} onClick={() => save(r.pillar_id, !r.active)}>
-              {r.active ? "Make free" : "Charge"}
-            </Button>
+            {r.price_kes > 0 && (
+              <Button size="sm" variant="ghost" disabled={saving === r.pillar_id} onClick={() => save(r.pillar_id, !r.active)}>
+                {r.active ? "Make free" : "Charge"}
+              </Button>
+            )}
           </div>
         ))}
+    </div>
+  );
+}
+
+function PremiumUnitsCard() {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState<string>(pillars[3]?.id ?? pillars[0].id);
+  const [busy, setBusy] = useState<string | null>(null);
+  const units = useQuery({
+    queryKey: ["admin_premium_units"],
+    queryFn: async (): Promise<{ id: string; title: string; pillar_id: string; order_index: number; is_premium: boolean }[]> => {
+      const { data, error } = await db
+        .from("units")
+        .select("id,title,pillar_id,order_index,is_premium")
+        .eq("track_type", "learning_path")
+        .order("order_index");
+      if (error) return [];
+      return data ?? [];
+    },
+  });
+
+  const toggle = async (id: string, value: boolean) => {
+    setBusy(id);
+    const { error } = await db.rpc("set_unit_premium", { _unit_id: id, _premium: value });
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin_premium_units"] });
+    qc.invalidateQueries({ queryKey: ["units"] });
+    qc.invalidateQueries({ queryKey: ["unit"] });
+  };
+
+  const list = (units.data ?? []).filter((u) => u.pillar_id === open);
+  const countFor = (pid: string) => (units.data ?? []).filter((u) => u.pillar_id === pid && u.is_premium).length;
+
+  return (
+    <div className="rounded-2xl border bg-card p-5 space-y-4">
+      <div className="flex items-center gap-2 font-semibold"><Crown className="w-4 h-4 text-amber-600" /> Premium units</div>
+      <p className="text-xs text-muted-foreground">
+        Switch on the units worth paying for. Their first session stays free as a preview. Premium units don't count toward
+        pillar completion, so learners who don't pay can still finish the pillar and move on.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {pillars.map((p) => (
+          <Button key={p.id} size="sm" variant={open === p.id ? "default" : "outline"} onClick={() => setOpen(p.id)}>
+            {p.name.split(" ")[0]}
+            {countFor(p.id) > 0 && <span className="ml-1.5 rounded-full bg-amber-500/25 px-1.5 text-[10px]">{countFor(p.id)}</span>}
+          </Button>
+        ))}
+      </div>
+      {units.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : list.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No units found for this pillar.</p>
+      ) : (
+        <div className="divide-y rounded-xl border">
+          {list.map((u) => (
+            <div key={u.id} className="flex items-center gap-3 p-3">
+              <span className="w-14 shrink-0 text-xs text-muted-foreground">Unit {u.order_index}</span>
+              <span className="flex-1 text-sm">{u.title}</span>
+              {u.is_premium && <span className="rounded-full bg-premium px-2 py-0.5 text-[10px] font-bold text-premium-foreground">PREMIUM</span>}
+              <Switch checked={u.is_premium} disabled={busy === u.id} onCheckedChange={(v) => toggle(u.id, v)} aria-label={`Premium: ${u.title}`} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

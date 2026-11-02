@@ -37,7 +37,7 @@ export default function LockedPillar({ access, color, price }: { access: PillarA
         </ul>
         {price && (
           <p className="text-sm text-muted-foreground mb-6">
-            Specialisation fee: <span className="font-semibold text-premium">Ksh {price.toLocaleString("en-KE")}</span>, paid once by M-Pesa when this pillar opens.
+            Free to join when it opens. Its premium units unlock for <span className="font-semibold text-amber-700">Ksh {price.toLocaleString("en-KE")}</span>, paid once by M-Pesa.
           </p>
         )}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

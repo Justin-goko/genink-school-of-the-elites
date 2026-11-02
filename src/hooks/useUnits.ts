@@ -26,6 +26,8 @@ export interface Unit {
   is_locked_by_default: boolean;
   status: UnitStatus;
   counts_toward_completion: boolean;
+  /** Premium units unlock with the pillar payment; their first session is free. */
+  is_premium?: boolean;
 }
 
 export interface UserUnitProgress {

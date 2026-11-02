@@ -11,6 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import { GoldParticles } from "@/components/motion";
 import { useUserRole } from "@/hooks/useUserRole";
+import { usePremiumAccess } from "@/hooks/usePillarPayments";
+import PillarUnlockCard from "@/components/payments/PillarUnlockCard";
 import { getPillarMotion } from "@/lib/motion/pillarThemes";
 
 export default function UnitDetail() {
@@ -20,6 +22,7 @@ export default function UnitDetail() {
   const { data: sessions = [], isLoading: sessionsLoading } = useUnitSessions(unitId);
   const { data: progressMap = {} } = useUserUnitProgress(unit ? [unit.id] : []);
   const { isAdmin, departmentRole } = useUserRole();
+  const premiumAccess = usePremiumAccess(pillarId, isAdmin);
 
   if (unitLoading || sessionsLoading) {
     return (
@@ -44,6 +47,7 @@ export default function UnitDetail() {
   const canPreviewLocked = isAdmin || departmentRole === "ceo" || departmentRole === "curriculum";
   const theme = getPillarMotion(pillar.id);
   const civic = pillar.id === "civic-leadership";
+  const premiumLocked = !!unit.is_premium && !premiumAccess.unlocked && !!premiumAccess.price;
 
   return (
     <div className="min-h-screen bg-cinematic-surface relative">
@@ -136,6 +140,7 @@ export default function UnitDetail() {
               const isCurrent = oneBased === completedCount + 1;
               const learnerLocked = oneBased > completedCount + 1;
               const isLocked = !canPreviewLocked && learnerLocked;
+              const isPremiumSession = premiumLocked && i > 0;
 
               return (
                 <Card
@@ -168,8 +173,10 @@ export default function UnitDetail() {
                            oneBased}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                          <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-2">
                             Session {oneBased}
+                            {premiumLocked && i === 0 && <span className="normal-case tracking-normal rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-700">FREE PREVIEW</span>}
+                            {isPremiumSession && <span className="normal-case tracking-normal rounded-full bg-premium px-2 py-0.5 text-[10px] font-bold text-premium-foreground">PREMIUM</span>}
                           </p>
                           <CardTitle className="text-base leading-snug truncate">
                             {s.title}
@@ -196,8 +203,8 @@ export default function UnitDetail() {
                         </span>
                       ) : (
                         <Link to={`/pillar/${pillar.id}/unit/${unit.id}/session/${oneBased}`}>
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                           {isCompleted ? "Review" : learnerLocked && canPreviewLocked ? "Preview" : isCurrent ? "Start" : "Open"}
+                          {isPremiumSession ? <Lock className="w-4 h-4 mr-2" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                           {isPremiumSession ? "Premium" : isCompleted ? "Review" : learnerLocked && canPreviewLocked ? "Preview" : isCurrent ? "Start" : "Open"}
                         </Link>
                       )}
                     </Button>
@@ -205,6 +212,18 @@ export default function UnitDetail() {
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {premiumLocked && (
+          <div className="mt-8">
+            <PillarUnlockCard
+              pillarId={pillar.id}
+              pillarName={pillar.name}
+              price={premiumAccess.price!}
+              color={pillar.color}
+              premiumUnits={[`Unit ${unit.order_index}: ${unit.title}`, "and every other premium unit in this pillar"]}
+            />
           </div>
         )}
       </div>
