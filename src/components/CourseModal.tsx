@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Star, CheckCircle2, Brain, ShieldCheck, Layers, Briefcase, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
+import { formatKes, usePillarPrices } from "@/hooks/usePillarPayments";
 import { type Course, getPillarForCourse, entrepreneurialIntelligenceModule, progressionLevels, type ProgressionLevel } from "@/data/courses";
 
 interface CourseModalProps {
@@ -18,7 +19,9 @@ interface CourseModalProps {
 }
 
 const CourseModal = ({ isOpen, onClose, course }: CourseModalProps) => {
+  const { data: pillarPrices = {} } = usePillarPrices();
   if (!course) return null;
+  const pillarPrice = pillarPrices[course.pillarId];
 
   const pillar = getPillarForCourse(course.id);
   const paths = pillar?.learningPaths ?? [];
@@ -65,9 +68,10 @@ const CourseModal = ({ isOpen, onClose, course }: CourseModalProps) => {
                 <span className="font-bold">{course.rating}</span>
               </div>
             </div>
-            {course.isPremium && course.price && (
-              <div className="text-3xl font-bold text-premium">{course.price}</div>
-            )}
+            <div className="text-right">
+              <div className={`text-2xl font-bold ${pillarPrice ? "text-premium" : "text-accent"}`}>{pillarPrice ? formatKes(pillarPrice) : "Free"}</div>
+              <div className="text-xs text-muted-foreground">{pillarPrice ? "one-time, unlocks the whole pillar" : "part of the free Foundation"}</div>
+            </div>
           </div>
 
           {/* Progression Levels */}

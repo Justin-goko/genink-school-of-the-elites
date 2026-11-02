@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useModules, useModulesMeta, useEnrollment, useUserModuleProgress, useCompleteModule, Module } from "@/hooks/useUserProgress";
 import { courses, Course, getPillarForCourse, entrepreneurialIntelligenceModule } from "@/data/courses";
 import StickyNav from "@/components/StickyNav";
+import { formatKes, usePillarPrices } from "@/hooks/usePillarPayments";
 import XPBar from "@/components/learning/XPBar";
 import ModuleCard from "@/components/learning/ModuleCard";
 import CourseProgress from "@/components/learning/CourseProgress";
@@ -219,6 +220,8 @@ const CourseLearning = () => {
   const [activeModule, setActiveModule] = useState<Module | null>(null);
 
   const course = courses.find(c => c.id === courseId);
+  const { data: pillarPrices = {} } = usePillarPrices();
+  const pillarPrice = course ? pillarPrices[course.pillarId] : undefined;
   const { data: modules = [], isLoading: modulesLoading } = useModules(courseId);
   const { data: modulesMeta = [], isLoading: metaLoading } = useModulesMeta(courseId);
   const { data: isEnrolled = false } = useEnrollment(courseId);
@@ -429,8 +432,10 @@ const CourseLearning = () => {
                       </p>
                     </div>
                     {!isEnrolled && (
-                      <Button className="bg-premium hover:bg-premium/90 text-premium-foreground whitespace-nowrap">
-                        Enroll for {course.price}
+                      <Button asChild className="bg-premium hover:bg-premium/90 text-premium-foreground whitespace-nowrap">
+                        <Link to={`/pillar/${course.pillarId}`}>
+                          {pillarPrice ? `Unlock for ${formatKes(pillarPrice)}` : "Enrol free"}
+                        </Link>
                       </Button>
                     )}
                   </div>

@@ -27,6 +27,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminImport from "./pages/AdminImport";
 import AdminBulkImport from "./pages/AdminBulkImport";
+import AdminPayments from "./pages/AdminPayments";
+import Pricing from "./pages/Pricing";
 import Profile from "./pages/Profile";
 import TeamManagement from "./pages/TeamManagement";
 import MyPlan from "./pages/MyPlan";
@@ -72,6 +74,7 @@ const App = () => (
             <Route path="/events" element={<Events />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/adapt" element={<AdaptDemo />} />
+            <Route path="/pricing" element={<Pricing />} />
 
             {/* Layer 2 — authenticated journey */}
             <Route path="/journey" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -89,6 +92,7 @@ const App = () => (
             <Route path="/ops-dashboard" element={<ProtectedRoute><OpsDashboard /></ProtectedRoute>} />
             <Route path="/admin/import" element={<ProtectedRoute><AdminImport /></ProtectedRoute>} />
             <Route path="/admin/import/bulk" element={<ProtectedRoute><AdminBulkImport /></ProtectedRoute>} />
+            <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/team-management" element={<ProtectedRoute><TeamManagement /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
