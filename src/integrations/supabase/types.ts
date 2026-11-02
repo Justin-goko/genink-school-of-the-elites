@@ -478,6 +478,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          account_reference: string | null
+          business_name: string | null
+          id: boolean
+          mpesa_method: string
+          mpesa_number: string | null
+          review_hours: number
+          updated_at: string
+        }
+        Insert: {
+          account_reference?: string | null
+          business_name?: string | null
+          id?: boolean
+          mpesa_method?: string
+          mpesa_number?: string | null
+          review_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          account_reference?: string | null
+          business_name?: string | null
+          id?: boolean
+          mpesa_method?: string
+          mpesa_number?: string | null
+          review_hours?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pending_role_assignments: {
         Row: {
           created_at: string
@@ -542,6 +572,91 @@ export type Database = {
             columns: ["recommended_unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pillar_payments: {
+        Row: {
+          amount_kes: number
+          created_at: string
+          id: string
+          method: string
+          mpesa_code: string
+          payer_name: string | null
+          phone: string | null
+          pillar_id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_kes: number
+          created_at?: string
+          id?: string
+          method?: string
+          mpesa_code: string
+          payer_name?: string | null
+          phone?: string | null
+          pillar_id: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_kes?: number
+          created_at?: string
+          id?: string
+          method?: string
+          mpesa_code?: string
+          payer_name?: string | null
+          phone?: string | null
+          pillar_id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pillar_payments_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pillar_prices: {
+        Row: {
+          active: boolean
+          pillar_id: string
+          price_kes: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          pillar_id: string
+          price_kes: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          pillar_id?: string
+          price_kes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pillar_prices_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: true
+            referencedRelation: "pillars"
             referencedColumns: ["id"]
           },
         ]
@@ -1161,6 +1276,24 @@ export type Database = {
       }
     }
     Functions: {
+      admin_list_pillar_payments: {
+        Args: { _status?: string }
+        Returns: {
+          amount_kes: number
+          created_at: string
+          id: string
+          learner_email: string
+          learner_name: string
+          mpesa_code: string
+          payer_name: string
+          phone: string
+          pillar_id: string
+          review_note: string
+          reviewed_at: string
+          status: string
+          user_id: string
+        }[]
+      }
       can_access_pillar: {
         Args: { _pillar_id: string; _user_id: string }
         Returns: boolean
@@ -1231,6 +1364,10 @@ export type Database = {
         Returns: number
       }
       refresh_unit_xp_totals: { Args: never; Returns: undefined }
+      review_pillar_payment: {
+        Args: { _approve: boolean; _note?: string; _payment_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
