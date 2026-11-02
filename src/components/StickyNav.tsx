@@ -32,13 +32,13 @@ const StickyNav = () => {
   // Context-aware primary nav links. Team members always see Operations
   // Dashboard first (with icon) so they never have to type the URL, and keep
   // access to the Student Journey for previewing what learners experience.
-  type NavLink = { name: string; href: string; icon?: React.ComponentType<{ className?: string }> };
+  type NavLink = { name: string; href: string; icon?: React.ComponentType<{ className?: string }>; badge?: string };
   const navLinks: NavLink[] =
     tier === "team"
       ? [
           { name: "Operations Dashboard", href: "/ops-dashboard", icon: LayoutDashboard },
           { name: "Student Journey", href: "/journey", icon: Compass },
-          { name: "Adapt", href: "/adapt", icon: Brain },
+          { name: "Adapt", href: "/adapt", icon: Brain, badge: "Beta" },
           ...(canManageTeam
             ? [{ name: "Learner Insights", href: "/learner-insights", icon: LineChart } as NavLink]
             : []),
@@ -49,7 +49,7 @@ const StickyNav = () => {
         ? [
             { name: "My Journey", href: "/journey" },
             { name: "My Plan", href: "/my-plan" },
-            { name: "Adapt", href: "/adapt" },
+            { name: "Adapt", href: "/adapt", badge: "Beta" },
             { name: "Community", href: "/events" },
             { name: "Resources", href: "/resources" },
           ]
@@ -57,7 +57,7 @@ const StickyNav = () => {
             { name: "About", href: "/#about" },
             { name: "How It Works", href: "/#how-it-works" },
             { name: "Pillars Preview", href: "/#pillars-preview" },
-            { name: "Adapt", href: "/adapt" },
+            { name: "Adapt", href: "/adapt", badge: "Beta" },
           ];
 
   const location = useLocation();
@@ -113,6 +113,11 @@ const StickyNav = () => {
         {isAdmin && (
           <DropdownMenuItem onClick={() => navigate("/admin/import")}>
             <Upload className="w-4 h-4 mr-2" /> Content Importer
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate("/admin/import/bulk")}>
+            <Upload className="w-4 h-4 mr-2" /> Bulk Curriculum Import
           </DropdownMenuItem>
         )}
         {canManageTeam && (
@@ -218,6 +223,7 @@ const StickyNav = () => {
                   <span className="inline-flex items-center gap-1.5">
                     {link.icon ? <link.icon className="w-4 h-4" /> : null}
                     {link.name}
+                    {link.badge ? <span className="rounded-full bg-accent px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-accent-foreground">{link.badge}</span> : null}
                   </span>
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
                 </Link>
@@ -249,6 +255,7 @@ const StickyNav = () => {
               >
                 {link.icon ? <link.icon className="w-4 h-4" /> : null}
                 <span>{link.name}</span>
+                {link.badge ? <span className="rounded-full bg-accent px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-accent-foreground">{link.badge}</span> : null}
               </Link>
             ))}
             {tier === "guest" ? (

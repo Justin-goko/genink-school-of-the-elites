@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import mammoth from "mammoth";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,7 +146,10 @@ export default function AdminImport() {
         </h1>
         <p className="mb-8 text-sm" style={{ color: READER.inkSoft }}>
           Pick a session, paste or upload structured text (Markdown or .docx), review the parsed blocks,
-          then publish. Existing blocks for the session are replaced on publish.
+          then publish. Existing blocks for the session are replaced on publish.{" "}
+          <Link to="/admin/import/bulk" className="font-semibold underline" style={{ color: READER.navy }}>
+            Import the whole curriculum at once
+          </Link>
         </p>
 
         <div className="grid lg:grid-cols-2 gap-6">

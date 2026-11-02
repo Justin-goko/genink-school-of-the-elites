@@ -26,6 +26,7 @@ import OpsDashboard from "./pages/OpsDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminImport from "./pages/AdminImport";
+import AdminBulkImport from "./pages/AdminBulkImport";
 import Profile from "./pages/Profile";
 import TeamManagement from "./pages/TeamManagement";
 import MyPlan from "./pages/MyPlan";
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><OperationsDashboard /></ProtectedRoute>} />
             <Route path="/ops-dashboard" element={<ProtectedRoute><OpsDashboard /></ProtectedRoute>} />
             <Route path="/admin/import" element={<ProtectedRoute><AdminImport /></ProtectedRoute>} />
+            <Route path="/admin/import/bulk" element={<ProtectedRoute><AdminBulkImport /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/team-management" element={<ProtectedRoute><TeamManagement /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
