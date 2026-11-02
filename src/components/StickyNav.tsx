@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users, Brain } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, Award, ArrowRight, ShieldCheck, LayoutDashboard, LineChart, Compass, UserCircle2, Upload, Users, Brain, Wallet } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, useAchievementCount } from "@/hooks/useUserRole";
@@ -57,6 +57,7 @@ const StickyNav = () => {
             { name: "About", href: "/#about" },
             { name: "How It Works", href: "/#how-it-works" },
             { name: "Pillars Preview", href: "/#pillars-preview" },
+            { name: "Pricing", href: "/pricing" },
             { name: "Adapt", href: "/adapt", badge: "Beta" },
           ];
 
@@ -118,6 +119,11 @@ const StickyNav = () => {
         {isAdmin && (
           <DropdownMenuItem onClick={() => navigate("/admin/import/bulk")}>
             <Upload className="w-4 h-4 mr-2" /> Bulk Curriculum Import
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate("/admin/payments")}>
+            <Wallet className="w-4 h-4 mr-2" /> Payments
           </DropdownMenuItem>
         )}
         {canManageTeam && (

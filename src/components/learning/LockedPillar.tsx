@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { previewHref, type PillarAccess } from "@/hooks/usePillarAccess";
 
 /** Friendly screen for direct links into a pillar the learner hasn't unlocked yet. */
-export default function LockedPillar({ access, color }: { access: PillarAccess; color: string }) {
+export default function LockedPillar({ access, color, price }: { access: PillarAccess; color: string; price?: number }) {
   return (
     <div className="container mx-auto px-4 py-16 max-w-2xl">
       <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2 text-muted-foreground">
@@ -35,6 +35,11 @@ export default function LockedPillar({ access, color }: { access: PillarAccess; 
             </li>
           ))}
         </ul>
+        {price && (
+          <p className="text-sm text-muted-foreground mb-6">
+            Specialisation fee: <span className="font-semibold text-premium">Ksh {price.toLocaleString("en-KE")}</span>, paid once by M-Pesa when this pillar opens.
+          </p>
+        )}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
             <Link to={previewHref(access)}><Eye className="w-4 h-4 mr-2" />Preview first session</Link>
