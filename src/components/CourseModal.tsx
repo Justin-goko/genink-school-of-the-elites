@@ -69,8 +69,8 @@ const CourseModal = ({ isOpen, onClose, course }: CourseModalProps) => {
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-2xl font-bold ${pillarPrice ? "text-premium" : "text-accent"}`}>{pillarPrice ? formatKes(pillarPrice) : "Free"}</div>
-              <div className="text-xs text-muted-foreground">{pillarPrice ? "one-time, unlocks the whole pillar" : "part of the free Foundation"}</div>
+              <div className="text-2xl font-bold text-accent">Free to join</div>
+              {pillarPrice ? <div className="text-xs text-muted-foreground">Premium units {formatKes(pillarPrice)}, one-time</div> : null}
             </div>
           </div>
 

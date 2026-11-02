@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles, CheckCircle2, Trophy } from "lucide-react";
 import UnitCard from "@/components/learning/UnitCard";
+import PillarUnlockCard from "@/components/payments/PillarUnlockCard";
+import { usePremiumAccess } from "@/hooks/usePillarPayments";
+import { useUserRole } from "@/hooks/useUserRole";
 import SpecializedUnitCard from "@/components/learning/SpecializedUnitCard";
 import PillarCalibrationCard from "@/components/learning/PillarCalibrationCard";
 import { usePillarUnits, useUserUnitProgress, type Unit, type UserUnitProgress } from "@/hooks/useUnits";
@@ -31,6 +34,9 @@ export default function PillarLearningView({ pillar, icon }: Props) {
   const [recommendedUnitId, setRecommendedUnitId] = useState<string | null>(null);
 
   const learningPathUnits = units.filter((u) => u.track_type === "learning_path");
+  const { isAdmin } = useUserRole();
+  const premiumAccess = usePremiumAccess(pillar.id, isAdmin);
+  const premiumUnits = learningPathUnits.filter((u) => u.is_premium);
   const specializedUnits = units.filter((u) => u.track_type === "specialized");
   // Progress, XP and unlocking count only live units that count toward completion.
   const countedUnits = learningPathUnits.filter((u) => u.status === "live" && u.counts_toward_completion);
@@ -57,7 +63,8 @@ export default function PillarLearningView({ pillar, icon }: Props) {
     const prog = progressMap[unit.id];
     const completed = prog?.sessions_completed ?? 0;
     if (completed >= unit.session_count && unit.session_count > 0) return "completed";
-    const prev = countedUnits.find((u) => u.order_index === unit.order_index - 1);
+    // The nearest earlier unit that counts (premium units don't gate the path).
+    const prev = [...countedUnits].reverse().find((u) => u.order_index < unit.order_index);
     const prevDone = !prev || (progressMap[prev.id]?.sessions_completed ?? 0) >= prev.session_count;
     if (unit.order_index === 1 || prevDone) return unit.id === nextUnit?.id ? "current" : "available";
     return "locked";
@@ -133,10 +140,22 @@ export default function PillarLearningView({ pillar, icon }: Props) {
                 progress={progressMap[unit.id]}
                 state={getState(unit)}
                 pillarId={pillar.id}
+                premium={unit.is_premium ? (premiumAccess.unlocked ? "unlocked" : "locked") : undefined}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {/* Premium units: one payment unlocks them all */}
+      {premiumUnits.length > 0 && premiumAccess.price && !premiumAccess.unlocked && (
+        <PillarUnlockCard
+          pillarId={pillar.id}
+          pillarName={pillar.name}
+          price={premiumAccess.price}
+          color={pillar.color}
+          premiumUnits={premiumUnits.map((u) => `Unit ${u.order_index}: ${u.title}`)}
+        />
       )}
 
       {/* Specialised content */}

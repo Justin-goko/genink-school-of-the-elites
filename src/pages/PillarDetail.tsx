@@ -23,7 +23,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { usePillarAccess } from "@/hooks/usePillarAccess";
 import LockedPillar from "@/components/learning/LockedPillar";
-import PillarUnlockCard from "@/components/payments/PillarUnlockCard";
 import { formatKes, usePillarPrices } from "@/hooks/usePillarPayments";
 
 const pillarIcons: Record<string, React.ReactNode> = {
@@ -48,7 +47,7 @@ const PillarDetail = () => {
   const { data: access } = usePillarAccess();
   const pillarAccess = access?.find((a) => a.pillar_id === pillarId);
   const isLocked = pillarAccess?.state === "locked";
-  const { data: prices = {}, isLoading: pricesLoading } = usePillarPrices();
+  const { data: prices = {} } = usePillarPrices();
   const price = pillarId ? prices[pillarId] : undefined;
 
   const { data: units = [] } = usePillarUnits(pillarId);
@@ -62,14 +61,12 @@ const PillarDetail = () => {
     if (!user || !pillar) return;
     if (isEnrolled || enrollmentLoading) return;
     if (!userHasAssessment) return;
-    // Paid pillars open through an approved payment, never by auto-enrolment.
-    if (pricesLoading || price) return;
     // Never auto-enrol into a locked pillar (the server would refuse anyway).
     if (!pillarAccess || pillarAccess.state !== "open") return;
     enrollInPillar(user.id, pillar.id).then(() => {
       queryClient.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillar.id] });
     });
-  }, [user, pillar, isEnrolled, enrollmentLoading, userHasAssessment, queryClient, pillarAccess, price, pricesLoading]);
+  }, [user, pillar, isEnrolled, enrollmentLoading, userHasAssessment, queryClient, pillarAccess]);
 
   if (!pillar) return <Navigate to="/courses" replace />;
 
@@ -244,13 +241,7 @@ const PillarDetail = () => {
           </>
         )}
 
-        {/* Paid pillar, open to this learner: pay to unlock (manual M-Pesa) */}
-        {price && user && userHasAssessment ? (
-          <div className="pt-6">
-            <PillarUnlockCard pillarId={pillar.id} pillarName={pillar.name} price={price} color={pillar.color} icon={iconEl} />
-          </div>
-        ) : (
-        /* Enrol CTA — visible to unauthenticated visitors and signed-in-but-not-enrolled users */
+        {/* Enrol CTA — visible to unauthenticated visitors and signed-in-but-not-enrolled users */}
         <div className="pt-6">
           <div
             className="rounded-2xl p-8 md:p-10 text-center relative overflow-hidden"
@@ -274,7 +265,7 @@ const PillarDetail = () => {
                 : "Start with the Pathway Intelligence assessment. You'll get a personalised profile, then unlock this pillar."}
             </p>
             {price && (
-              <p className="text-sm font-semibold text-premium mb-4">Specialisation fee: {formatKes(price)}, paid once by M-Pesa</p>
+              <p className="text-sm mb-4"><span className="font-semibold">Free to join.</span> Premium units unlock for <span className="font-semibold text-amber-700">{formatKes(price)}</span>, paid once by M-Pesa.</p>
             )}
             <Button
               onClick={handleEnrol}
@@ -295,7 +286,6 @@ const PillarDetail = () => {
             )}
           </div>
         </div>
-        )}
       </div>
     </div>
   );

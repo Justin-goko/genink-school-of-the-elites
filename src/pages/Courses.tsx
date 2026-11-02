@@ -143,9 +143,8 @@ const Courses = () => {
                       </div>
                     </div>
                     <p className="text-sm font-semibold">
-                      {prices[pillar.id]
-                        ? <span className="text-premium">{formatKes(prices[pillar.id])} <span className="font-normal text-muted-foreground">one-time</span></span>
-                        : <span className="text-accent">Free</span>}
+                      <span className="text-accent">Free to join</span>
+                      {prices[pillar.id] && <span className="text-muted-foreground font-normal"> · Premium units {formatKes(prices[pillar.id])}</span>}
                     </p>
                     <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                       <Link to={`/pillar/${pillar.id}`}>

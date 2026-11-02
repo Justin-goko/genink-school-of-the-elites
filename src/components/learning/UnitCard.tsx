@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Lock, CheckCircle2, Clock, Sparkles } from "lucide-react";
+import { Lock, CheckCircle2, Clock, Sparkles, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Unit, UserUnitProgress, PillarTheme } from "@/hooks/useUnits";
 import { getPillarMotion } from "@/lib/motion/pillarThemes";
@@ -19,9 +19,11 @@ interface Props {
   progress?: UserUnitProgress;
   state: "locked" | "current" | "completed" | "available";
   pillarId: string;
+  /** "locked" = premium and not paid for; "unlocked" = premium and paid (or free for now). */
+  premium?: "locked" | "unlocked";
 }
 
-export default function UnitCard({ unit, progress, state, pillarId }: Props) {
+export default function UnitCard({ unit, progress, state, pillarId, premium }: Props) {
   const t = THEME[unit.theme];
   const theme = getPillarMotion(pillarId);
   const civic = pillarId === "civic-leadership";
@@ -68,8 +70,13 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
       )}
 
       <div className="relative">
-        <div className={cn("text-xs font-semibold uppercase tracking-wider mb-2", t.text)}>
-          Unit {unit.order_index}
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <span className={cn("text-xs font-semibold uppercase tracking-wider", t.text)}>Unit {unit.order_index}</span>
+          {premium && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-premium-foreground">
+              <Crown className="w-3 h-3" /> Premium
+            </span>
+          )}
         </div>
         <h3 className="font-bold text-base leading-snug line-clamp-2 min-h-[2.6rem] mb-3">
           {unit.title}
@@ -79,6 +86,10 @@ export default function UnitCard({ unit, progress, state, pillarId }: Props) {
           <Clock className="w-3.5 h-3.5" />
           <span>{unit.session_count} sessions · ~{hours} hours</span>
         </div>
+
+        {premium === "locked" && !isLocked && (
+          <p className="text-xs font-medium text-amber-800 mb-2">First session free · the rest unlocks with Premium</p>
+        )}
 
         {isComingSoon && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-foreground/10 text-muted-foreground">

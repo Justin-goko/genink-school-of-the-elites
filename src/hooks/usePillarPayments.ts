@@ -101,3 +101,24 @@ export function useSubmitPillarPayment() {
     await qc.invalidateQueries({ queryKey: ["my_pillar_payments", user.id] });
   };
 }
+
+/**
+ * Premium access for one pillar. A pillar's premium units are locked only when
+ * the pillar has an active price and the learner has no approved payment
+ * (admins always have access). The database enforces the same rule
+ * (has_premium_access + the session_blocks policy); this only drives the UI.
+ */
+export function usePremiumAccess(pillarId: string | undefined, isAdmin = false) {
+  const { data: prices = {}, isLoading: pricesLoading } = usePillarPrices();
+  const { data: payments = [], isLoading: paymentsLoading } = useMyPillarPayments();
+  const price = pillarId ? prices[pillarId] : undefined;
+  const mine = payments.filter((p) => p.pillar_id === pillarId);
+  const approved = mine.some((p) => p.status === "approved");
+  const pending = mine.some((p) => p.status === "pending");
+  return {
+    price,
+    unlocked: isAdmin || !price || approved,
+    pending,
+    loading: pricesLoading || paymentsLoading,
+  };
+}

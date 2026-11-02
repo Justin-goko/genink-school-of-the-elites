@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, Loader2, Smartphone, XCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Clock, Crown, Loader2, Smartphone, XCircle, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { enrollInPillar } from "@/hooks/usePillarEnrollment";
 import {
   formatKes, MPESA_CODE, useMyPillarPayments, usePaymentSettings, useSubmitPillarPayment,
 } from "@/hooks/usePillarPayments";
@@ -17,14 +16,15 @@ interface Props {
   price: number;
   color: string;
   icon?: ReactNode;
+  /** Titles of the premium units this payment unlocks. */
+  premiumUnits?: string[];
 }
 
 /**
- * Shown on a paid (specialisation) pillar that is open to the learner but not
- * yet unlocked. Manual M-Pesa: pay to the Till/Paybill, submit the code, an
- * admin approves it and the pillar opens.
+ * Unlocks a pillar's premium units (manual M-Pesa): pay to the Till/Paybill,
+ * submit the code, an admin approves it and the premium sessions open.
  */
-export default function PillarUnlockCard({ pillarId, pillarName, price, color, icon }: Props) {
+export default function PillarUnlockCard({ pillarId, pillarName, price, color, icon, premiumUnits = [] }: Props) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: settings } = usePaymentSettings();
@@ -44,7 +44,7 @@ export default function PillarUnlockCard({ pillarId, pillarName, price, color, i
     setBusy(true);
     try {
       await submit({ pillarId, code: cleanCode, phone, payerName: name });
-      toast.success("Payment submitted. We'll unlock the pillar once it's confirmed.");
+      toast.success("Payment submitted. We'll unlock the premium units once it's confirmed.");
       setCode("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not submit the payment.");
@@ -53,16 +53,11 @@ export default function PillarUnlockCard({ pillarId, pillarName, price, color, i
     }
   };
 
-  // Approved but not yet enrolled (e.g. approval landed while the page was open).
-  const openPillar = async () => {
+  // Approved: reload the premium content and enrolment so it opens here.
+  const openPremium = async () => {
     if (!user) return;
-    const { error } = await enrollInPillar(user.id, pillarId);
-    if (error && !String(error.message).includes("duplicate")) {
-      toast.error(error.message);
-      return;
-    }
+    await qc.invalidateQueries({ queryKey: ["session_blocks"] });
     await qc.invalidateQueries({ queryKey: ["pillar_enrollment", user.id, pillarId] });
-    await qc.invalidateQueries({ queryKey: ["pillar_access"] });
   };
 
   return (
@@ -77,12 +72,20 @@ export default function PillarUnlockCard({ pillarId, pillarName, price, color, i
               {icon}
             </div>
           )}
-          <p className="text-xs uppercase tracking-widest text-accent mb-1">Specialisation · one-time fee</p>
-          <h3 className="text-2xl md:text-3xl font-bold mb-1">Unlock {pillarName}</h3>
-          <div className="text-3xl font-bold text-premium mb-4">{formatKes(price)}</div>
-          <p className="text-sm text-muted-foreground mb-4">
-            One payment unlocks all units in this pillar, XP tracking and the Light Guide for every session. You keep access for good.
+          <p className="text-xs uppercase tracking-widest text-amber-700 mb-1 inline-flex items-center gap-1"><Crown className="w-3.5 h-3.5" /> Premium · one-time fee</p>
+          <h3 className="text-2xl md:text-3xl font-bold mb-1">Unlock {pillarName} Premium</h3>
+          <div className="text-3xl font-bold text-amber-700 mb-3">{formatKes(price)}</div>
+          <p className="text-sm text-muted-foreground mb-3">
+            The other units in this pillar are free. One payment unlocks every premium unit below, and you keep access for good.
+            You can read the first session of each premium unit before paying.
           </p>
+          {premiumUnits.length > 0 && (
+            <ul className="mb-5 space-y-1.5">
+              {premiumUnits.map((t) => (
+                <li key={t} className="flex gap-2 text-sm font-medium"><Crown className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />{t}</li>
+              ))}
+            </ul>
+          )}
           {ready ? (
             <ol className="space-y-3 text-sm">
               <Step n={1}>
@@ -115,15 +118,15 @@ export default function PillarUnlockCard({ pillarId, pillarName, price, color, i
             <Status icon={<Clock className="w-5 h-5 text-accent" />} title="Payment received, being checked">
               <p>
                 Code <b className="font-mono">{latest.mpesa_code}</b> for {formatKes(latest.amount_kes)}. We usually confirm within{" "}
-                {settings?.review_hours ?? 24} hours, and the pillar opens automatically.
+                {settings?.review_hours ?? 24} hours, and the premium units open automatically.
               </p>
               <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>Check again</Button>
             </Status>
           ) : latest?.status === "approved" ? (
             <Status icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} title="Payment confirmed">
-              <p>Your payment was confirmed.</p>
-              <Button className="mt-3 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={openPillar}>
-                Open {pillarName} <ArrowRight className="w-4 h-4 ml-2" />
+              <p>Your payment was confirmed. The premium units are open.</p>
+              <Button className="mt-3 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={openPremium}>
+                Start reading <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Status>
           ) : (
