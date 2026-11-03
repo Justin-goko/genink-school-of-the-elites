@@ -949,6 +949,7 @@ export type Database = {
           estimated_minutes: number
           id: string
           is_locked_by_default: boolean
+          is_premium: boolean
           order_index: number
           pillar_id: string
           session_count: number
@@ -966,6 +967,7 @@ export type Database = {
           estimated_minutes?: number
           id?: string
           is_locked_by_default?: boolean
+          is_premium?: boolean
           order_index?: number
           pillar_id: string
           session_count?: number
@@ -983,6 +985,7 @@ export type Database = {
           estimated_minutes?: number
           id?: string
           is_locked_by_default?: boolean
+          is_premium?: boolean
           order_index?: number
           pillar_id?: string
           session_count?: number
@@ -1322,6 +1325,10 @@ export type Database = {
         Returns: undefined
       }
       has_ops_access: { Args: { _user_id: string }; Returns: boolean }
+      has_premium_access: {
+        Args: { _pillar_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1366,6 +1373,10 @@ export type Database = {
       refresh_unit_xp_totals: { Args: never; Returns: undefined }
       review_pillar_payment: {
         Args: { _approve: boolean; _note?: string; _payment_id: string }
+        Returns: undefined
+      }
+      set_unit_premium: {
+        Args: { _premium: boolean; _unit_id: string }
         Returns: undefined
       }
     }
